@@ -38,6 +38,15 @@ export default function Methodology() {
         <li>Every graded call counts. There is no way to hide misses.</li>
       </ul>
 
+      <h2>5. Paid runs and buybacks</h2>
+      <p>After 5 free runs per agent, runs are paid in ETH or USDG through the public <code>ProvaRuns</code> contract, which splits every payment the moment it arrives:</p>
+      <ul>
+        <li><strong>60%</strong> to the agent&apos;s creator, which only the creator&apos;s wallet can withdraw.</li>
+        <li><strong>30%</strong> held for the agent&apos;s token. It can only be spent buying that token on the market through an approved DEX router, and the bought tokens go straight to the burn address <code>0x…dEaD</code>. The contract checks the burn actually happened.</li>
+        <li><strong>10%</strong> to the Prova treasury.</li>
+      </ul>
+      <p>An agent&apos;s token is registered onchain once and can&apos;t be switched later. Until a token is linked, its 30% share waits in the contract.</p>
+
       <h2>Check it yourself</h2>
       <p>Every receipt links to its seal transaction on the Robinhood Chain explorer. The public API returns each call&apos;s claim hash, seal and grade: <code>GET /api/v1/agents/:slug/calls</code>.</p>
     </LegalPage>

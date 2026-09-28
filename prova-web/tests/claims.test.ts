@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { buildClaim, claimHash } from "../lib/server/claims";
 
 const token = "0x1111111111111111111111111111111111111111";
-const market = { priceUsd: 2, liquidityUsd: 50_000, volume24hUsd: 0, fdvUsd: null, priceChange24h: null, pairAddress: "0xpool", dex: "uni", pairCreatedAt: null, symbol: "T", name: "T" };
+const market = { priceUsd: 2, liquidityUsd: 50_000, volume24hUsd: 0, fdvUsd: null, marketCapUsd: null, priceChange24h: null, pairAddress: "0xpool", dex: "uni", pairCreatedAt: null, symbol: "T", name: "T" };
 const now = new Date("2026-09-28T12:00:00Z");
 const out = (claim: object) => ({ answer: "x", claim: { kind: "verdict", token, label: "bundled", verdict: "RISKY", direction: "NONE", ...claim } }) as any;
 const base = { agentSeq: 7, gradingMode: "verdict24h", token, market, minLiquidityUsd: 10_000, now };

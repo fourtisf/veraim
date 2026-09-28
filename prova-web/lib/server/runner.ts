@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { FREE_RUNS_PER_AGENT, gradingLabel } from "@/config/models";
 import { buildClaim } from "./claims";
 import { ENV } from "./env";
+import { paidRunsLeft } from "./payments";
 import { runModel } from "./llm";
 import { tokenMarket } from "./tools/dexscreener";
 import { resolveToken, runTools } from "./tools";
@@ -50,7 +51,10 @@ export async function runAgent(agent: Agent, user: User, rawInput: string, viaAp
     prisma.run.count({ where: { createdAt: { gte: new Date(Date.now() - 86400_000) } } }),
   ]);
   if (today >= ENV.maxRunsPerDay) throw new RunError("Prova is at today's run capacity. Please try again tomorrow.", 429);
-  if (used >= FREE_RUNS_PER_AGENT) throw new RunError(`You've used your ${FREE_RUNS_PER_AGENT} free runs of ${agent.name}. Paid runs open soon.`, 402);
+  // Free runs first, then runs the wallet paid for.
+  const paid = used >= FREE_RUNS_PER_AGENT;
+  const paidLeft = paid ? await paidRunsLeft(user.id, agent.id) : null;
+  if (paid && !paidLeft) throw new RunError(`You've used your ${FREE_RUNS_PER_AGENT} free runs of ${agent.name}. Buy runs to keep going.`, 402);
   if (lastHour >= ENV.runsPerHourPerWallet) throw new RunError("You've hit the hourly run limit. Try again a bit later.", 429);
 
   const token = await resolveToken(input);
@@ -73,6 +77,14 @@ export async function runAgent(agent: Agent, user: User, rawInput: string, viaAp
   const claim = buildClaim({ agentSeq: agent.seq, gradingMode: agent.gradingMode, output, token, market, minLiquidityUsd: ENV.minLiquidityUsd, now });
 
   const call = await prisma.$transaction(async (tx) => {
+    if (paid) {
+      // Re-check inside the transaction so two runs at once can't spend the same credit.
+      const [bought, usedPaid] = await Promise.all([
+        tx.payment.aggregate({ where: { userId: user.id, agentId: agent.id }, _sum: { quantity: true } }),
+        tx.run.count({ where: { userId: user.id, agentId: agent.id, paid: true } }),
+      ]);
+      if ((bought._sum.quantity || 0) - usedPaid < 1) throw new RunError("No paid runs left. Buy runs to keep going.", 402);
+    }
     const c = await tx.call.create({
       data: {
         agentId: agent.id,
@@ -94,9 +106,9 @@ export async function runAgent(agent: Agent, user: User, rawInput: string, viaAp
       },
       include: { agent: true },
     });
-    await tx.run.create({ data: { agentId: agent.id, userId: user.id, callId: c.id, viaApi } });
+    await tx.run.create({ data: { agentId: agent.id, userId: user.id, callId: c.id, viaApi, paid, amountUsd: paid ? agent.pricePerRunUsd : 0 } });
     return c;
-  });
+  }, paid ? { isolationLevel: "Serializable" } : undefined);
 
-  return { call: toCallView(call), freeRunsLeft: FREE_RUNS_PER_AGENT - used - 1 };
+  return { call: toCallView(call), freeRunsLeft: Math.max(0, FREE_RUNS_PER_AGENT - used - 1), paidRunsLeft: paid ? paidLeft! - 1 : await paidRunsLeft(user.id, agent.id) };
 }

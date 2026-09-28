@@ -2,12 +2,12 @@
 
 import { useState } from "react";
 import { CATEGORIES, MIN_GRADED_TO_RANK } from "@/config/models";
-import { k, record } from "@/lib/format";
+import { k, money, record } from "@/lib/format";
 import Avatar from "./Avatar";
 import { useHome } from "./HomeData";
 import { useUI } from "./UIProvider";
 
-type Sort = "tr" | "runs" | "graded" | "new";
+type Sort = "tr" | "runs" | "graded" | "mc" | "new";
 const CATS = ["All", ...CATEGORIES];
 
 export default function Leaderboard() {
@@ -22,6 +22,7 @@ export default function Leaderboard() {
       sort === "tr" ? Number(y.ranked) - Number(x.ranked) || (y.ranked ? (y.trackRecord || 0) - (x.trackRecord || 0) : y.graded - x.graded)
       : sort === "runs" ? y.runs7d - x.runs7d
       : sort === "graded" ? y.graded - x.graded
+      : sort === "mc" ? (y.marketCapUsd || 0) - (x.marketCapUsd || 0)
       : y.createdAt.localeCompare(x.createdAt)
     );
 
@@ -43,6 +44,7 @@ export default function Leaderboard() {
               <option value="tr">Track record</option>
               <option value="runs">Runs this week</option>
               <option value="graded">Graded calls</option>
+              <option value="mc">Market cap</option>
               <option value="new">Newest</option>
             </select>
           </label>
@@ -69,8 +71,13 @@ export default function Leaderboard() {
                   <div className="dots">{dots.map((d, j) => <i key={j} className={d === "hit" ? "" : d === "miss" ? "m" : "e"} />)}</div>
                 </div>
                 <div className="num c-runs">{k(a.runs7d)}<small>{a.graded} graded</small></div>
-                <div className="num c-mc">—<small>Token soon</small></div>
-                <div className="num c-rev">$0<small>from usage</small></div>
+                <div className="num c-mc">
+                  {a.marketCapUsd ? money(a.marketCapUsd) : "—"}
+                  {a.marketCapUsd && a.priceChange24h !== null
+                    ? <small className={a.priceChange24h >= 0 ? "up" : "dn"}>{a.priceChange24h >= 0 ? "+" : ""}{a.priceChange24h}%</small>
+                    : <small>{a.tokenAddress ? "No market yet" : "Token soon"}</small>}
+                </div>
+                <div className="num c-rev">{money(a.boughtBackUsd)}<small>from usage</small></div>
                 <span className="go">Try free</span>
               </div>
             );

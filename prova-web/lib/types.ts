@@ -20,6 +20,12 @@ export type AgentView = {
   official: boolean;
   creator: string | null; // creator wallet (lowercase)
   tokenAddress: string | null;
+  tokenSymbol: string | null;
+  marketCapUsd: number | null;
+  priceUsd: number | null;
+  priceChange24h: number | null;
+  boughtBackUsd: number;
+  paidRuns7d: number;
   createdAt: string;
   ageDays: number;
   trackRecord: number | null; // % of weighted graded calls that hit

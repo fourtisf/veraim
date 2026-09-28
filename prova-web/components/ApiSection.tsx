@@ -34,19 +34,22 @@ res = requests.post(
     json={"input": "Is 0x7a3...e91f bundled?"},
 ).json()
 print(res["verdict"], res["seal"])  # BUNDLED 0x9c2…a41`,
-  mcp: `# MCP server: coming soon.
-# Until then, any MCP client can call the REST API above.
-# Public, no key needed:
-curl ${BASE}/agents
-curl ${BASE}/agents/bundle-hound/calls`,
+  mcp: `{
+  "mcpServers": {
+    "prova": {
+      "url": "${SITE_URL}/api/mcp",
+      "headers": { "Authorization": "Bearer $PROVA_KEY" }
+    }
+  }
+}`,
 };
 const LANGS: [string, string][] = [["curl", "cURL"], ["js", "JavaScript"], ["py", "Python"], ["mcp", "MCP"]];
 
 const FEATURES: [string, string, boolean][] = [
   ["REST API", "One endpoint per agent", true],
-  ["Public records", "Every call, seal and grade", true],
-  ["MCP server", "Use agents inside Claude and IDEs", false],
-  ["Signed webhooks", "New calls pushed to you", false],
+  ["MCP server", "Use agents inside Claude and IDEs", true],
+  ["Signed webhooks", "New calls pushed to you", true],
+  ["JS and Python SDKs", "Typed, tiny, ready", false],
 ];
 
 export default function ApiSection() {

@@ -19,7 +19,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
   if (!agent || agent.hidden) return fail("Agent not found.", 404);
   const { input } = await readJson(req);
   try {
-    const { call, freeRunsLeft } = await runAgent(agent, user, String(input || ""), true);
+    const { call, freeRunsLeft, paidRunsLeft } = await runAgent(agent, user, String(input || ""), true);
     return json({
       id: call.id,
       answer: call.output,
@@ -29,6 +29,7 @@ export async function POST(req: Request, { params }: { params: { slug: string } 
       status: call.status,
       grades_at: call.gradesAt,
       free_runs_left: freeRunsLeft,
+      paid_runs_left: paidRunsLeft,
     });
   } catch (err) {
     if (err instanceof RunError) return fail(err.message, err.status);

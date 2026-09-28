@@ -3,7 +3,10 @@ import AdminAgentToggle from "@/components/AdminAgentToggle";
 import { prisma } from "@/lib/db";
 import { currentUser, isAdmin } from "@/lib/server/session";
 import { agentViews, siteStats } from "@/lib/server/views";
-import { sealingEnabled } from "@/lib/server/chain";
+import { chainInfo, paymentsEnabled, publicClient, RUNS_ABI, sealingEnabled } from "@/lib/server/chain";
+import { ENV } from "@/lib/server/env";
+import TreasuryButtons from "@/components/TreasuryButtons";
+import { money } from "@/lib/format";
 import { modelAvailable } from "@/lib/server/llm";
 import { telegramEnabled } from "@/lib/server/telegram";
 
@@ -25,8 +28,23 @@ export default async function AdminPage() {
     prisma.run.count(),
   ]);
   const stats = await siteStats(visible);
+  const [paid, bought] = await Promise.all([
+    prisma.payment.aggregate({ _sum: { amountUsd: true, quantity: true } }),
+    prisma.buyback.aggregate({ _sum: { amountUsd: true }, _count: true }),
+  ]);
+  let treasuryEth = 0, treasuryUsdg = 0;
+  if (paymentsEnabled()) {
+    try {
+      const read = (asset: string) => publicClient().readContract({ address: ENV.runsContract as `0x${string}`, abi: RUNS_ABI, functionName: "treasuryBalance", args: [asset] }) as Promise<bigint>;
+      const [e, u] = await Promise.all([read("0x0000000000000000000000000000000000000000"), read(ENV.usdg)]);
+      treasuryEth = Number(e) / 1e18;
+      treasuryUsdg = Number(u) / 1e6;
+    } catch {}
+  }
   const checks: [string, boolean][] = [
     ["Onchain sealing (SEALER_PRIVATE_KEY + SEAL_CONTRACT)", sealingEnabled()],
+    ["Paid runs (RUNS_CONTRACT)", paymentsEnabled()],
+    ["Buybacks (SWAP_ROUTER + WETH_ADDRESS)", !!(ENV.swapRouter && ENV.weth)],
     ["Claude models (ANTHROPIC_API_KEY)", modelAvailable("claude-sonnet")],
     ["Other models (OPENROUTER_API_KEY)", modelAvailable("gpt")],
     ["Telegram alerts (TELEGRAM_BOT_TOKEN + TELEGRAM_BOT_USERNAME)", telegramEnabled()],
@@ -45,7 +63,16 @@ export default async function AdminPage() {
           <div><strong>{stats.waitlistCount}</strong><span>Waitlist</span></div>
         </div>
 
-        <div className="grid2" style={{ marginTop: 24 }}>
+        <div className="panel" style={{ marginTop: 24, maxWidth: "none" }}>
+          <h3 style={{ fontSize: 17, fontWeight: 500 }}>Money</h3>
+          <p className="hint">
+            Paid runs sold: {paid._sum.quantity || 0} ({money(paid._sum.amountUsd || 0)}). Bought back and burned: {money(bought._sum.amountUsd || 0)} in {bought._count} buyback{bought._count === 1 ? "" : "s"}.
+            {" "}Treasury held in the contract: {treasuryEth.toFixed(6)} ETH and {treasuryUsdg.toFixed(2)} USDG.
+          </p>
+          {paymentsEnabled() && <TreasuryButtons chain={chainInfo()} eth={treasuryEth} usdg={treasuryUsdg} />}
+        </div>
+
+        <div className="grid2" style={{ marginTop: 16 }}>
           <div className="panel">
             <h3 style={{ fontSize: 17, fontWeight: 500, marginBottom: 12 }}>Setup checks</h3>
             <table className="tbl"><tbody>

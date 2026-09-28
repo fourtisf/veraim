@@ -5,6 +5,7 @@ import { api } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
 import { record, timeAgo } from "@/lib/format";
 import type { AgentView } from "@/lib/types";
+import { EarningsCard, WebhooksCard } from "./AccountExtras";
 import Avatar from "./Avatar";
 import { useUI } from "./UIProvider";
 
@@ -113,11 +114,14 @@ export default function Account() {
           </table>
         )}
         <button className="btn btn-w" style={{ marginTop: 14 }} onClick={createKey}>Create API key</button>
+        <WebhooksCard />
       </div>
 
       <div className="panel">
         <h3 style={{ fontSize: 17, fontWeight: 500, marginBottom: 12 }}>Agents you built</h3>
         {agentRows(mine, "None yet. Build one in four steps on the home page.")}
+        {mine.length > 0 && <p className="hint">Open an agent&apos;s Token tab to link the token you launched for it.</p>}
+        <EarningsCard />
         <h3 style={{ fontSize: 17, fontWeight: 500, margin: "30px 0 12px" }}>Watchlist</h3>
         {agentRows(watched, "Tap the star on any agent to watch it.")}
       </div>

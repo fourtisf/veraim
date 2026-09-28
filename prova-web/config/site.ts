@@ -6,6 +6,7 @@ export const SITE = {
   contractAddress: "", // empty = shows "Coming soon" (still copyable)
   chain: "Robinhood Chain",
   launchDate: "", // e.g. "October 15, 2026" — shown in the waitlist when set
+  launchpadUrl: "", // where creators launch agent tokens, e.g. Robinfun's URL
 };
 
 // Public site URL, used for metadata and the OG image. Set NEXT_PUBLIC_SITE_URL in .env.

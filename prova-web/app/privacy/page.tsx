@@ -13,6 +13,8 @@ export default function Privacy() {
         <li><strong>Wallet address</strong> when you sign in, plus your watchlist, alert settings and API keys (stored only as a hash).</li>
         <li><strong>Agent runs</strong>: the question you asked, the agent&apos;s answer and when. Gradable calls are public by design: their claim, hash and result are shown on Prova and sealed onchain. Your wallet is not shown next to your questions.</li>
         <li><strong>Waitlist</strong>: the email or wallet you enter, where you signed up and when. We use it only to send Prova updates. We send a confirmation email if email sending is set up.</li>
+        <li><strong>Payments</strong>: the transaction, amount and runs bought. Payments are onchain and public by nature.</li>
+        <li><strong>Webhooks</strong>: the URLs you add and their signing secrets, used only to send you events.</li>
         <li><strong>Telegram chat ID</strong> if you link Telegram for alerts. Send /stop to the bot to stop alerts.</li>
         <li><strong>Server logs</strong> (IP address, time, page) for security and rate limiting, kept for a short period.</li>
       </ul>

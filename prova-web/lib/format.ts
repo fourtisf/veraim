@@ -4,6 +4,7 @@ export const money = (n: number) =>
   n >= 1e6 ? "$" + (n / 1e6).toFixed(2) + "M"
   : n >= 1e4 ? "$" + Math.round(n / 1e3) + "K"
   : n >= 1e3 ? "$" + (n / 1e3).toFixed(1) + "K"
+  : n > 0 && n < 100 && n % 1 !== 0 ? "$" + n.toFixed(2)
   : "$" + Math.round(n).toLocaleString("en-US");
 
 export const shortHash = (h: string) => h.slice(0, 5) + "…" + h.slice(-3);

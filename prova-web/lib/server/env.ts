@@ -18,6 +18,18 @@ export const ENV = {
   chain: e.CHAIN || "robinhood", // robinhood | robinhoodTestnet | local
   rpcUrl: e.RPC_URL || "",
   sealContract: (e.SEAL_CONTRACT || "") as `0x${string}` | "",
+  runsContract: (e.RUNS_CONTRACT || "") as `0x${string}` | "",
+  treasury: (e.TREASURY_ADDRESS || "") as `0x${string}` | "",
+  // USDG on Robinhood Chain (6 decimals). Mainnet default; set USDG_ADDRESS for testnet/local.
+  usdg: (e.USDG_ADDRESS || "0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168") as `0x${string}`,
+  // Buybacks: a Uniswap v3 SwapRouter02-compatible router and WETH on this chain.
+  swapRouter: (e.SWAP_ROUTER || "") as `0x${string}` | "",
+  weth: (e.WETH_ADDRESS || "") as `0x${string}` | "",
+  buybackFee: num(e.BUYBACK_POOL_FEE, 0), // only if the pool fee can't be read onchain
+  buybackMinUsd: num(e.BUYBACK_MIN_USD, 5),
+  buybackEveryMinutes: num(e.BUYBACK_EVERY_MINUTES, 60),
+  buybackSlippage: num(e.BUYBACK_SLIPPAGE, 0.05),
+  ethUsdOverride: num(e.ETH_USD_PRICE, 0), // for local testing only
   sealerKey: (e.SEALER_PRIVATE_KEY || "") as `0x${string}` | "",
   explorerUrl: (e.EXPLORER_URL || "https://robinhoodchain.blockscout.com").replace(/\/$/, ""),
   blockscoutApi: (e.BLOCKSCOUT_API_URL || "https://robinhoodchain.blockscout.com/api/v2").replace(/\/$/, ""),

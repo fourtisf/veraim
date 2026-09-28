@@ -15,6 +15,8 @@ Wherever you see `prova.live`, use your real domain instead.
 5. *(Optional)* **An OpenRouter API key** from https://openrouter.ai/keys, for agents built with GPT, Llama or DeepSeek.
 6. **A new wallet just for sealing.** Create a fresh wallet in MetaMask or Rabby (Add account → Create new) and export its private key. Don't reuse your main wallet: this key sits on the server. Send it about **0.01 ETH on Robinhood Chain** for gas. Sealing is batched, so this lasts a long time.
 7. **Your own wallet address** (the one you'll use on the site), so you can open the admin page.
+8. **A treasury wallet address**, which receives Prova's 10% of paid runs (and the creator share of the official agents). A hardware wallet is best. It can be the same as #7.
+9. *(For buybacks)* The addresses of **Uniswap v3's SwapRouter02** and **WETH** on Robinhood Chain. Ask Uniswap/Robinhood Chain docs or your developer. Everything else works without them; buyback money just waits in the contract until they're set.
 
 ---
 
@@ -100,8 +102,10 @@ Fill in these lines. Every setting is explained in the file.
 | `OPENROUTER_API_KEY` | Your OpenRouter key (optional) |
 | `CHAIN` | `robinhood` |
 | `SEALER_PRIVATE_KEY` | The private key of the sealing wallet (starts with `0x`) |
+| `TREASURY_ADDRESS` | Your treasury wallet address (from "What you need first" #8) |
+| `SWAP_ROUTER`, `WETH_ADDRESS` | The router and WETH addresses (#9), if you have them |
 
-Leave `SEAL_CONTRACT` empty for now. Save and exit with `Ctrl+O`, `Enter`, then `Ctrl+X`.
+Leave `SEAL_CONTRACT` and `RUNS_CONTRACT` empty for now. Save and exit with `Ctrl+O`, `Enter`, then `Ctrl+X`.
 
 Then lock the file so only root can read it:
 
@@ -122,15 +126,20 @@ npm run seed
 - `prisma migrate deploy` creates the tables.
 - `npm run seed` adds Prova's four official agents: Bundle Hound, Tidewatch, Dev Ledger and Deepstack. They start with no calls; their records build up from real use.
 
-## Step 7: Put the seal contract on Robinhood Chain
+## Step 7: Put the contracts on Robinhood Chain
 
-This deploys `ProvaSeal`, the public contract that stores every call's hash and result. You only do this once.
+This deploys two public contracts. You only do this once.
+
+- **`ProvaSeal`** stores every call's hash and its result.
+- **`ProvaRuns`** takes payments for runs and splits each one: 60% creator, 30% token buyback, 10% treasury.
 
 ```bash
 npm run contract:deploy
 ```
 
-It prints `SEAL_CONTRACT=0x…`. Open `.env` again (`nano .env`), paste that address into `SEAL_CONTRACT`, then save.
+It prints `SEAL_CONTRACT=0x…` and `RUNS_CONTRACT=0x…`. Open `.env` again (`nano .env`), paste both addresses, then save.
+
+If you add `SWAP_ROUTER` later, run `npm run contract:deploy` again. It skips the contracts that already exist and only allows the router.
 
 If it says the wallet has no ETH, send a little ETH on Robinhood Chain to the address it shows and try again.
 
@@ -190,7 +199,8 @@ When Certbot asks, enter your email and agree to the terms. If it asks about red
 2. Click **Connect wallet** and sign the message. The button changes to your address.
 3. Open **Bundle Hound**, paste a real token address from Robinhood Chain, and press **Run**. After 20–40 seconds you get an answer, and it says "sealing onchain…".
 4. About a minute later, open the agent's **Receipts** tab. The call shows a "seal ↗" link to the explorer.
-5. Open `https://prova.live/admin`. The "Setup checks" box shows which features are on.
+5. Use up the 5 free runs of one agent. A **Buy runs** box appears. Buy 1 run with a little ETH: your wallet asks to switch to Robinhood Chain, then to confirm. "1 run added" appears.
+6. Open `https://prova.live/admin`. The "Setup checks" box shows which features are on, and "Money" shows the payment.
 
 ---
 
@@ -249,6 +259,28 @@ npx prisma migrate deploy
 npm run build
 pm2 reload all
 ```
+
+### Link an agent's token (turns on buybacks)
+
+1. The agent's creator launches its token (for example on Robinfun).
+2. On Prova they open the agent, go to the **Token** tab, paste the token address and press **Link**. For the official agents, do this with your admin wallet.
+3. Within a minute the worker registers it onchain. Once registered it can't be changed.
+4. Every hour the worker spends each agent's 30% share on its token and sends what it buys to the burn address. The leaderboard's "Bought back" and "Market cap" columns update.
+
+Buybacks need a Uniswap v3 pool that pairs the token with WETH (for ETH payments) or USDG (for USDG payments). If a token trades somewhere else, the money keeps waiting in the contract and the worker log says why.
+
+### Creator payouts and the treasury
+
+- **Creators** withdraw their 60% from **My account → Earnings**. Nobody else can move it.
+- **Treasury:** on `/admin`, press **Send … to treasury**. The money can only go to `TREASURY_ADDRESS`.
+
+### Extra safety (recommended once everything works)
+
+The sealing wallet also owns the ProvaRuns contract, which lets it approve DEX routers. Creator money and the treasury can never be taken by it, but buyback money could be misused by a stolen key. After setup, ask your developer to move ownership to your hardware wallet with `transferOwnership`.
+
+### Publish the SDKs (optional)
+
+The JavaScript and Python SDKs are in the `sdk/` folder of the repository. Each has a README with the publish command. You need your own npm and PyPI accounts.
 
 ### Hide an agent
 

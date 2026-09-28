@@ -16,11 +16,14 @@ model User {
   telegramChatId  String?
   telegramLinkCode String? @unique // one-time code for t.me/<bot>?start=<code>
 
-  runs    Run[]
-  watches Watch[]
-  alerts  Alert[]
-  agents  Agent[]
-  apiKeys ApiKey[]
+  runs     Run[]
+  watches  Watch[]
+  alerts   Alert[]
+  agents   Agent[]
+  apiKeys  ApiKey[]
+  quotes   Quote[]
+  payments Payment[]
+  webhooks Webhook[]
 }
 
 model Agent {
@@ -37,17 +40,26 @@ model Agent {
   gradingMode    String   // "verdict24h" | "price7d" | "none"
   pricePerRunUsd Float    @default(0.05)
   openingBuy     String?
-  tokenAddress   String?  // set once the agent token is launched
+  tokenAddress   String?  // agent token (linked by its creator after launch)
+  tokenSymbol    String?
+  marketCapUsd   Float?   // refreshed by the worker from DexScreener
+  priceUsd       Float?
+  priceChange24h Float?
+  registeredTx   String?  // creator registered on ProvaRuns
+  tokenTx        String?  // token registered on ProvaRuns
   official       Boolean  @default(false) // built by Prova
   hidden         Boolean  @default(false) // hidden by an admin
   creatorId      String?
   creator        User?    @relation(fields: [creatorId], references: [id])
   createdAt      DateTime @default(now())
 
-  calls   Call[]
-  runs    Run[]
-  watches Watch[]
-  alerts  Alert[]
+  calls    Call[]
+  runs     Run[]
+  watches  Watch[]
+  alerts   Alert[]
+  quotes   Quote[]
+  payments Payment[]
+  buybacks Buyback[]
 }
 
 // One answer from an agent. If it contains a gradable claim it is hashed,
@@ -72,6 +84,8 @@ model Call {
   outcomeJson String?
   gradeTx     String?
   alertedAt   DateTime?
+  hookSealAt  DateTime? // webhook "call.sealed" delivered
+  hookGradeAt DateTime? // webhook "call.graded" delivered
   createdAt   DateTime  @default(now())
 
   run Run?
@@ -140,4 +154,64 @@ model Waitlist {
   createdAt     DateTime @default(now())
 
   @@map("waitlist")
+}
+
+// A price quote for paid runs. Its id (a bytes32 hex) is the payment reference sent onchain.
+model Quote {
+  id        String   @id // 0x… bytes32 ref
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id])
+  quantity  Int
+  asset     String   // "ETH" | "USDG"
+  amount    String   // smallest units (wei / USDG 6 decimals)
+  amountUsd Float
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+// A confirmed onchain payment for runs (RunsPaid event on ProvaRuns).
+model Payment {
+  id        String   @id @default(cuid())
+  ref       String   @unique
+  txHash    String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id])
+  asset     String
+  amount    String
+  amountUsd Float
+  quantity  Int
+  createdAt DateTime @default(now())
+
+  @@index([userId, agentId])
+}
+
+// An executed buyback-and-burn (BuybackBurned event).
+model Buyback {
+  id           String   @id @default(cuid())
+  agentId      String
+  agent        Agent    @relation(fields: [agentId], references: [id])
+  txHash       String   @unique
+  asset        String
+  amountIn     String
+  amountUsd    Float
+  tokensBurned String
+  createdAt    DateTime @default(now())
+}
+
+// Signed webhooks: calls of agents on the owner's watchlist are POSTed here.
+model Webhook {
+  id        String    @id @default(cuid())
+  userId    String
+  user      User      @relation(fields: [userId], references: [id])
+  url       String
+  secret    String
+  failures  Int       @default(0)
+  lastError String?
+  lastOkAt  DateTime?
+  disabled  Boolean   @default(false)
+  createdAt DateTime  @default(now())
 }

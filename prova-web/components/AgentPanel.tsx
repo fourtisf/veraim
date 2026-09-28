@@ -5,15 +5,17 @@ import { FREE_RUNS_PER_AGENT, MIN_GRADED_TO_RANK } from "@/config/models";
 import { SITE } from "@/config/site";
 import { api, ApiError } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
-import { k, record, shortAddr, shortHash, timeAgo, until } from "@/lib/format";
+import { k, money, record, shortAddr, shortHash, timeAgo, until } from "@/lib/format";
 import type { AgentView, CallStatus, CallView } from "@/lib/types";
 import Avatar from "./Avatar";
+import BuyRuns from "./BuyRuns";
+import LinkToken from "./LinkToken";
 import LineChart from "./LineChart";
 import { useUI } from "./UIProvider";
 
 const TABS: [string, string][] = [["try", "Try it"], ["perf", "Performance"], ["rec", "Receipts"], ["tok", "Token"]];
 
-export type AgentDetail = { agent: AgentView; calls: CallView[]; series: (number | null)[]; freeRunsLeft: number | null };
+export type AgentDetail = { agent: AgentView; calls: CallView[]; series: (number | null)[]; freeRunsLeft: number | null; paidRunsLeft?: number | null; paymentsEnabled?: boolean };
 type Msg = { u: boolean; text: string; call?: CallView; error?: boolean };
 
 export function Status({ c, gradesAt }: { c: CallStatus; gradesAt?: string | null }) {
@@ -76,23 +78,27 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
     setMsgs((m) => [...m, { u: true, text }]);
     setPending(true);
     try {
-      const res = await api<{ call: CallView; freeRunsLeft: number }>(`/api/agents/${slug}/run`, { body: { input: text } });
+      const res = await api<{ call: CallView; freeRunsLeft: number; paidRunsLeft: number }>(`/api/agents/${slug}/run`, { body: { input: text } });
       setMsgs((m) => [...m, { u: false, text: res.call.output, call: res.call }]);
-      setData((d) => d && { ...d, freeRunsLeft: res.freeRunsLeft, calls: [res.call, ...d.calls] });
+      setData((d) => d && { ...d, freeRunsLeft: res.freeRunsLeft, paidRunsLeft: res.paidRunsLeft, calls: [res.call, ...d.calls] });
       bumpData();
     } catch (err) {
       setMsgs((m) => [...m, { u: false, text: err instanceof ApiError ? err.message : "Something went wrong. Please try again.", error: true }]);
-      if (err instanceof ApiError && err.status === 402) setData((d) => d && { ...d, freeRunsLeft: 0 });
+      if (err instanceof ApiError && err.status === 402) setData((d) => d && { ...d, freeRunsLeft: 0, paidRunsLeft: 0 });
     } finally {
       setPending(false);
     }
   };
 
   const left = data.freeRunsLeft;
+  const paidLeft = data.paidRunsLeft || 0;
   const freeText =
     left === null ? `Connect a wallet to try it: ${FREE_RUNS_PER_AGENT} free runs, then $${a.price.toFixed(2)} per run`
     : left > 0 ? `${left} free run${left > 1 ? "s" : ""} left, then $${a.price.toFixed(2)} per run`
+    : paidLeft > 0 ? `${paidLeft} paid run${paidLeft > 1 ? "s" : ""} left`
+    : data.paymentsEnabled ? "Free runs used. Buy runs below to keep going."
     : "Free runs used. Paid runs open soon.";
+  const isCreator = !!me && (a.creator ? a.creator === me.wallet : me.admin);
   const examples = a.gradingMode === "price7d" ? ["LONG or SHORT on $TICKER?", "What are whales doing with 0x…?"] : ["Is 0x… bundled?", "Check the deployer of 0x…"];
   const graded = data.calls.filter((c) => c.status === "hit" || c.status === "miss");
   let best = 0, cur = 0;
@@ -117,7 +123,7 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
       <div className="d-stats">
         <div><small>Track record</small><b className="g">{a.ranked ? record(a.trackRecord) : "—"}</b></div>
         <div><small>Graded calls</small><b>{a.graded}</b></div>
-        <div><small>Bought back</small><b>$0</b></div>
+        <div><small>Bought back</small><b>{money(a.boughtBackUsd)}</b></div>
       </div>
       {!a.ranked && a.gradingMode !== "none" && (
         <p className="free" style={{ marginTop: -12, marginBottom: 16 }}>
@@ -162,6 +168,9 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
           <button className="btn btn-w" onClick={() => run(q)} disabled={pending}>Run</button>
         </div>
         <p className="free">{freeText}</p>
+        {left === 0 && data.paymentsEnabled && (
+          <BuyRuns slug={a.slug} price={a.price} onPaid={(n) => setData((d) => d && { ...d, paidRunsLeft: (d.paidRunsLeft || 0) + n })} />
+        )}
       </div>
 
       <div className={`dpane ${tab === "rec" ? "on" : ""}`}>
@@ -208,14 +217,36 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
 
       <div className={`dpane ${tab === "tok" ? "on" : ""}`}>
         <div className="tok">
-          <div className="kv"><span>Token</span><b>{a.tokenAddress ? shortHash(a.tokenAddress) : `$${a.ticker} · not launched yet`}</b></div>
-          <div className="kv"><span>Paid runs this week</span><b>{k(0)}</b></div>
+          <div className="kv"><span>Token</span><b>{a.tokenAddress ? `$${a.tokenSymbol || a.ticker} · ${shortHash(a.tokenAddress)}` : `$${a.ticker} · not launched yet`}</b></div>
+          {a.tokenAddress && (
+            <>
+              <div className="kv"><span>Market cap</span><b>{a.marketCapUsd ? money(a.marketCapUsd) : "—"}</b></div>
+              <div className="kv"><span>24h change</span><b className={(a.priceChange24h || 0) >= 0 ? "up" : "dn"}>{a.priceChange24h === null ? "—" : `${a.priceChange24h >= 0 ? "+" : ""}${a.priceChange24h}%`}</b></div>
+            </>
+          )}
+          <div className="kv"><span>Paid runs this week</span><b>{k(a.paidRuns7d)}</b></div>
+          <div className="kv"><span>Bought back and burned</span><b>{money(a.boughtBackUsd)}</b></div>
           <div className="kv"><span>Price per run</span><b>${a.price.toFixed(2)} after {FREE_RUNS_PER_AGENT} free</b></div>
           <div className="kv"><span>Model</span><b>{a.model}</b></div>
           <div className="kv"><span>Chain</span><b>{SITE.chain}</b></div>
-          <div className="bb">Agent tokens launch on Robinfun soon. Then <b>30% of every paid run</b> buys back and burns ${a.ticker}.</div>
-          <div style={{ display: "flex", gap: 8, marginTop: 16 }}>
-            <a className="btn btn-gold" style={{ flex: 1 }} href={`/agents/${a.slug}`}>Open agent page</a>
+          {a.tokenAddress ? (
+            <div className="bb"><b>30% of every paid run</b> buys ${a.tokenSymbol || a.ticker} on the market and burns it. Buying pressure that doesn&apos;t depend on hype.</div>
+          ) : (
+            <div className="bb">
+              No token yet. Until one is linked, the 30% buyback share of paid runs is held for it in the contract.
+              {SITE.launchpadUrl && <> Creators launch on <a href={SITE.launchpadUrl} target="_blank" rel="noopener">the launchpad ↗</a> and link it here.</>}
+            </div>
+          )}
+          {isCreator && !a.tokenAddress && <LinkToken slug={a.slug} onLinked={load} />}
+          <div style={{ display: "flex", gap: 8, marginTop: 16, flexWrap: "wrap" }}>
+            {a.tokenAddress ? (
+              <>
+                <a className="btn btn-gold" style={{ flex: 1 }} href={`https://dexscreener.com/robinhood/${a.tokenAddress}`} target="_blank" rel="noopener">Buy ${a.tokenSymbol || a.ticker}</a>
+                <button className="btn btn-g" onClick={() => copyText(a.tokenAddress!).then(() => toast("Contract address copied"))}>Copy CA</button>
+              </>
+            ) : (
+              <a className="btn btn-gold" style={{ flex: 1 }} href={`/agents/${a.slug}`}>Open agent page</a>
+            )}
             <button className="btn btn-g" onClick={() => copyText(agentUrl).then(() => toast("Link copied"))}>Copy link</button>
           </div>
         </div>

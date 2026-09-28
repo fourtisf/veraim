@@ -4,12 +4,16 @@
 //  - sends Telegram alerts and links Telegram accounts
 import "dotenv/config";
 import { BaseError, ContractFunctionRevertedError, parseEventLogs } from "viem";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { publicClient, SEAL_ABI, sealerClient, sealingEnabled } from "@/lib/server/chain";
 import { ENV } from "@/lib/server/env";
 import { grade, measure } from "@/lib/server/grading";
 import { escapeHtml, sendTelegram, telegramEnabled, tg } from "@/lib/server/telegram";
 import { tokenMarket } from "@/lib/server/tools/dexscreener";
+import { deliverWebhook } from "@/lib/server/webhooks";
+import { toCallView } from "@/lib/server/views";
+import { indexPayments, moneyEnabled, refreshMarkets, registerAgents, registerTokens, runBuybacks } from "./money";
 
 const log = (...a: unknown[]) => console.log(new Date().toISOString(), ...a);
 const RESULT = { hit: 1, miss: 2, void: 3 } as const;
@@ -157,6 +161,36 @@ async function telegramUpdates() {
   }
 }
 
+// Webhooks: every sealed and every graded call of an agent is POSTed to the
+// webhooks of wallets that have that agent on their watchlist.
+async function sendWebhooks() {
+  const kinds: { field: "hookSealAt" | "hookGradeAt"; type: string; where: Prisma.CallWhereInput }[] = [
+    { field: "hookSealAt", type: "call.sealed", where: { sealTx: { not: null }, hookSealAt: null } },
+    { field: "hookGradeAt", type: "call.graded", where: { status: { in: ["hit", "miss", "void"] }, hookGradeAt: null } },
+  ];
+  for (const { field, type, where } of kinds) {
+    const calls = await prisma.call.findMany({
+      where: { ...where, createdAt: { gte: new Date(Date.now() - 8 * 86400_000) } },
+      include: { agent: { include: { watches: { include: { user: { include: { webhooks: { where: { disabled: false } } } } } } } } },
+      take: 50,
+    });
+    for (const c of calls) {
+      const v = toCallView(c);
+      const event = { type, created: new Date().toISOString(), data: { agent: c.agent.slug, call: { id: v.id, verdict: v.label, token: v.subject, status: v.status, seal: v.claimHash, seal_tx: v.sealTx, grades_at: v.gradesAt, graded_at: v.gradedAt, price_change_pct: v.priceChangePct, answer: v.output } } };
+      for (const hook of c.agent.watches.flatMap((w) => w.user.webhooks)) {
+        try {
+          await deliverWebhook(hook.url, hook.secret, event);
+          await prisma.webhook.update({ where: { id: hook.id }, data: { failures: 0, lastError: null, lastOkAt: new Date() } });
+        } catch (err) {
+          const failures = hook.failures + 1;
+          await prisma.webhook.update({ where: { id: hook.id }, data: { failures, lastError: (err as Error).message.slice(0, 200), disabled: failures >= 20 } });
+        }
+      }
+      await prisma.call.update({ where: { id: c.id }, data: { [field]: new Date() } });
+    }
+  }
+}
+
 // Runs a job every `ms`, never overlapping with itself.
 function every(name: string, ms: number, job: () => Promise<void>) {
   let busy = false;
@@ -166,7 +200,9 @@ function every(name: string, ms: number, job: () => Promise<void>) {
     try {
       await job();
     } catch (err) {
-      const msg = err instanceof BaseError ? (err.walk((e) => e instanceof ContractFunctionRevertedError) as Error | null)?.message || err.shortMessage : (err as Error).message;
+      const msg = err instanceof BaseError
+        ? (err.walk((e) => e instanceof ContractFunctionRevertedError) as Error | null)?.message || `${err.shortMessage} ${err.details || ""}`.trim()
+        : (err as Error).message;
       log(`${name} failed:`, msg);
     } finally {
       busy = false;
@@ -176,7 +212,7 @@ function every(name: string, ms: number, job: () => Promise<void>) {
   setInterval(tick, ms);
 }
 
-log(`Prova worker started. Sealing ${sealingEnabled() ? "on (" + ENV.chain + ")" : "OFF: set SEALER_PRIVATE_KEY and SEAL_CONTRACT"}. Telegram ${telegramEnabled() ? "on" : "off"}.`);
+log(`Prova worker started. Sealing ${sealingEnabled() ? "on (" + ENV.chain + ")" : "OFF: set SEALER_PRIVATE_KEY and SEAL_CONTRACT"}. Telegram ${telegramEnabled() ? "on" : "off"}. Payments ${moneyEnabled() ? "on" : "OFF: set RUNS_CONTRACT"}. Buybacks ${moneyEnabled() && ENV.swapRouter ? "on" : "off"}.`);
 every("seal", 20_000, sealPending);
 every("grade", 60_000, async () => {
   await gradeDue();
@@ -184,3 +220,11 @@ every("grade", 60_000, async () => {
 });
 every("alerts", 20_000, sendAlerts);
 every("telegram", 5_000, telegramUpdates);
+every("webhooks", 15_000, sendWebhooks);
+every("payments", 15_000, async () => {
+  await registerAgents();
+  await registerTokens();
+  await indexPayments();
+});
+every("buybacks", ENV.buybackEveryMinutes * 60_000, runBuybacks);
+every("markets", 5 * 60_000, refreshMarkets);

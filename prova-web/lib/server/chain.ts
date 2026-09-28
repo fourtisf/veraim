@@ -2,11 +2,13 @@ import { createPublicClient, createWalletClient, defineChain, http, type Abi, ty
 import { privateKeyToAccount } from "viem/accounts";
 import { robinhood, robinhoodTestnet } from "viem/chains";
 import { ENV } from "./env";
+import RunsArtifact from "@/contracts/ProvaRuns.json";
 import SealArtifact from "@/contracts/ProvaSeal.json";
 
 export const SEAL_ABI = SealArtifact.abi as Abi;
+export const RUNS_ABI = RunsArtifact.abi as Abi;
 
-function chain(): Chain {
+export function chain(): Chain {
   if (ENV.chain === "robinhoodTestnet") return robinhoodTestnet;
   if (ENV.chain === "local") {
     return defineChain({ id: 1337, name: "Local", nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 }, rpcUrls: { default: { http: [ENV.rpcUrl || "http://127.0.0.1:8545"] } } });
@@ -29,3 +31,21 @@ export function sealerClient() {
 }
 
 export const sealingEnabled = () => !!(ENV.sealerKey && ENV.sealContract);
+
+// Paid runs are on when the ProvaRuns contract is configured.
+export const paymentsEnabled = () => !!ENV.runsContract;
+
+// What the browser needs to send payments and withdrawals.
+export function chainInfo() {
+  const c = chain();
+  return {
+    chainId: c.id,
+    name: c.name,
+    rpcUrl: ENV.rpcUrl || c.rpcUrls.default.http[0],
+    explorer: ENV.explorerUrl,
+    runsContract: ENV.runsContract || null,
+    usdg: ENV.usdg,
+    enabled: paymentsEnabled(),
+  };
+}
+export type ChainInfo = ReturnType<typeof chainInfo>;

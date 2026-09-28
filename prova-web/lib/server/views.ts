@@ -47,9 +47,11 @@ export async function agentViews(where: { hidden?: boolean; id?: string; slug?: 
   const agents = await prisma.agent.findMany({ where, include: { creator: true }, orderBy: { createdAt: "asc" } });
   if (!agents.length) return [];
   const ids = agents.map((a) => a.id);
-  const [byStatus, runs7d, last] = await Promise.all([
+  const [byStatus, runs7d, paid7d, bought, last] = await Promise.all([
     prisma.call.groupBy({ by: ["agentId", "status"], where: { agentId: { in: ids } }, _count: true, _sum: { weight: true } }),
     prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, createdAt: { gte: new Date(Date.now() - 7 * DAY) } }, _count: true }),
+    prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, paid: true, createdAt: { gte: new Date(Date.now() - 7 * DAY) } }, _count: true }),
+    prisma.buyback.groupBy({ by: ["agentId"], where: { agentId: { in: ids } }, _sum: { amountUsd: true } }),
     prisma.$queryRaw<{ agentId: string; status: string }[]>`
       SELECT "agentId", status FROM (
         SELECT "agentId", status, ROW_NUMBER() OVER (PARTITION BY "agentId" ORDER BY "gradedAt" DESC) AS rn
@@ -84,6 +86,12 @@ export async function agentViews(where: { hidden?: boolean; id?: string; slug?: 
       official: a.official,
       creator: a.creator?.wallet || null,
       tokenAddress: a.tokenAddress,
+      tokenSymbol: a.tokenSymbol,
+      marketCapUsd: a.marketCapUsd,
+      priceUsd: a.priceUsd,
+      priceChange24h: a.priceChange24h,
+      boughtBackUsd: Math.round((bought.find((b) => b.agentId === a.id)?._sum.amountUsd || 0) * 100) / 100,
+      paidRuns7d: paid7d.find((r) => r.agentId === a.id)?._count || 0,
       createdAt: a.createdAt.toISOString(),
       ageDays: Math.max(0, Math.floor((Date.now() - a.createdAt.getTime()) / DAY)),
       trackRecord: hitW + missW > 0 ? Math.round((hitW / (hitW + missW)) * 1000) / 10 : null,
@@ -128,7 +136,7 @@ export async function recentCalls(opts: { take?: number; agentId?: string; statu
 export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
   const now = Date.now();
   const startOfDay = new Date(new Date().setUTCHours(0, 0, 0, 0));
-  const [sealedCalls, sealedToday, sealedYesterday, pending, graded24, calls24h, waitlistCount] = await Promise.all([
+  const [sealedCalls, sealedToday, sealedYesterday, pending, graded24, calls24h, waitlistCount, bought] = await Promise.all([
     prisma.call.count({ where: { sealTx: { not: null } } }),
     prisma.call.count({ where: { sealedAt: { gte: startOfDay } } }),
     prisma.call.count({ where: { sealedAt: { gte: new Date(startOfDay.getTime() - DAY), lt: startOfDay } } }),
@@ -136,6 +144,7 @@ export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
     prisma.call.groupBy({ by: ["status"], where: { status: { in: ["hit", "miss"] }, gradedAt: { gte: new Date(now - DAY) } }, _count: true }),
     prisma.call.count({ where: { createdAt: { gte: new Date(now - DAY) } } }),
     prisma.waitlist.count(),
+    prisma.buyback.aggregate({ _sum: { amountUsd: true } }),
   ]);
   const top = agents.filter((a) => a.ranked).sort((x, y) => (y.trackRecord || 0) - (x.trackRecord || 0)).slice(0, 100);
   const h = graded24.find((g) => g.status === "hit")?._count || 0;
@@ -144,7 +153,7 @@ export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
     agentCount: agents.length,
     sealedCalls,
     avgTopRecord: top.length ? Math.round((top.reduce((s, a) => s + (a.trackRecord || 0), 0) / top.length) * 10) / 10 : null,
-    boughtBackUsd: 0,
+    boughtBackUsd: Math.round(bought._sum.amountUsd || 0),
     typicalPrice: 0.05,
     sealedToday,
     sealedYesterday,

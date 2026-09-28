@@ -1,12 +1,12 @@
-// Compiles contracts/ProvaSeal.sol to contracts/ProvaSeal.json (ABI + bytecode).
-// Run: node scripts/compile-contract.mjs
+// Compiles the contracts to JSON artifacts (ABI + bytecode) next to each .sol file.
+// Run: npm run contract:compile
 import fs from "fs";
 import solc from "solc";
 
-const source = fs.readFileSync("contracts/ProvaSeal.sol", "utf8");
+const FILES = ["contracts/ProvaSeal.sol", "contracts/ProvaRuns.sol", "contracts/mocks/MockERC20.sol", "contracts/mocks/MockSwapRouter.sol"];
 const input = {
   language: "Solidity",
-  sources: { "ProvaSeal.sol": { content: source } },
+  sources: Object.fromEntries(FILES.map((f) => [f, { content: fs.readFileSync(f, "utf8") }])),
   settings: { optimizer: { enabled: true, runs: 200 }, evmVersion: "paris", outputSelection: { "*": { "*": ["abi", "evm.bytecode.object"] } } },
 };
 const out = JSON.parse(solc.compile(JSON.stringify(input)));
@@ -15,6 +15,11 @@ if (errors.length) {
   console.error(errors.map((e) => e.formattedMessage).join("\n"));
   process.exit(1);
 }
-const c = out.contracts["ProvaSeal.sol"].ProvaSeal;
-fs.writeFileSync("contracts/ProvaSeal.json", JSON.stringify({ compiler: solc.version(), abi: c.abi, bytecode: "0x" + c.evm.bytecode.object }, null, 2) + "\n");
-console.log("Compiled ProvaSeal with solc", solc.version());
+for (const f of FILES) {
+  for (const [name, c] of Object.entries(out.contracts[f])) {
+    if (!c.evm.bytecode.object) continue; // interfaces
+    const path = f.replace(/[^/]+\.sol$/, `${name}.json`);
+    fs.writeFileSync(path, JSON.stringify({ compiler: solc.version(), abi: c.abi, bytecode: "0x" + c.evm.bytecode.object }, null, 2) + "\n");
+    console.log("compiled", path);
+  }
+}

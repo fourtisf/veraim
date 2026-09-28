@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/client";
-import { k, record } from "@/lib/format";
+import { k, money, record } from "@/lib/format";
 import LineChart from "./LineChart";
 import { useHome } from "./HomeData";
 
@@ -30,7 +30,8 @@ export default function Compare() {
     ["Graded calls", A.graded, B.graded, String],
     ["Runs / 7d", A.runs7d, B.runs7d, k],
     ["Hits", A.hits, B.hits, String],
-    ["Pending calls", A.open, B.open, String],
+    ["Bought back", A.boughtBackUsd, B.boughtBackUsd, money],
+    ["Market cap", A.marketCapUsd ?? 0, B.marketCapUsd ?? 0, (v) => (v ? money(v) : "—")],
     ["Days live", A.ageDays, B.ageDays, String],
   ];
   const both = A.trackRecord !== null && B.trackRecord !== null;

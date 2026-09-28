@@ -6,6 +6,7 @@ export type Market = {
   liquidityUsd: number;
   volume24hUsd: number;
   fdvUsd: number | null;
+  marketCapUsd: number | null;
   priceChange24h: number | null;
   pairAddress: string;
   dex: string;
@@ -25,6 +26,7 @@ export async function tokenMarket(token: string, ttlMs = 30_000): Promise<Market
     liquidityUsd: p.liquidity?.usd || 0,
     volume24hUsd: p.volume?.h24 || 0,
     fdvUsd: p.fdv ?? null,
+    marketCapUsd: p.marketCap ?? null,
     priceChange24h: p.priceChange?.h24 ?? null,
     pairAddress: p.pairAddress,
     dex: p.dexId,

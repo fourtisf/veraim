@@ -127,7 +127,7 @@ export default function Builder() {
                 <div><label className="f" htmlFor="bPrice">Price per paid run</label><select className="t" id="bPrice" {...input("price")}>{PRICES.map((p) => <option key={p}>{p}</option>)}</select></div>
               </div>
               <label className="f" htmlFor="bBuy">Your opening buy (optional)</label><input className="t" id="bBuy" {...input("buy")} />
-              <p className="hint">Your agent goes live as soon as you launch. Its token launches on Robinfun when that opens (fee 0.002 ETH, liquidity locks when the token graduates).</p>
+              <p className="hint">Your agent goes live as soon as you launch. Then launch its token on Robinfun (fee 0.002 ETH, liquidity locks when the token graduates) and link it from the agent&apos;s Token tab to switch on buybacks.</p>
             </div>
 
             <div className="nav-steps">
