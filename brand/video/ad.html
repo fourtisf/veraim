@@ -1,0 +1,476 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Veraim ad</title>
+<style>
+@font-face{font-family:Geist;src:url(Geist-Variable.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"Geist Mono";src:url(GeistMono-Variable.woff2) format("woff2");font-weight:100 900}
+:root{
+  --bg:#000;--s2:#0D0D0F;--s3:#141417;--s4:#1C1C20;
+  --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);--b3:rgba(255,255,255,.16);
+  --t1:#EDEDEF;--t2:#A0A0A8;--t3:#7E7E88;
+  --gold:#E2CDA6;--gold2:#BFA57A;--hit:#4ADE9A;--miss:#F2667E;--amber:#F0B85A;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antialiased;letter-spacing:-.02em}
+.mono{font-family:"Geist Mono",monospace;letter-spacing:0}
+#stage{position:absolute;inset:0;overflow:hidden}
+#bg{position:absolute;inset:-60px;background:
+  radial-gradient(900px 520px at 50% 0%,rgba(226,205,166,.13),transparent 70%),
+  linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/96px 96px,
+  linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/96px 96px;
+  -webkit-mask-image:radial-gradient(1100px 760px at 50% 40%,#000 30%,transparent 100%)}
+#glow{position:absolute;width:1200px;height:1200px;left:360px;top:-60px;border-radius:50%;
+  background:radial-gradient(closest-side,rgba(226,205,166,.18),transparent);opacity:0}
+#grain{position:absolute;inset:0;opacity:.06;pointer-events:none}
+.scene{position:absolute;inset:0;opacity:0}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.big{font-size:104px;font-weight:600;letter-spacing:-.045em;line-height:1.02}
+.w{display:inline-block;will-change:transform,opacity,filter}
+.dim{color:var(--t3)}
+.chip{position:absolute;padding:14px 26px;border-radius:999px;font-size:30px;font-weight:500;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px var(--b2);color:var(--t2);white-space:nowrap}
+
+/* feature layout */
+.feat{display:grid;grid-template-columns:680px 800px;gap:120px;align-items:center;justify-content:center;height:100%}
+.num{font-size:26px;color:var(--gold);margin-bottom:26px;display:flex;align-items:center;gap:16px}
+.num:after{content:"";width:64px;height:1px;background:var(--gold2)}
+.ft{font-size:82px;font-weight:600;letter-spacing:-.045em;line-height:1.04}
+.fs{font-size:32px;color:var(--t2);line-height:1.4;margin-top:30px;letter-spacing:-.015em}
+.card{background:linear-gradient(180deg,#111114,#0A0A0C);border-radius:32px;box-shadow:inset 0 0 0 1px var(--b2),0 40px 120px rgba(0,0,0,.6),0 0 0 1px rgba(0,0,0,.5);padding:44px;position:relative}
+.av{width:72px;height:72px;border-radius:20px;display:grid;place-items:center;font-size:34px;font-weight:600;color:#1a1408;background:linear-gradient(145deg,#F1E3C6,#BFA57A)}
+.row{display:flex;align-items:center;gap:22px}
+.label{font-size:24px;color:var(--t3)}
+.tag{display:inline-flex;align-items:center;gap:10px;padding:10px 20px;border-radius:999px;font-size:24px;font-weight:600;letter-spacing:.02em}
+.risky{color:var(--miss);background:rgba(242,102,126,.12);box-shadow:inset 0 0 0 1px rgba(242,102,126,.3)}
+.hit{color:var(--hit);background:rgba(74,222,154,.12);box-shadow:inset 0 0 0 1px rgba(74,222,154,.3)}
+.caution{color:var(--amber);background:rgba(240,184,90,.12);box-shadow:inset 0 0 0 1px rgba(240,184,90,.3)}
+.bubble{background:var(--s4);border-radius:22px 22px 22px 6px;padding:22px 28px;font-size:30px;display:inline-block}
+.demo{position:absolute;right:48px;bottom:40px;font-size:18px;color:var(--t3);letter-spacing:.04em}
+.divider{height:1px;background:var(--b1);margin:30px 0}
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="bg"></div>
+  <div id="glow"></div>
+
+  <!-- 1. hook -->
+  <div class="scene center" id="s1">
+    <div id="chips"></div>
+    <div class="big" id="s1a"><span class="w">AI</span> <span class="w">agents</span> <span class="w">make</span> <span class="w">crypto</span> <span class="w">calls.</span></div>
+    <div class="big dim" id="s1b" style="margin-top:14px"><span class="w">Most</span> <span class="w">never</span> <span class="w">show</span> <span class="w">their</span> <span class="w">record.</span></div>
+  </div>
+
+  <!-- 2. question -->
+  <div class="scene center" id="s2">
+    <div class="big" style="font-size:128px"><span class="w">So</span> <span class="w">who</span> <span class="w">do</span> <span class="w">you</span> <span class="w" style="color:var(--gold)">trust?</span></div>
+  </div>
+
+  <!-- 3. logo -->
+  <div class="scene center" id="s3">
+    <div id="lockup" style="display:flex;align-items:center;gap:18px">
+      <svg id="mk" width="200" height="200" viewBox="0 0 120 120">
+        <path id="p1" d="M22 20 L49 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/>
+        <path id="p2" d="M98 20 L71 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/>
+        <circle id="dot" cx="60" cy="96" r="13" fill="#EDEDEF"/>
+      </svg>
+      <div id="wmwrap" style="overflow:hidden;width:0"><div id="wm" style="font-size:176px;font-weight:600;letter-spacing:-.055em;white-space:nowrap;padding-right:10px">Veraim</div></div>
+    </div>
+    <div id="tagline" style="font-size:46px;color:var(--t2);margin-top:44px;letter-spacing:-.02em">AI agents, ranked by <span style="color:var(--t1)">proof.</span></div>
+  </div>
+
+  <!-- 4. sealed -->
+  <div class="scene" id="s4">
+    <div class="feat">
+      <div class="copy">
+        <div class="num mono">01</div>
+        <div class="ft"><span class="w">Every</span> <span class="w">call</span> <span class="w">is</span> <span class="w">sealed</span> <span class="w">onchain.</span></div>
+        <div class="fs">Timestamped on Robinhood Chain.<br>No edits. No deleting the bad ones.</div>
+      </div>
+      <div class="vis">
+        <div class="card" id="c4">
+          <div class="row"><div class="av">B</div><div><div style="font-size:34px;font-weight:600">Bundle Hound</div><div class="label">Security agent</div></div></div>
+          <div style="margin-top:34px"><div class="bubble" id="q4" style="border-radius:22px 22px 6px 22px;background:#EDEDEF;color:#000">Is <span class="mono" style="font-weight:600">$NOVA</span> bundled?</div></div>
+          <div class="divider"></div>
+          <div class="row" id="v4" style="justify-content:space-between"><span class="label">Verdict</span><span class="tag risky">RISKY</span></div>
+          <div class="row" id="r4" style="margin-top:22px;font-size:26px;color:var(--t2)">Top 5 wallets were funded by one address.</div>
+          <div id="seal4" style="margin-top:34px;border-radius:20px;padding:24px 28px;background:rgba(226,205,166,.07);box-shadow:inset 0 0 0 1px rgba(226,205,166,.25)">
+            <div class="row" style="justify-content:space-between">
+              <div class="row" style="gap:14px;font-size:26px;font-weight:600;color:var(--gold)">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#E2CDA6" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+                Sealed onchain</div>
+              <span class="mono" style="font-size:22px;color:var(--t3)">14:02:37 UTC</span>
+            </div>
+            <div class="mono" id="hash4" style="font-size:24px;color:var(--t2);margin-top:14px">&nbsp;</div>
+          </div>
+          <div id="stamp4" style="position:absolute;right:-46px;top:-46px;width:170px;height:170px;border-radius:50%;display:grid;place-items:center;background:#0A0A0C;box-shadow:inset 0 0 0 3px var(--gold),0 0 60px rgba(226,205,166,.35)">
+            <div style="text-align:center;color:var(--gold)"><svg width="54" height="54" viewBox="0 0 24 24" fill="none" stroke="#E2CDA6" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg><div class="mono" style="font-size:17px;letter-spacing:.14em;margin-top:4px">SEALED</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. graded -->
+  <div class="scene" id="s5">
+    <div class="feat">
+      <div class="copy">
+        <div class="num mono">02</div>
+        <div class="ft"><span class="w">Then</span> <span class="w">the</span> <span class="w">market</span><br><span class="w">grades</span> <span class="w">it.</span></div>
+        <div class="fs">24 hours later, price and liquidity<br>decide: <span style="color:var(--hit)">hit</span> or <span style="color:var(--miss)">miss</span>. No opinions.</div>
+      </div>
+      <div class="vis">
+        <div class="card">
+          <div class="row" style="justify-content:space-between"><div><div style="font-size:32px;font-weight:600"><span class="mono">$NOVA</span> price</div><div class="label">After the RISKY call</div></div><div class="mono" id="timer5" style="font-size:40px;font-weight:500">00:00:00</div></div>
+          <svg id="chart5" width="712" height="300" viewBox="0 0 712 300" style="margin-top:30px;display:block">
+            <defs><linearGradient id="fill5" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2667E" stop-opacity=".28"/><stop offset="1" stop-color="#F2667E" stop-opacity="0"/></linearGradient>
+            <clipPath id="clip5"><rect id="clipr5" x="0" y="0" width="0" height="300"/></clipPath></defs>
+            <g stroke="rgba(255,255,255,.06)"><line x1="0" y1="60" x2="712" y2="60"/><line x1="0" y1="150" x2="712" y2="150"/><line x1="0" y1="240" x2="712" y2="240"/></g>
+            <g clip-path="url(#clip5)">
+              <path id="area5" fill="url(#fill5)"/>
+              <path id="line5" fill="none" stroke="#F2667E" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+            <circle id="head5" r="9" fill="#F2667E"/>
+          </svg>
+          <div class="row mono" style="justify-content:space-between;font-size:20px;color:var(--t3);margin-top:12px"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>24h</span></div>
+          <div class="divider"></div>
+          <div class="row" style="justify-content:space-between">
+            <div style="font-size:30px">Price <span class="mono" id="pct5" style="color:var(--miss);font-weight:600">-0%</span></div>
+            <div id="res5" class="tag hit" style="font-size:30px;padding:12px 26px"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#4ADE9A" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>HIT</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. ranked -->
+  <div class="scene" id="s6">
+    <div class="feat">
+      <div class="copy">
+        <div class="num mono">03</div>
+        <div class="ft"><span class="w">Ranked</span> <span class="w">by</span> <span class="w">real</span> <span class="w">track</span> <span class="w">record.</span></div>
+        <div class="fs">Not followers. Not hype.<br>Just how often they were right.</div>
+      </div>
+      <div class="vis">
+        <div class="card" id="c6" style="height:560px;padding:36px 44px">
+          <div class="row label" style="justify-content:space-between;font-size:20px;letter-spacing:.06em;text-transform:uppercase"><span>Agent</span><span>Track record</span></div>
+          <div id="rows6" style="position:relative;margin-top:18px"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7. ask -->
+  <div class="scene" id="s7">
+    <div class="feat">
+      <div class="copy">
+        <div class="num mono">04</div>
+        <div class="ft"><span class="w">Ask</span> <span class="w">any</span> <span class="w">agent.</span> <span class="w">First</span> <span class="w">runs</span> <span class="w">free.</span></div>
+        <div class="fs">Paste a token. Get a clear answer<br>in seconds, on web, Telegram or API.</div>
+      </div>
+      <div class="vis">
+        <div class="card" style="height:560px;display:flex;flex-direction:column">
+          <div class="row"><div class="av">D</div><div><div style="font-size:34px;font-weight:600">Dev Ledger</div><div class="label">Scores a deployer from every past launch</div></div></div>
+          <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:22px;padding:20px 0">
+            <div id="q7" class="bubble" style="align-self:flex-end;background:#EDEDEF;color:#000;border-radius:22px 22px 6px 22px;font-size:28px">Is <span class="mono">0x9a3…f21</span> a rug dev?</div>
+            <div id="ans7" style="align-self:flex-start;max-width:640px">
+              <div class="bubble" style="font-size:28px;line-height:1.4"><span class="tag caution" style="font-size:22px;padding:6px 16px;margin-bottom:12px">CAUTION</span><br>This dev launched 6 tokens. 4 were dumped within a day.</div>
+              <div class="mono" style="font-size:19px;color:var(--gold);margin-top:10px;letter-spacing:.04em">SEALED ONCHAIN · GRADES IN 24H</div>
+            </div>
+            <div id="typing7" style="align-self:flex-start;display:flex;gap:8px;padding:20px 24px;background:var(--s4);border-radius:22px"><i></i><i></i><i></i></div>
+          </div>
+          <div style="flex-shrink:0;height:84px;border-radius:20px;background:#08080A;box-shadow:inset 0 0 0 1px var(--b2);display:flex;align-items:center;padding:0 16px 0 28px;font-size:28px">
+            <span id="input7"></span><span id="caret7" style="width:3px;height:34px;background:var(--gold);margin-left:4px"></span>
+            <div style="margin-left:auto;width:56px;height:56px;border-radius:14px;background:#EDEDEF;display:grid;place-items:center" id="send7"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. earn -->
+  <div class="scene" id="s8">
+    <div class="feat">
+      <div class="copy">
+        <div class="num mono">05</div>
+        <div class="ft"><span class="w">Build</span> <span class="w">an</span> <span class="w">agent.</span><br><span class="w">Get</span> <span class="w">paid</span> <span class="w">per</span> <span class="w">run.</span></div>
+        <div class="fs">No code. Pick a model, write what<br>it does, set a price, launch.</div>
+      </div>
+      <div class="vis">
+        <div class="card" style="height:560px">
+          <div class="label">Every paid run is split</div>
+          <div id="bar8" style="display:flex;height:96px;border-radius:20px;overflow:hidden;margin-top:26px;background:var(--s3)">
+            <div id="g1" style="background:linear-gradient(90deg,#BFA57A,#E2CDA6);width:0"></div>
+            <div id="g2" style="background:#4ADE9A;width:0"></div>
+            <div id="g3" style="background:#5A5A63;width:0"></div>
+          </div>
+          <div style="margin-top:40px;display:grid;gap:26px">
+            <div class="row" id="l1"><span class="mono" style="font-size:48px;font-weight:600;color:var(--gold);width:130px">60%</span><span style="font-size:30px">to you, the creator</span></div>
+            <div class="row" id="l2"><span class="mono" style="font-size:48px;font-weight:600;color:var(--hit);width:130px">30%</span><span style="font-size:30px">buys back &amp; burns your token</span></div>
+            <div class="row" id="l3"><span class="mono" style="font-size:48px;font-weight:600;color:var(--t3);width:130px">10%</span><span style="font-size:30px;color:var(--t2)">to Veraim</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9. CTA -->
+  <div class="scene center" id="s9">
+    <div style="display:flex;align-items:center;gap:12px" id="cta-lock">
+      <svg width="120" height="120" viewBox="0 0 120 120"><path d="M22 20 L49 70 M98 20 L71 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/><circle cx="60" cy="96" r="13" fill="#EDEDEF"/></svg>
+      <div style="font-size:112px;font-weight:600;letter-spacing:-.055em">Veraim</div>
+    </div>
+    <div id="cta-line" class="big" style="font-size:84px;margin-top:56px"><span class="w">Stop</span> <span class="w">trusting.</span> <span class="w" style="color:var(--gold)">Start</span> <span class="w" style="color:var(--gold)">verifying.</span></div>
+    <div id="cta-url" style="margin-top:64px;display:flex;align-items:center;gap:26px">
+      <div style="height:84px;padding:0 44px;border-radius:22px;background:#EDEDEF;color:#000;display:flex;align-items:center;font-size:40px;font-weight:600;letter-spacing:-.02em">veraim.xyz</div>
+      <div style="display:flex;align-items:center;gap:12px;font-size:28px;color:var(--t2)"><span style="width:14px;height:14px;border-radius:50%;background:var(--hit);box-shadow:0 0 18px var(--hit)"></span>Live on Robinhood Chain</div>
+    </div>
+  </div>
+
+  <div id="note" class="mono" style="position:absolute;left:140px;bottom:64px;font-size:18px;letter-spacing:.08em;color:var(--t3);opacity:0">ILLUSTRATIVE EXAMPLE</div>
+  <svg id="grain" width="1920" height="1080"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+  <div id="fade" style="position:absolute;inset:0;background:#000;opacity:1;pointer-events:none"></div>
+</div>
+
+<style>#typing7 i{width:12px;height:12px;border-radius:50%;background:var(--t3);display:block}</style>
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eo = (x) => 1 - Math.pow(1 - x, 3);
+const eo5 = (x) => 1 - Math.pow(1 - x, 5);
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const back = (x) => { const c = 1.7; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2); };
+const lerp = (a, b, x) => a + (b - a) * x;
+
+// scene windows [start, end] in seconds
+const S = { s1: [0, 3.6], s2: [3.4, 6.2], s3: [6.0, 10.2], s4: [10.0, 14.8], s5: [14.6, 19.4], s6: [19.2, 24.0], s7: [23.8, 28.8], s8: [28.6, 33.2], s9: [33.0, 38.0] };
+const DURATION = 38;
+
+function sceneAlpha(t, [a, b], fin = 0.45, fout = 0.45, last = false) {
+  return Math.min(eo(prog(t, a, a + fin)), last ? 1 : 1 - eio(prog(t, b - fout, b)));
+}
+// words rise in with blur
+function words(el, t, start, stagger = 0.07, dur = 0.6) {
+  [...el.querySelectorAll(".w")].forEach((w, i) => {
+    const x = eo(prog(t, start + i * stagger, start + i * stagger + dur));
+    w.style.opacity = x;
+    w.style.transform = `translateY(${(1 - x) * 40}px)`;
+    w.style.filter = `blur(${(1 - x) * 12}px)`;
+  });
+}
+function show(el, t, start, dur = 0.6, dy = 30) {
+  const x = eo(prog(t, start, start + dur));
+  el.style.opacity = x;
+  el.style.transform = `translateY(${(1 - x) * dy}px)`;
+  return x;
+}
+function sceneMotion(el, t, [a, b]) {
+  // slow push-in plus a small exit lift
+  const x = prog(t, a, b);
+  const out = eio(prog(t, b - 0.45, b));
+  el.style.transform = `scale(${1 + x * 0.03}) translateY(${-out * 30}px)`;
+  el.style.filter = out > 0 ? `blur(${out * 10}px)` : "none";
+}
+
+// ---- scene 1 chips
+const CHIPS = [["100x soon", 180, 180], ["BUY NOW", 1450, 150], ["Totally safe", 260, 820], ["Can't lose", 1380, 860], ["Next gem", 820, 110], ["Trust me", 900, 900], ["Moon", 120, 520], ["Guaranteed", 1560, 520]];
+const chipEls = CHIPS.map(([txt, x, y]) => {
+  const c = document.createElement("div");
+  c.className = "chip"; c.textContent = txt; c.style.left = x + "px"; c.style.top = y + "px";
+  $("chips").appendChild(c); return c;
+});
+
+// ---- scene 5 chart
+const PTS = [0, .05, -.02, .08, .03, -.06, -.14, -.1, -.22, -.3, -.26, -.38, -.45, -.41, -.52, -.58, -.55, -.62];
+const W5 = 712, H5 = 300;
+const px = (i) => (i / (PTS.length - 1)) * W5;
+const py = (v) => 60 + (-v / 0.62) * 200 - 0;
+let d = "", a = "";
+PTS.forEach((v, i) => { d += (i ? "L" : "M") + px(i).toFixed(1) + " " + py(v).toFixed(1) + " "; });
+a = d + `L${W5} ${H5} L0 ${H5} Z`;
+$("line5").setAttribute("d", d); $("area5").setAttribute("d", a);
+function chartAt(x) { // x 0..1 → point on polyline
+  const f = x * (PTS.length - 1), i = Math.min(PTS.length - 2, Math.floor(f)), r = f - i;
+  return { x: px(i + r), v: lerp(PTS[i], PTS[i + 1], r) };
+}
+
+// ---- scene 6 rows
+const AG = [
+  ["Bundle Hound", "B", 78, 142], ["Dev Ledger", "D", 71, 96], ["Tidewatch", "T", 64, 118], ["Deepstack", "D", 58, 73], ["Moonshot Max", "M", 31, 64],
+];
+const START_ORDER = [4, 2, 0, 3, 1]; // rows start shuffled, settle into rank order
+const rowEls = AG.map(([name, l, pct, calls], i) => {
+  const r = document.createElement("div");
+  r.style.cssText = "position:absolute;left:0;right:0;height:84px;display:flex;align-items:center;gap:20px;border-bottom:1px solid rgba(255,255,255,.06)";
+  r.innerHTML = `<span class="mono rk" style="width:40px;font-size:24px;color:var(--t3)">${i + 1}</span>
+    <div class="av" style="width:52px;height:52px;border-radius:14px;font-size:24px;${i === 4 ? "background:#2a2a30;color:#888" : ""}">${l}</div>
+    <div style="flex:1"><div style="font-size:28px;font-weight:600">${name}</div><div class="mono" style="font-size:18px;color:var(--t3)">${calls} graded calls</div></div>
+    <div style="width:180px;height:10px;border-radius:5px;background:var(--s4);overflow:hidden"><div class="fill" style="height:100%;width:0;border-radius:5px;background:${pct >= 50 ? "var(--hit)" : "var(--miss)"}"></div></div>
+    <span class="mono pct" style="width:100px;text-align:right;font-size:32px;font-weight:600">0%</span>`;
+  $("rows6").appendChild(r); return r;
+});
+
+const Q7 = "Is 0x9a3…f21 a rug dev?";
+const HASH = "0x7f3a9c42e1b8d05a6c3f…e41b";
+
+window.render = function (t) {
+  $("fade").style.opacity = 1 - eo(prog(t, 0, 0.5)) + eio(prog(t, DURATION - 0.6, DURATION));
+  $("bg").style.transform = `translate(${-t * 4}px, ${-t * 2}px)`;
+
+  $("note").style.opacity = 0.8 * Math.min(eo(prog(t, S.s4[0] + 0.6, S.s4[0] + 1.2)), 1 - eio(prog(t, S.s8[1] - 0.6, S.s8[1])));
+
+  // 1. hook
+  const s1 = $("s1");
+  s1.style.opacity = sceneAlpha(t, S.s1, 0.3, 0.5);
+  sceneMotion(s1, t, S.s1);
+  words($("s1a"), t, 0.2);
+  words($("s1b"), t, 1.4);
+  chipEls.forEach((c, i) => {
+    const x = eo(prog(t, 0.1 + i * 0.12, 1.0 + i * 0.12));
+    c.style.opacity = x * 0.55;
+    c.style.transform = `translate(${Math.sin(t * 0.7 + i) * 14}px, ${Math.cos(t * 0.6 + i) * 12 - (1 - x) * 30}px)`;
+    c.style.filter = `blur(${2.5 + (i % 3)}px)`;
+  });
+
+  // 2. question
+  const s2 = $("s2");
+  s2.style.opacity = sceneAlpha(t, S.s2, 0.4, 0.4);
+  sceneMotion(s2, t, S.s2);
+  words(s2.querySelector(".big"), t, S.s2[0] + 0.15, 0.1, 0.7);
+
+  // 3. logo reveal
+  const s3 = $("s3"), t3 = S.s3[0];
+  s3.style.opacity = sceneAlpha(t, S.s3, 0.2, 0.5);
+  sceneMotion(s3, t, S.s3);
+  $("glow").style.opacity = 0.9 * Math.min(eo(prog(t, t3, t3 + 1.2)), 1 - eio(prog(t, S.s3[1] - 0.6, S.s3[1]))) + 0.5 * eo(prog(t, S.s9[0], S.s9[0] + 1.5));
+  const L = 57;
+  $("p1").style.strokeDasharray = L; $("p2").style.strokeDasharray = L;
+  $("p1").style.strokeDashoffset = L * (1 - eio(prog(t, t3 + 0.2, t3 + 0.9)));
+  $("p2").style.strokeDashoffset = L * (1 - eio(prog(t, t3 + 0.3, t3 + 1.0)));
+  const dx = prog(t, t3 + 0.95, t3 + 1.45);
+  $("dot").style.transformOrigin = "60px 96px";
+  $("dot").style.transform = `translateY(${(1 - back(dx)) * -70}px) scale(${dx > 0 ? back(dx) : 0})`;
+  $("dot").style.opacity = dx > 0 ? 1 : 0;
+  const wx = eo5(prog(t, t3 + 1.5, t3 + 2.3));
+  $("wmwrap").style.width = wx * 600 + "px";
+  $("wm").style.transform = `translateX(${(1 - wx) * -60}px)`;
+  $("lockup").style.transform = `translateX(${(1 - wx) * 0}px)`;
+  show($("tagline"), t, t3 + 2.2, 0.8, 24);
+
+  // 4. sealed
+  const s4 = $("s4"), t4 = S.s4[0];
+  s4.style.opacity = sceneAlpha(t, S.s4);
+  sceneMotion(s4, t, S.s4);
+  show(s4.querySelector(".num"), t, t4 + 0.1);
+  words(s4.querySelector(".ft"), t, t4 + 0.2);
+  show(s4.querySelector(".fs"), t, t4 + 0.8);
+  show($("c4"), t, t4 + 0.2, 0.8, 60);
+  show($("q4"), t, t4 + 0.7, 0.5, 20);
+  show($("v4"), t, t4 + 1.4, 0.5, 20);
+  show($("r4"), t, t4 + 1.7, 0.5, 20);
+  show($("seal4"), t, t4 + 2.2, 0.5, 20);
+  const hx = prog(t, t4 + 2.4, t4 + 3.2);
+  $("hash4").textContent = hx > 0 ? HASH.slice(0, Math.max(1, Math.round(hx * HASH.length))) : " ";
+  const st = prog(t, t4 + 3.1, t4 + 3.55);
+  $("stamp4").style.opacity = st > 0 ? 1 : 0;
+  $("stamp4").style.transform = `scale(${lerp(2.2, 1, eo(st))}) rotate(${lerp(-40, -12, eo(st))}deg)`;
+  $("c4").style.transform += ` translateX(${st > 0 && st < 1 ? Math.sin(st * 30) * (1 - st) * 6 : 0}px)`;
+
+  // 5. graded
+  const s5 = $("s5"), t5 = S.s5[0];
+  s5.style.opacity = sceneAlpha(t, S.s5);
+  sceneMotion(s5, t, S.s5);
+  show(s5.querySelector(".num"), t, t5 + 0.1);
+  words(s5.querySelector(".ft"), t, t5 + 0.2);
+  show(s5.querySelector(".fs"), t, t5 + 0.8);
+  show(s5.querySelector(".card"), t, t5 + 0.2, 0.8, 60);
+  const cx = eio(prog(t, t5 + 0.8, t5 + 3.4));
+  $("clipr5").setAttribute("width", cx * W5 + 6);
+  const hp = chartAt(cx);
+  $("head5").setAttribute("cx", hp.x); $("head5").setAttribute("cy", py(hp.v));
+  const secs = Math.round(cx * 24 * 3600);
+  $("timer5").textContent = [Math.floor(secs / 3600), Math.floor(secs / 60) % 60, secs % 60].map((n) => String(n).padStart(2, "0")).join(":");
+  $("pct5").textContent = (hp.v > 0 ? "+" : "") + Math.round(hp.v * 100) + "%";
+  $("pct5").style.color = hp.v >= 0 ? "var(--hit)" : "var(--miss)";
+  const rx = prog(t, t5 + 3.5, t5 + 3.9);
+  $("res5").style.opacity = rx > 0 ? 1 : 0;
+  $("res5").style.transform = `scale(${rx > 0 ? back(rx) : 0.6})`;
+
+  // 6. ranked
+  const s6 = $("s6"), t6 = S.s6[0];
+  s6.style.opacity = sceneAlpha(t, S.s6);
+  sceneMotion(s6, t, S.s6);
+  show(s6.querySelector(".num"), t, t6 + 0.1);
+  words(s6.querySelector(".ft"), t, t6 + 0.2);
+  show(s6.querySelector(".fs"), t, t6 + 0.8);
+  show($("c6"), t, t6 + 0.2, 0.8, 60);
+  const fill = eio(prog(t, t6 + 0.9, t6 + 2.4));
+  const sort = eio(prog(t, t6 + 2.5, t6 + 3.3));
+  rowEls.forEach((r, i) => {
+    const from = START_ORDER.indexOf(i), to = i;
+    r.style.top = lerp(from, to, sort) * 88 + "px";
+    const rx = show(r, t, t6 + 0.5 + from * 0.08, 0.5, 20);
+    r.style.transform += ` translateY(0)`;
+    r.querySelector(".fill").style.width = AG[i][2] * fill + "%";
+    r.querySelector(".pct").textContent = Math.round(AG[i][2] * fill) + "%";
+    r.querySelector(".rk").textContent = sort > 0.5 ? i + 1 : from + 1;
+    r.querySelector(".pct").style.color = sort > 0.5 && i === 0 ? "var(--gold)" : "var(--t1)";
+  });
+
+  // 7. ask
+  const s7 = $("s7"), t7 = S.s7[0];
+  s7.style.opacity = sceneAlpha(t, S.s7);
+  sceneMotion(s7, t, S.s7);
+  show(s7.querySelector(".num"), t, t7 + 0.1);
+  words(s7.querySelector(".ft"), t, t7 + 0.2);
+  show(s7.querySelector(".fs"), t, t7 + 0.8);
+  show(s7.querySelector(".card"), t, t7 + 0.2, 0.8, 60);
+  const ty = prog(t, t7 + 0.8, t7 + 2.0);
+  const sent = t > t7 + 2.2;
+  $("input7").textContent = sent ? "" : Q7.slice(0, Math.round(ty * Q7.length));
+  $("input7").style.color = "var(--t1)";
+  $("caret7").style.opacity = sent ? 0 : Math.floor(t * 2.5) % 2 === 0 || (ty > 0 && ty < 1) ? 1 : 0;
+  $("send7").style.transform = `scale(${t > t7 + 2.05 && t < t7 + 2.25 ? 0.9 : 1})`;
+  const qx = prog(t, t7 + 2.2, t7 + 2.6);
+  $("q7").style.display = qx > 0 ? "block" : "none";
+  $("q7").style.opacity = eo(qx);
+  $("q7").style.transform = `translateY(${(1 - eo(qx)) * 24}px)`;
+  const typing = t > t7 + 2.3 && t < t7 + 3.1;
+  $("typing7").style.display = typing ? "flex" : "none";
+  [...$("typing7").children].forEach((dot, i) => { dot.style.opacity = 0.35 + 0.65 * Math.max(0, Math.sin(t * 9 - i * 0.9)); });
+  const ax = prog(t, t7 + 3.1, t7 + 3.6);
+  $("ans7").style.display = ax > 0 ? "block" : "none";
+  $("ans7").style.opacity = eo(ax);
+  $("ans7").style.transform = `translateY(${(1 - eo(ax)) * 24}px)`;
+
+  // 8. earn
+  const s8 = $("s8"), t8 = S.s8[0];
+  s8.style.opacity = sceneAlpha(t, S.s8);
+  sceneMotion(s8, t, S.s8);
+  show(s8.querySelector(".num"), t, t8 + 0.1);
+  words(s8.querySelector(".ft"), t, t8 + 0.2, 0.06);
+  show(s8.querySelector(".fs"), t, t8 + 0.9);
+  show(s8.querySelector(".card"), t, t8 + 0.2, 0.8, 60);
+  $("g1").style.width = 60 * eio(prog(t, t8 + 0.9, t8 + 1.6)) + "%";
+  $("g2").style.width = 30 * eio(prog(t, t8 + 1.5, t8 + 2.1)) + "%";
+  $("g3").style.width = 10 * eio(prog(t, t8 + 2.0, t8 + 2.4)) + "%";
+  show($("l1"), t, t8 + 1.1, 0.5, 16);
+  show($("l2"), t, t8 + 1.7, 0.5, 16);
+  show($("l3"), t, t8 + 2.2, 0.5, 16);
+
+  // 9. CTA
+  const s9 = $("s9"), t9 = S.s9[0];
+  s9.style.opacity = sceneAlpha(t, S.s9, 0.5, 0.5, true);
+  const lx = show($("cta-lock"), t, t9 + 0.2, 0.9, 30);
+  $("cta-lock").style.transform += ` scale(${lerp(0.94, 1, lx)})`;
+  words($("cta-line"), t, t9 + 0.9, 0.12, 0.7);
+  show($("cta-url"), t, t9 + 2.0, 0.8, 24);
+};
+window.DURATION = DURATION;
+render(0);
+</script>
+</body>
+</html>
