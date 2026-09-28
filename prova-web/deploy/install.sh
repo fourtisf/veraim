@@ -32,7 +32,7 @@ setenv() {
 
 say "1/8 Installing system packages (Node.js 20, PostgreSQL, Nginx, Certbot, PM2)"
 export DEBIAN_FRONTEND=noninteractive
-apt-get update -y
+apt-get update -y || warn "Some other package sources on this server could not update (not Veraim's). Continuing."
 apt-get install -y curl git nginx postgresql certbot python3-certbot-nginx openssl ca-certificates
 if ! command -v node >/dev/null || [ "$(node -p 'process.versions.node.split(".")[0]')" -lt 18 ]; then
   curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
@@ -53,6 +53,8 @@ if [ ! -f .env ]; then
     sudo -u postgres psql -qc "CREATE USER veraim WITH PASSWORD '$DB_PASS';"
   fi
   sudo -u postgres psql -tAc "SELECT 1 FROM pg_database WHERE datname='veraim'" | grep -q 1 || sudo -u postgres psql -qc "CREATE DATABASE veraim OWNER veraim;"
+  # the port of this PostgreSQL (5433+ if something else, e.g. Docker, already uses 5432)
+  DB_PORT=$(sudo -u postgres psql -tAc "SHOW port" | tr -d '[:space:]')
 
   echo "Answer a few questions (press Enter to skip the optional ones; you can edit .env later)."
   ask ADMIN_WALLET "Your wallet address, for the /admin page (0x...)"
@@ -64,7 +66,7 @@ if [ ! -f .env ]; then
 
   cp .env.example .env
   chmod 600 .env
-  setenv DATABASE_URL "postgresql://veraim:${DB_PASS}@localhost:5432/veraim?schema=public"
+  setenv DATABASE_URL "postgresql://veraim:${DB_PASS}@localhost:${DB_PORT:-5432}/veraim?schema=public"
   setenv NEXT_PUBLIC_SITE_URL "https://${DOMAIN}"
   setenv SESSION_SECRET "$(openssl rand -hex 32)"
   setenv ADMIN_WALLETS "${ADMIN_WALLET:-}"
