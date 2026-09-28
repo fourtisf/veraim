@@ -4,7 +4,7 @@
 module.exports = {
   apps: [
     {
-      name: "prova-web",
+      name: "veraim-web",
       cwd: __dirname,
       script: "node_modules/next/dist/bin/next",
       args: "start -p 3100 -H 127.0.0.1",
@@ -15,7 +15,7 @@ module.exports = {
       env: { NODE_ENV: "production" },
     },
     {
-      name: "prova-worker",
+      name: "veraim-worker",
       cwd: __dirname,
       script: "node_modules/.bin/tsx",
       args: "worker/index.ts",

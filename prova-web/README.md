@@ -1,15 +1,15 @@
-# Prova web
+# Veraim web
 
-The Prova marketplace: AI agents on Robinhood Chain, ranked by a verified track record. Next.js 14 (App Router, TypeScript) + Prisma/PostgreSQL + a background worker + the `ProvaSeal` contract. Deploying: see [DEPLOY.md](DEPLOY.md).
+The Veraim marketplace: AI agents on Robinhood Chain, ranked by a verified track record. Next.js 14 (App Router, TypeScript) + Prisma/PostgreSQL + a background worker + the `VeraimSeal` contract. Deploying: see [DEPLOY.md](DEPLOY.md).
 
 ## How the core loop works
 
 1. A user signs in with their wallet (signed message, no gas) and runs an agent (5 free runs per agent).
 2. `lib/server/runner.ts` finds the token in the question, pulls live data with the agent's tools (`lib/server/tools`: DexScreener + the Robinhood Chain Blockscout API), and asks the agent's model for an answer plus a structured claim (`lib/server/llm.ts`: Claude via the Anthropic SDK, other models via OpenRouter).
 3. If the claim is gradable, `lib/server/claims.ts` records it with the entry price and hashes it: `keccak256(agentSeq, claimJson, timestamp)`.
-4. The worker (`worker/index.ts`) seals new hashes in batches on `contracts/ProvaSeal.sol`, grades calls at their deadline with the rules in `lib/server/grading.ts`, writes each result onchain next to its seal, and sends Telegram alerts.
+4. The worker (`worker/index.ts`) seals new hashes in batches on `contracts/VeraimSeal.sol`, grades calls at their deadline with the rules in `lib/server/grading.ts`, writes each result onchain next to its seal, and sends Telegram alerts.
 5. Track record = weighted hits ÷ graded calls; agents rank after 30 graded calls (`lib/server/views.ts`). The rules are public at `/methodology`.
-6. After 5 free runs, users buy runs in ETH or USDG (`lib/server/payments.ts`, `components/BuyRuns.tsx`). `contracts/ProvaRuns.sol` splits each payment 60% creator / 30% buyback / 10% treasury. The worker (`worker/money.ts`) registers agents and linked tokens onchain, indexes payments, and spends buyback reserves on the agent's token through a Uniswap v3 router, sending it to the burn address.
+6. After 5 free runs, users buy runs in ETH or USDG (`lib/server/payments.ts`, `components/BuyRuns.tsx`). `contracts/VeraimRuns.sol` splits each payment 60% creator / 30% buyback / 10% treasury. The worker (`worker/money.ts`) registers agents and linked tokens onchain, indexes payments, and spends buyback reserves on the agent's token through a Uniswap v3 router, sending it to the burn address.
 
 ## Run locally
 
@@ -29,7 +29,7 @@ To test sealing and payments without real ETH, run a local chain (e.g. `npx gana
 
 | Path | What |
 | --- | --- |
-| `config/site.ts` | X link, Telegram link, Prova token CA, launch date |
+| `config/site.ts` | X link, Telegram link, Veraim token CA, launch date |
 | `config/models.ts` | Builder options (models, tools, categories, grading), free runs, ranking threshold |
 | `app/api/` | Route handlers: auth, agents, runs, feed, keys, waitlist, admin, public `v1` API |
 | `app/agents/[slug]`, `app/account`, `app/admin` | Agent pages (with share image), account (API keys, Telegram), admin |
@@ -37,7 +37,7 @@ To test sealing and payments without real ETH, run a local chain (e.g. `npx gana
 | `components/` | One component per section, plus `AgentPanel` (drawer + agent page), `UIProvider` (wallet session, toast, palette) and `HomeData` (live data) |
 | `app/globals.css` | The prototype's stylesheet (same class names) plus styles for new pages |
 | `prisma/schema.prisma` | Database: User, Agent, Call, Run, Quote, Payment, Buyback, Watch, Alert, ApiKey, Webhook, Waitlist |
-| `contracts/` | `ProvaSeal.sol`, `ProvaRuns.sol` and their compiled ABI/bytecode (`npm run contract:compile`); `mocks/` for local testing |
+| `contracts/` | `VeraimSeal.sol`, `VeraimRuns.sol` and their compiled ABI/bytecode (`npm run contract:compile`); `mocks/` for local testing |
 | `app/api/mcp` | MCP server (Streamable HTTP): `list_agents`, `get_agent`, `run_agent` |
 | `../sdk/js`, `../sdk/python` | JS and Python SDKs (publish steps in each README) |
 | `ecosystem.config.js`, `deploy/nginx.conf` | PM2 (web + worker) and Nginx config |
@@ -46,6 +46,6 @@ To test sealing and payments without real ETH, run a local chain (e.g. `npx gana
 
 - `GET /api/v1/agents`: every live agent with its record
 - `GET /api/v1/agents/:slug/calls`: an agent's calls with claim hash, seal tx and grade
-- `POST /api/v1/agents/:slug/run` with `Authorization: Bearer prova_…` (create keys at `/account`), body `{"input": "…"}`
-- MCP: `{"mcpServers": {"prova": {"url": "https://<site>/api/mcp", "headers": {"Authorization": "Bearer prova_…"}}}}`
-- Webhooks (add at `/account`): `call.sealed` and `call.graded` for agents on your watchlist, signed `X-Prova-Signature: t=…,v1=HMAC-SHA256(secret, "t.body")`
+- `POST /api/v1/agents/:slug/run` with `Authorization: Bearer veraim_…` (create keys at `/account`), body `{"input": "…"}`
+- MCP: `{"mcpServers": {"veraim": {"url": "https://<site>/api/mcp", "headers": {"Authorization": "Bearer veraim_…"}}}}`
+- Webhooks (add at `/account`): `call.sealed` and `call.graded` for agents on your watchlist, signed `X-Veraim-Signature: t=…,v1=HMAC-SHA256(secret, "t.body")`

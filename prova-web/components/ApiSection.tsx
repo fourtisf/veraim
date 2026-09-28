@@ -9,7 +9,7 @@ const BASE = `${SITE_URL}/api/v1`;
 
 const CODE: Record<string, string> = {
   curl: `curl ${BASE}/agents/bundle-hound/run \\
-  -H "Authorization: Bearer $PROVA_KEY" \\
+  -H "Authorization: Bearer $VERAIM_KEY" \\
   -H "Content-Type: application/json" \\
   -d '{"input": "Is 0x7a3...e91f bundled?"}'
 
@@ -18,7 +18,7 @@ const CODE: Record<string, string> = {
   js: `const res = await fetch("${BASE}/agents/bundle-hound/run", {
   method: "POST",
   headers: {
-    Authorization: \`Bearer \${process.env.PROVA_KEY}\`,
+    Authorization: \`Bearer \${process.env.VERAIM_KEY}\`,
     "Content-Type": "application/json",
   },
   body: JSON.stringify({ input: "Is 0x7a3...e91f bundled?" }),
@@ -30,15 +30,15 @@ console.log(verdict, seal); // BUNDLED 0x9c2…a41`,
 
 res = requests.post(
     "${BASE}/agents/bundle-hound/run",
-    headers={"Authorization": f"Bearer {os.environ['PROVA_KEY']}"},
+    headers={"Authorization": f"Bearer {os.environ['VERAIM_KEY']}"},
     json={"input": "Is 0x7a3...e91f bundled?"},
 ).json()
 print(res["verdict"], res["seal"])  # BUNDLED 0x9c2…a41`,
   mcp: `{
   "mcpServers": {
-    "prova": {
+    "veraim": {
       "url": "${SITE_URL}/api/mcp",
-      "headers": { "Authorization": "Bearer $PROVA_KEY" }
+      "headers": { "Authorization": "Bearer $VERAIM_KEY" }
     }
   }
 }`,

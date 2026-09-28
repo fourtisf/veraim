@@ -2,15 +2,15 @@ import type { Metadata } from "next";
 import LegalPage from "@/components/LegalPage";
 import { MIN_GRADED_TO_RANK } from "@/config/models";
 
-export const metadata: Metadata = { title: "Methodology · Prova", description: "How Prova seals, grades and ranks agent calls." };
+export const metadata: Metadata = { title: "Methodology · Veraim", description: "How Veraim seals, grades and ranks agent calls." };
 
 export default function Methodology() {
   return (
     <LegalPage kicker="Methodology" title="How calls are sealed, graded and ranked">
-      <p>Prova ranks AI agents by how often they are right, not by how loud their token is. These are the exact rules.</p>
+      <p>Veraim ranks AI agents by how often they are right, not by how loud their token is. These are the exact rules.</p>
 
       <h2>1. A call is made</h2>
-      <p>When someone runs an agent about a token, the agent pulls live data (price, holders, early buyers, deployer history, whale flow) and answers. If the answer contains a gradable claim about that token, Prova records it together with the token&apos;s price and liquidity at that moment.</p>
+      <p>When someone runs an agent about a token, the agent pulls live data (price, holders, early buyers, deployer history, whale flow) and answers. If the answer contains a gradable claim about that token, Veraim records it together with the token&apos;s price and liquidity at that moment.</p>
       <ul>
         <li><strong>Verdict agents</strong> answer SAFE, CAUTION or RISKY and are graded after 24 hours.</li>
         <li><strong>Price-call agents</strong> answer LONG or SHORT and are graded after 7 days.</li>
@@ -18,10 +18,10 @@ export default function Methodology() {
       </ul>
 
       <h2>2. It is sealed onchain</h2>
-      <p>The claim is written as JSON and hashed: <code>keccak256(agentId, claimJson, timestamp)</code>. Within about a minute the hash is written to the public <code>ProvaSeal</code> contract on Robinhood Chain. The contract only lets a hash be sealed once and has no way to edit or delete it. A call that is not sealed before its deadline is void and never counts.</p>
+      <p>The claim is written as JSON and hashed: <code>keccak256(agentId, claimJson, timestamp)</code>. Within about a minute the hash is written to the public <code>VeraimSeal</code> contract on Robinhood Chain. The contract only lets a hash be sealed once and has no way to edit or delete it. A call that is not sealed before its deadline is void and never counts.</p>
 
       <h2>3. It is graded at the deadline</h2>
-      <p>At the deadline Prova reads the token&apos;s price and liquidity from its most liquid pool on Robinhood Chain (via DexScreener) and compares them with the values at the time of the call:</p>
+      <p>At the deadline Veraim reads the token&apos;s price and liquidity from its most liquid pool on Robinhood Chain (via DexScreener) and compares them with the values at the time of the call:</p>
       <ul>
         <li><strong>LONG</strong> is a hit if the price is higher. <strong>SHORT</strong> is a hit if it is lower.</li>
         <li><strong>RISKY</strong> is a hit if price or liquidity fell 50% or more, or the market disappeared.</li>
@@ -39,11 +39,11 @@ export default function Methodology() {
       </ul>
 
       <h2>5. Paid runs and buybacks</h2>
-      <p>After 5 free runs per agent, runs are paid in ETH or USDG through the public <code>ProvaRuns</code> contract, which splits every payment the moment it arrives:</p>
+      <p>After 5 free runs per agent, runs are paid in ETH or USDG through the public <code>VeraimRuns</code> contract, which splits every payment the moment it arrives:</p>
       <ul>
         <li><strong>60%</strong> to the agent&apos;s creator, which only the creator&apos;s wallet can withdraw.</li>
         <li><strong>30%</strong> held for the agent&apos;s token. It can only be spent buying that token on the market through an approved DEX router, and the bought tokens go straight to the burn address <code>0x…dEaD</code>. The contract checks the burn actually happened.</li>
-        <li><strong>10%</strong> to the Prova treasury.</li>
+        <li><strong>10%</strong> to the Veraim treasury.</li>
       </ul>
       <p>An agent&apos;s token is registered onchain once and can&apos;t be switched later. Until a token is linked, its 30% share waits in the contract.</p>
 

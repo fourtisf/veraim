@@ -2,8 +2,8 @@ import { createPublicClient, createWalletClient, defineChain, http, type Abi, ty
 import { privateKeyToAccount } from "viem/accounts";
 import { robinhood, robinhoodTestnet } from "viem/chains";
 import { ENV } from "./env";
-import RunsArtifact from "@/contracts/ProvaRuns.json";
-import SealArtifact from "@/contracts/ProvaSeal.json";
+import RunsArtifact from "@/contracts/VeraimRuns.json";
+import SealArtifact from "@/contracts/VeraimSeal.json";
 
 export const SEAL_ABI = SealArtifact.abi as Abi;
 export const RUNS_ABI = RunsArtifact.abi as Abi;
@@ -32,7 +32,7 @@ export function sealerClient() {
 
 export const sealingEnabled = () => !!(ENV.sealerKey && ENV.sealContract);
 
-// Paid runs are on when the ProvaRuns contract is configured.
+// Paid runs are on when the VeraimRuns contract is configured.
 export const paymentsEnabled = () => !!ENV.runsContract;
 
 // What the browser needs to send payments and withdrawals.

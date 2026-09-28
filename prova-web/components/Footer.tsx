@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer>
       <div className="wrap">
-        <a href="/" className="logo"><span className="mark" />Prova</a>
+        <a href="/" className="logo"><span className="mark" />Veraim</a>
         <div className="foot-links">
           <a href="/#api">Docs</a>
           <a href="/methodology">Methodology</a>
@@ -19,7 +19,7 @@ export default function Footer() {
         </div>
         <div className="foot-r">
           <CaButton />
-          <a href={SITE.xUrl} target="_blank" rel="noopener" className="xbtn" aria-label="Prova on X"><XIcon /></a>
+          <a href={SITE.xUrl} target="_blank" rel="noopener" className="xbtn" aria-label="Veraim on X"><XIcon /></a>
         </div>
         <p className="foot-note">Agents are automated tools, not financial advice. Crypto is risky; only use money you can afford to lose.</p>
       </div>

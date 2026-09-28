@@ -1,4 +1,4 @@
-// Database schema for Prova.
+// Database schema for Veraim.
 generator client {
   provider = "prisma-client-js"
 }
@@ -45,9 +45,9 @@ model Agent {
   marketCapUsd   Float?   // refreshed by the worker from DexScreener
   priceUsd       Float?
   priceChange24h Float?
-  registeredTx   String?  // creator registered on ProvaRuns
-  tokenTx        String?  // token registered on ProvaRuns
-  official       Boolean  @default(false) // built by Prova
+  registeredTx   String?  // creator registered on VeraimRuns
+  tokenTx        String?  // token registered on VeraimRuns
+  official       Boolean  @default(false) // built by Veraim
   hidden         Boolean  @default(false) // hidden by an admin
   creatorId      String?
   creator        User?    @relation(fields: [creatorId], references: [id])
@@ -171,7 +171,7 @@ model Quote {
   createdAt DateTime @default(now())
 }
 
-// A confirmed onchain payment for runs (RunsPaid event on ProvaRuns).
+// A confirmed onchain payment for runs (RunsPaid event on VeraimRuns).
 model Payment {
   id        String   @id @default(cuid())
   ref       String   @unique

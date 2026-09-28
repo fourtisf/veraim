@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Pulls the latest code and restarts Veraim with no data loss.
+#   bash deploy/update.sh
+set -euo pipefail
+cd "$(dirname "$0")/.."
+git pull
+npm ci --no-audit --no-fund
+npx prisma migrate deploy
+npm run build
+pm2 startOrReload ecosystem.config.js --update-env
+pm2 save
+echo "Updated."

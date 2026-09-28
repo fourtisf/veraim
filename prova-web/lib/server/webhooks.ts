@@ -3,7 +3,7 @@ import { lookup } from "dns/promises";
 import { isIP } from "net";
 
 // Signed webhooks. Each POST carries:
-//   X-Prova-Signature: t=<unix seconds>,v1=<hex HMAC-SHA256 of "<t>.<body>" with your secret>
+//   X-Veraim-Signature: t=<unix seconds>,v1=<hex HMAC-SHA256 of "<t>.<body>" with your secret>
 export const newWebhookSecret = () => "whsec_" + randomBytes(24).toString("base64url");
 
 export function signWebhook(secret: string, body: string, t = Math.floor(Date.now() / 1000)) {
@@ -26,7 +26,7 @@ export async function checkWebhookUrl(raw: string): Promise<string | null> {
   try {
     url = new URL(raw);
   } catch {
-    return "Enter a full URL, e.g. https://example.com/prova-hook";
+    return "Enter a full URL, e.g. https://example.com/veraim-hook";
   }
   const allowHttp = process.env.ALLOW_HTTP_WEBHOOKS === "1";
   if (url.protocol !== "https:" && !(allowHttp && url.protocol === "http:")) return "Webhook URLs must use https://";
@@ -48,7 +48,7 @@ export async function deliverWebhook(url: string, secret: string, event: object)
   const body = JSON.stringify(event);
   const res = await fetch(url, {
     method: "POST",
-    headers: { "content-type": "application/json", "user-agent": "Prova-Webhooks/1.0", "x-prova-signature": signWebhook(secret, body) },
+    headers: { "content-type": "application/json", "user-agent": "Veraim-Webhooks/1.0", "x-veraim-signature": signWebhook(secret, body) },
     body,
     redirect: "manual",
     signal: AbortSignal.timeout(8000),

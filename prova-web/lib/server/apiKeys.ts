@@ -4,6 +4,6 @@ export const hashApiKey = (key: string) => createHash("sha256").update(key).dige
 
 // New key: shown to the user once; only the hash is stored.
 export function newApiKey() {
-  const key = "prova_" + randomBytes(24).toString("base64url");
+  const key = "veraim_" + randomBytes(24).toString("base64url");
   return { key, prefix: key.slice(0, 12), hash: hashApiKey(key) };
 }

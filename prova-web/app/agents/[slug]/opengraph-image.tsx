@@ -1,8 +1,9 @@
 import { ImageResponse } from "next/og";
+import LogoMark from "@/components/LogoMark";
 import { ogFonts } from "@/lib/ogFonts";
 import { agentViews } from "@/lib/server/views";
 
-export const alt = "Prova agent";
+export const alt = "Veraim agent";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 export const dynamic = "force-dynamic";
@@ -23,10 +24,8 @@ export default async function AgentOg({ params }: { params: { slug: string } }) 
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", background: "#000", color: "#EDEDEF", fontFamily: "Geist", padding: 64, position: "relative" }}>
         <div style={{ position: "absolute", left: 0, top: -300, width: 1200, height: 800, display: "flex", background: "radial-gradient(ellipse 45% 45% at 50% 40%, rgba(226,205,166,.18), transparent 70%)" }} />
         <div style={{ display: "flex", alignItems: "center", gap: 12, fontSize: 26, fontWeight: 600 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 10, display: "flex", background: "linear-gradient(145deg,#F4E6CC,#9C8158)" }}>
-            <svg width="34" height="34" viewBox="0 0 64 64"><polyline points="16.13,28.56 25.56,37.98 42.53,21.01" fill="none" stroke="#0A0A0A" strokeWidth="5.33" /></svg>
-          </div>
-          Prova
+          <LogoMark size={34} color="#FFFFFF" />
+          Veraim
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 28, marginTop: 70 }}>
           <div style={{ width: 110, height: 110, borderRadius: 28, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 52, fontWeight: 600, color: "#fff", background: `radial-gradient(circle at 30% 20%, ${c1}, ${c2})` }}>{name[0]}</div>

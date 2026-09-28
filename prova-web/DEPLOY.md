@@ -1,8 +1,49 @@
-# Deploying Prova to the Hostinger VPS
+# Deploying Veraim to the Hostinger VPS
 
-This guide puts Prova live on your domain with HTTPS: the website, the database, the worker that seals and grades calls, and the contract on Robinhood Chain. Copy and paste each command in order. Lines that start with `#` are notes, so don't paste those.
+This guide puts Veraim live on your domain with HTTPS: the website, the database, the worker that seals and grades calls, and the contract on Robinhood Chain. Copy and paste each command in order. Lines that start with `#` are notes, so don't paste those.
 
-Wherever you see `prova.live`, use your real domain instead.
+Wherever you see `veraim.xyz`, use your real domain instead.
+
+---
+
+## Quick deploy (recommended)
+
+One script does everything below for you: installs the software, creates the database and settings file, builds the site, starts it with PM2, connects the domain with Nginx and turns on HTTPS.
+
+**Before you start:** point your domain at the VPS. In the domain's DNS, add an `A` record for `@` with the VPS IP, and a `CNAME` for `www` pointing to your domain.
+
+Log in to the VPS (`ssh root@YOUR_VPS_IP`) and run:
+
+```bash
+apt-get update && apt-get install -y git
+git clone -b claude/new-session-hs7nrs https://github.com/fourtisf/prova.git /var/www/veraim
+cd /var/www/veraim/prova-web
+DOMAIN=veraim.xyz bash deploy/install.sh
+```
+
+If the repository is private, `git clone` asks for your GitHub username and a **personal access token** as the password (GitHub → Settings → Developer settings → Personal access tokens).
+
+The script asks for:
+- your wallet address (for `/admin`),
+- the treasury wallet,
+- your Anthropic API key (optional),
+- your OpenRouter key and Telegram bot (optional),
+- an email for the SSL certificate.
+
+It creates a **new sealing wallet** by itself and prints its address at the end. Send it about 0.01 ETH on Robinhood Chain, then run:
+
+```bash
+cd /var/www/veraim/prova-web
+bash deploy/contracts.sh
+```
+
+That deploys the contracts, saves their addresses in `.env` and restarts the app.
+
+To update the site later: `bash deploy/update.sh`.
+
+To change a setting later: `nano .env`, then `pm2 restart all --update-env`.
+
+The manual steps below do the same thing by hand, if you prefer or need to fix something.
 
 ---
 
@@ -15,7 +56,7 @@ Wherever you see `prova.live`, use your real domain instead.
 5. *(Optional)* **An OpenRouter API key** from https://openrouter.ai/keys, for agents built with GPT, Llama or DeepSeek.
 6. **A new wallet just for sealing.** Create a fresh wallet in MetaMask or Rabby (Add account → Create new) and export its private key. Don't reuse your main wallet: this key sits on the server. Send it about **0.01 ETH on Robinhood Chain** for gas. Sealing is batched, so this lasts a long time.
 7. **Your own wallet address** (the one you'll use on the site), so you can open the admin page.
-8. **A treasury wallet address**, which receives Prova's 10% of paid runs (and the creator share of the official agents). A hardware wallet is best. It can be the same as #7.
+8. **A treasury wallet address**, which receives Veraim's 10% of paid runs (and the creator share of the official agents). A hardware wallet is best. It can be the same as #7.
 9. *(For buybacks)* The addresses of **Uniswap v3's SwapRouter02** and **WETH** on Robinhood Chain. Ask Uniswap/Robinhood Chain docs or your developer. Everything else works without them; buyback money just waits in the contract until they're set.
 
 ---
@@ -62,8 +103,8 @@ apt-get install -y postgresql
 Choose a strong password and use it in place of `CHANGE_ME` here and in Step 5.
 
 ```bash
-sudo -u postgres psql -c "CREATE USER prova WITH PASSWORD 'CHANGE_ME';"
-sudo -u postgres psql -c "CREATE DATABASE prova OWNER prova;"
+sudo -u postgres psql -c "CREATE USER veraim WITH PASSWORD 'CHANGE_ME';"
+sudo -u postgres psql -c "CREATE DATABASE veraim OWNER veraim;"
 ```
 
 ## Step 4: Download the code
@@ -72,7 +113,7 @@ sudo -u postgres psql -c "CREATE DATABASE prova OWNER prova;"
 mkdir -p /var/www
 cd /var/www
 git clone https://github.com/fourtisf/prova.git
-cd /var/www/prova/prova-web
+cd /var/www/veraim/prova-web
 ```
 
 ## Step 5: Add the settings file
@@ -95,7 +136,7 @@ Fill in these lines. Every setting is explained in the file.
 | Setting | What to put |
 |---|---|
 | `DATABASE_URL` | Replace `CHANGE_ME` with your password from Step 3 |
-| `NEXT_PUBLIC_SITE_URL` | `https://prova.live` (your domain) |
+| `NEXT_PUBLIC_SITE_URL` | `https://veraim.xyz` (your domain) |
 | `SESSION_SECRET` | The long code `openssl` just printed |
 | `ADMIN_WALLETS` | Your own wallet address |
 | `ANTHROPIC_API_KEY` | Your Anthropic key |
@@ -116,7 +157,7 @@ chmod 600 .env
 ## Step 6: Install and set up the database
 
 ```bash
-cd /var/www/prova/prova-web
+cd /var/www/veraim/prova-web
 npm ci
 npx prisma migrate deploy
 npm run seed
@@ -124,14 +165,14 @@ npm run seed
 
 - `npm ci` installs everything the build needs. Don't add `--omit=dev`.
 - `prisma migrate deploy` creates the tables.
-- `npm run seed` adds Prova's four official agents: Bundle Hound, Tidewatch, Dev Ledger and Deepstack. They start with no calls; their records build up from real use.
+- `npm run seed` adds Veraim's four official agents: Bundle Hound, Tidewatch, Dev Ledger and Deepstack. They start with no calls; their records build up from real use.
 
 ## Step 7: Put the contracts on Robinhood Chain
 
 This deploys two public contracts. You only do this once.
 
-- **`ProvaSeal`** stores every call's hash and its result.
-- **`ProvaRuns`** takes payments for runs and splits each one: 60% creator, 30% token buyback, 10% treasury.
+- **`VeraimSeal`** stores every call's hash and its result.
+- **`VeraimRuns`** takes payments for runs and splits each one: 60% creator, 30% token buyback, 10% treasury.
 
 ```bash
 npm run contract:deploy
@@ -146,7 +187,7 @@ If it says the wallet has no ETH, send a little ETH on Robinhood Chain to the ad
 ## Step 8: Build and start
 
 ```bash
-cd /var/www/prova/prova-web
+cd /var/www/veraim/prova-web
 npm run build
 pm2 start ecosystem.config.js
 pm2 save
@@ -154,8 +195,8 @@ pm2 save
 
 This starts two processes:
 
-- **`prova-web`**: the website, on port 3100.
-- **`prova-worker`**: seals new calls onchain, grades them when their time is up, and sends Telegram alerts.
+- **`veraim-web`**: the website, on port 3100.
+- **`veraim-worker`**: seals new calls onchain, grades them when their time is up, and sends Telegram alerts.
 
 Check both say `online`:
 
@@ -163,8 +204,8 @@ Check both say `online`:
 pm2 status
 curl -I http://127.0.0.1:3100
 # expect: HTTP/1.1 200 OK
-pm2 logs prova-worker --lines 5
-# expect: "Prova worker started. Sealing on (robinhood)."
+pm2 logs veraim-worker --lines 5
+# expect: "Veraim worker started. Sealing on (robinhood)."
 ```
 
 If another project already uses port 3100, change `3100` to a free port in both `ecosystem.config.js` and `deploy/nginx.conf`.
@@ -174,11 +215,11 @@ If PM2 isn't set to start on reboot yet, run `pm2 startup`, then copy and run th
 ## Step 9: Connect the domain with Nginx
 
 ```bash
-cp /var/www/prova/prova-web/deploy/nginx.conf /etc/nginx/sites-available/prova
-nano /etc/nginx/sites-available/prova
-# replace "prova.live" with your domain on the server_name line, then save and exit
+cp /var/www/veraim/prova-web/deploy/nginx.conf /etc/nginx/sites-available/veraim
+nano /etc/nginx/sites-available/veraim
+# replace "veraim.xyz" with your domain on the server_name line, then save and exit
 
-ln -s /etc/nginx/sites-available/prova /etc/nginx/sites-enabled/prova
+ln -s /etc/nginx/sites-available/veraim /etc/nginx/sites-enabled/veraim
 nginx -t
 systemctl reload nginx
 ```
@@ -188,19 +229,19 @@ systemctl reload nginx
 ## Step 10: Turn on HTTPS
 
 ```bash
-certbot --nginx -d prova.live -d www.prova.live
+certbot --nginx -d veraim.xyz -d www.veraim.xyz
 ```
 
 When Certbot asks, enter your email and agree to the terms. If it asks about redirecting, choose **redirect**.
 
 ## Step 11: Check it works
 
-1. Open `https://prova.live`. It should load with the padlock.
+1. Open `https://veraim.xyz`. It should load with the padlock.
 2. Click **Connect wallet** and sign the message. The button changes to your address.
 3. Open **Bundle Hound**, paste a real token address from Robinhood Chain, and press **Run**. After 20–40 seconds you get an answer, and it says "sealing onchain…".
 4. About a minute later, open the agent's **Receipts** tab. The call shows a "seal ↗" link to the explorer.
 5. Use up the 5 free runs of one agent. A **Buy runs** box appears. Buy 1 run with a little ETH: your wallet asks to switch to Robinhood Chain, then to confirm. "1 run added" appears.
-6. Open `https://prova.live/admin`. The "Setup checks" box shows which features are on, and "Money" shows the payment.
+6. Open `https://veraim.xyz/admin`. The "Setup checks" box shows which features are on, and "Money" shows the payment.
 
 ---
 
@@ -208,7 +249,7 @@ When Certbot asks, enter your email and agree to the terms. If it asks about red
 
 ### Telegram alerts
 
-1. In Telegram, message **@BotFather**, send `/newbot` and follow the steps. It gives you a token and a username like `ProvaAlertsBot`.
+1. In Telegram, message **@BotFather**, send `/newbot` and follow the steps. It gives you a token and a username like `VeraimAlertsBot`.
 2. Put them in `.env` as `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` (without the `@`).
 3. Restart: `pm2 restart all`
 
@@ -233,7 +274,7 @@ To see visitor numbers without cookies, run a self-hosted Umami (https://umami.i
 ### Change the X link, Telegram link, contract address or launch date
 
 ```bash
-cd /var/www/prova/prova-web
+cd /var/www/veraim/prova-web
 nano config/site.ts
 ```
 
@@ -241,7 +282,7 @@ nano config/site.ts
 export const SITE = {
   xUrl: "https://x.com/yourhandle",
   telegramUrl: "https://t.me/yourgroup",
-  contractAddress: "0x…", // Prova token CA. Leave "" to show "Coming soon"
+  contractAddress: "0x…", // Veraim token CA. Leave "" to show "Coming soon"
   chain: "Robinhood Chain",
   launchDate: "October 15, 2026", // shown in the waitlist when set
 };
@@ -252,7 +293,7 @@ Save, then rebuild with the next section.
 ### Update the site after code changes
 
 ```bash
-cd /var/www/prova/prova-web
+cd /var/www/veraim/prova-web
 git pull
 npm ci
 npx prisma migrate deploy
@@ -263,7 +304,7 @@ pm2 reload all
 ### Link an agent's token (turns on buybacks)
 
 1. The agent's creator launches its token (for example on Robinfun).
-2. On Prova they open the agent, go to the **Token** tab, paste the token address and press **Link**. For the official agents, do this with your admin wallet.
+2. On Veraim they open the agent, go to the **Token** tab, paste the token address and press **Link**. For the official agents, do this with your admin wallet.
 3. Within a minute the worker registers it onchain. Once registered it can't be changed.
 4. Every hour the worker spends each agent's 30% share on its token and sends what it buys to the burn address. The leaderboard's "Bought back" and "Market cap" columns update.
 
@@ -276,7 +317,7 @@ Buybacks need a Uniswap v3 pool that pairs the token with WETH (for ETH payments
 
 ### Extra safety (recommended once everything works)
 
-The sealing wallet also owns the ProvaRuns contract, which lets it approve DEX routers. Creator money and the treasury can never be taken by it, but buyback money could be misused by a stolen key. After setup, ask your developer to move ownership to your hardware wallet with `transferOwnership`.
+The sealing wallet also owns the VeraimRuns contract, which lets it approve DEX routers. Creator money and the treasury can never be taken by it, but buyback money could be misused by a stolen key. After setup, ask your developer to move ownership to your hardware wallet with `transferOwnership`.
 
 ### Publish the SDKs (optional)
 
@@ -284,7 +325,7 @@ The JavaScript and Python SDKs are in the `sdk/` folder of the repository. Each 
 
 ### Hide an agent
 
-Open `https://prova.live/admin` with your admin wallet and press **Hide** next to the agent. Its sealed calls stay onchain, but it disappears from the site.
+Open `https://veraim.xyz/admin` with your admin wallet and press **Hide** next to the agent. Its sealed calls stay onchain, but it disappears from the site.
 
 ### See or export the waitlist
 
@@ -295,7 +336,7 @@ Open `/admin` and press **Download CSV**.
 `/admin` shows whether sealing is on. The worker log says when a seal fails:
 
 ```bash
-pm2 logs prova-worker --lines 50
+pm2 logs veraim-worker --lines 50
 ```
 
 If you see "insufficient funds", send more ETH on Robinhood Chain to the sealing wallet.
@@ -307,20 +348,20 @@ If you see "insufficient funds", send more ETH on Robinhood Chain to the sealing
 Save a copy of the database every night and keep 14 days of copies:
 
 ```bash
-mkdir -p /var/backups/prova
+mkdir -p /var/backups/veraim
 crontab -e
 ```
 
 Add this line at the bottom, then save:
 
 ```
-15 3 * * * sudo -u postgres pg_dump prova | gzip > /var/backups/prova/prova-$(date +\%F).sql.gz && find /var/backups/prova -name '*.sql.gz' -mtime +14 -delete
+15 3 * * * sudo -u postgres pg_dump veraim | gzip > /var/backups/veraim/veraim-$(date +\%F).sql.gz && find /var/backups/veraim -name '*.sql.gz' -mtime +14 -delete
 ```
 
 To restore a backup into an empty database:
 
 ```bash
-gunzip -c /var/backups/prova/prova-2026-10-01.sql.gz | sudo -u postgres psql prova
+gunzip -c /var/backups/veraim/veraim-2026-10-01.sql.gz | sudo -u postgres psql veraim
 ```
 
 Also keep a copy of your `.env` file somewhere safe, off the server. It holds the sealing wallet key.
@@ -330,19 +371,19 @@ Also keep a copy of your `.env` file somewhere safe, off the server. It holds th
 ## If something goes wrong
 
 ```bash
-pm2 status                  # are prova-web and prova-worker "online"?
-pm2 logs prova-web          # website errors (Ctrl+C to exit)
-pm2 logs prova-worker       # sealing, grading and Telegram errors
+pm2 status                  # are veraim-web and veraim-worker "online"?
+pm2 logs veraim-web          # website errors (Ctrl+C to exit)
+pm2 logs veraim-worker       # sealing, grading and Telegram errors
 pm2 restart all
 tail -n 50 /var/log/nginx/error.log
 ```
 
 | What you see | What it means |
 |---|---|
-| **502 Bad Gateway** | The website isn't running. Check `pm2 logs prova-web`. |
+| **502 Bad Gateway** | The website isn't running. Check `pm2 logs veraim-web`. |
 | **"This agent's model isn't connected yet"** | The API key for that model is missing in `.env`. |
 | **"The model isn't connected correctly (API key)"** | The key is wrong or has no credit. |
-| **Calls stay "sealing…"** | Check `pm2 logs prova-worker`: usually no ETH for gas or a wrong `SEAL_CONTRACT`. |
+| **Calls stay "sealing…"** | Check `pm2 logs veraim-worker`: usually no ETH for gas or a wrong `SEAL_CONTRACT`. |
 | **"Signature check failed"** | `SESSION_SECRET` changed or the page was open too long. Reload and connect again. |
 | **Waitlist says "Something went wrong"** | `DATABASE_URL` is wrong. |
 | **"Too many requests"** | Spam protection. The limits are in `.env` (`RUNS_PER_HOUR_PER_WALLET`, `MAX_RUNS_PER_DAY`). |

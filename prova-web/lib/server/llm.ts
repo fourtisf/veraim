@@ -73,7 +73,7 @@ async function runOpenRouter(model: string, system: string, user: string): Promi
       "content-type": "application/json",
       authorization: `Bearer ${ENV.openrouterKey}`,
       "HTTP-Referer": ENV.siteUrl,
-      "X-Title": "Prova",
+      "X-Title": "Veraim",
     },
     body: JSON.stringify({
       model,

@@ -11,7 +11,7 @@ import { modelAvailable } from "@/lib/server/llm";
 import { telegramEnabled } from "@/lib/server/telegram";
 
 export const dynamic = "force-dynamic";
-export const metadata: Metadata = { title: "Admin · Prova", robots: { index: false } };
+export const metadata: Metadata = { title: "Admin · Veraim", robots: { index: false } };
 
 export default async function AdminPage() {
   const user = await currentUser();
@@ -98,7 +98,7 @@ export default async function AdminPage() {
               {[...visible, ...hidden].map((a) => (
                 <tr key={a.id} style={hidden.includes(a) ? { opacity: 0.5 } : undefined}>
                   <td><a href={`/agents/${a.slug}`}>{a.name}</a></td>
-                  <td className="mono">{a.official ? "Prova" : a.creator}</td>
+                  <td className="mono">{a.official ? "Veraim" : a.creator}</td>
                   <td>{a.graded}</td>
                   <td>{a.trackRecord ?? "—"}</td>
                   <td>{a.runs7d}</td>

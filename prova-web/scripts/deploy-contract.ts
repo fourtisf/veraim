@@ -1,12 +1,12 @@
-// Deploys the Prova contracts with SEALER_PRIVATE_KEY on CHAIN / RPC_URL:
-//   ProvaSeal (call seals + grades)   -> SEAL_CONTRACT
-//   ProvaRuns (paid runs + buybacks)  -> RUNS_CONTRACT
+// Deploys the Veraim contracts with SEALER_PRIVATE_KEY on CHAIN / RPC_URL:
+//   VeraimSeal (call seals + grades)   -> SEAL_CONTRACT
+//   VeraimRuns (paid runs + buybacks)  -> RUNS_CONTRACT
 // Skips any contract already set in .env. Run: npm run contract:deploy
 import "dotenv/config";
 import { createWalletClient, formatEther, http, type Abi } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import RunsArtifact from "../contracts/ProvaRuns.json";
-import SealArtifact from "../contracts/ProvaSeal.json";
+import RunsArtifact from "../contracts/VeraimRuns.json";
+import SealArtifact from "../contracts/VeraimSeal.json";
 import { publicClient } from "../lib/server/chain";
 import { ENV } from "../lib/server/env";
 
@@ -27,16 +27,16 @@ async function main() {
   };
 
   const lines: string[] = [];
-  if (!ENV.sealContract) lines.push(`SEAL_CONTRACT=${await deploy("ProvaSeal", SealArtifact)}`);
-  else console.log("ProvaSeal already set:", ENV.sealContract);
+  if (!ENV.sealContract) lines.push(`SEAL_CONTRACT=${await deploy("VeraimSeal", SealArtifact)}`);
+  else console.log("VeraimSeal already set:", ENV.sealContract);
 
   let runs = ENV.runsContract;
   if (!runs) {
     const treasury = ENV.treasury || account.address;
-    runs = (await deploy("ProvaRuns", RunsArtifact, [treasury, ENV.usdg])) as `0x${string}`;
+    runs = (await deploy("VeraimRuns", RunsArtifact, [treasury, ENV.usdg])) as `0x${string}`;
     console.log(`  treasury ${treasury}, USDG ${ENV.usdg}`);
     lines.push(`RUNS_CONTRACT=${runs}`);
-  } else console.log("ProvaRuns already set:", runs);
+  } else console.log("VeraimRuns already set:", runs);
 
   // Allow the DEX router used for buybacks (safe to run again).
   if (ENV.swapRouter) {

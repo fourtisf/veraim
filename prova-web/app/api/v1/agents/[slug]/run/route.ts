@@ -10,7 +10,7 @@ import { apiKeyUser } from "@/lib/server/session";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-// Public API: POST /api/v1/agents/:slug/run  with  Authorization: Bearer prova_…
+// Public API: POST /api/v1/agents/:slug/run  with  Authorization: Bearer veraim_…
 export async function POST(req: Request, { params }: { params: { slug: string } }) {
   if (rateLimited("run:" + clientIp(req), ENV.runsPerHourPerIp, 3600_000)) return fail("Too many runs from your network. Try again later.", 429);
   const user = await apiKeyUser(req);

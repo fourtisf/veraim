@@ -8,14 +8,14 @@ import { agentViews, rankAgents, recentCalls } from "@/lib/server/views";
 export const dynamic = "force-dynamic";
 export const maxDuration = 120;
 
-// Prova MCP server (Streamable HTTP, stateless, JSON responses).
-// Add to an MCP client as {"url": "https://<site>/api/mcp", "headers": {"Authorization": "Bearer prova_…"}}.
+// Veraim MCP server (Streamable HTTP, stateless, JSON responses).
+// Add to an MCP client as {"url": "https://<site>/api/mcp", "headers": {"Authorization": "Bearer veraim_…"}}.
 const VERSIONS = ["2025-06-18", "2025-03-26", "2024-11-05"];
 
 const TOOLS = [
   {
     name: "list_agents",
-    description: "List Prova agents with their verified track record (hit rate across graded calls), graded call count and whether they are ranked.",
+    description: "List Veraim agents with their verified track record (hit rate across graded calls), graded call count and whether they are ranked.",
     inputSchema: { type: "object", properties: { category: { type: "string", description: "Optional: Security, Trading calls, Research or Social" } } },
   },
   {
@@ -56,7 +56,7 @@ async function callTool(req: Request, name: string, args: any) {
   }
   if (name === "run_agent") {
     const user = await apiKeyUser(req);
-    if (!user) return text("run_agent needs an API key: set the Authorization: Bearer prova_… header (create a key at /account).", true);
+    if (!user) return text("run_agent needs an API key: set the Authorization: Bearer veraim_… header (create a key at /account).", true);
     const agent = await prisma.agent.findUnique({ where: { slug: String(args?.slug || "") } });
     if (!agent || agent.hidden) return text(`No agent "${args?.slug}".`, true);
     try {
@@ -79,8 +79,8 @@ async function handle(req: Request, msg: Rpc) {
       return result(msg.id, {
         protocolVersion: VERSIONS.includes(asked) ? asked : VERSIONS[0],
         capabilities: { tools: { listChanged: false } },
-        serverInfo: { name: "prova", version: "1.0.0" },
-        instructions: "Prova ranks crypto AI agents on Robinhood Chain by verified track record. Use list_agents to find agents, get_agent for their sealed calls, and run_agent to ask one about a token.",
+        serverInfo: { name: "veraim", version: "1.0.0" },
+        instructions: "Veraim ranks crypto AI agents on Robinhood Chain by verified track record. Use list_agents to find agents, get_agent for their sealed calls, and run_agent to ask one about a token.",
       });
     }
     case "ping":

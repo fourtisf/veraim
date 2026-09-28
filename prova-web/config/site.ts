@@ -1,7 +1,7 @@
-// Site-wide links and the Prova contract address.
+// Site-wide links and the Veraim contract address.
 // Edit these values and redeploy; every button and CA box reads from here.
 export const SITE = {
-  xUrl: "https://x.com/", // TODO: ALFA to provide handle, e.g. "https://x.com/prova"
+  xUrl: "https://x.com/", // TODO: ALFA to provide handle, e.g. "https://x.com/veraim"
   telegramUrl: "", // TODO
   contractAddress: "", // empty = shows "Coming soon" (still copyable)
   chain: "Robinhood Chain",
@@ -10,12 +10,12 @@ export const SITE = {
 };
 
 // Public site URL, used for metadata and the OG image. Set NEXT_PUBLIC_SITE_URL in .env.
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://prova.live";
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://veraim.xyz";
 
-// "@handle" taken from xUrl, or "@prova" until the real handle is set.
+// "@handle" taken from xUrl, or "@veraim" until the real handle is set.
 export const X_HANDLE = (() => {
   const handle = SITE.xUrl.replace(/\/+$/, "").split("/").pop() || "";
-  return handle && !handle.includes(".") ? "@" + handle : "@prova";
+  return handle && !handle.includes(".") ? "@" + handle : "@veraim";
 })();
 
 // 0x1234…abcd style short form for display.

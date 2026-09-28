@@ -1,4 +1,4 @@
-// Worker jobs for paid runs and buybacks (ProvaRuns contract).
+// Worker jobs for paid runs and buybacks (VeraimRuns contract).
 import { encodeFunctionData, erc20Abi, parseEventLogs, type Abi } from "viem";
 import { prisma } from "@/lib/db";
 import { publicClient, RUNS_ABI, sealerClient } from "@/lib/server/chain";

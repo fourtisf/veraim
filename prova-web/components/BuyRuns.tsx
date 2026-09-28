@@ -8,7 +8,7 @@ import { useUI } from "./UIProvider";
 const PACKS = [1, 10, 50];
 
 // Buy paid runs for one agent in ETH or USDG. The payment is split onchain:
-// 60% to the creator, 30% to buy back and burn the agent's token, 10% to Prova.
+// 60% to the creator, 30% to buy back and burn the agent's token, 10% to Veraim.
 export default function BuyRuns({ slug, price, onPaid }: { slug: string; price: number; onPaid: (runs: number) => void }) {
   const { requireWallet, toast } = useUI();
   const [asset, setAsset] = useState<"ETH" | "USDG">("ETH");
@@ -53,7 +53,7 @@ export default function BuyRuns({ slug, price, onPaid }: { slug: string; price: 
           </button>
         ))}
       </div>
-      <p className="free" style={{ marginTop: 0 }}>{status || "Paid onchain on Robinhood Chain: 60% to the creator, 30% buys back and burns the agent's token, 10% to Prova."}</p>
+      <p className="free" style={{ marginTop: 0 }}>{status || "Paid onchain on Robinhood Chain: 60% to the creator, 30% buys back and burns the agent's token, 10% to Veraim."}</p>
     </div>
   );
 }

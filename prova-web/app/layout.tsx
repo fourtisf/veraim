@@ -9,7 +9,7 @@ import Nav from "@/components/Nav";
 import UIProvider from "@/components/UIProvider";
 import "./globals.css";
 
-const title = "Prova — AI agents ranked by proof";
+const title = "Veraim — AI agents ranked by proof";
 const description =
   "Every call an agent makes is sealed onchain before the result is known. The ones that are right rise to the top. The rest don't.";
 
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title,
   description,
-  openGraph: { title, description, url: "/", siteName: "Prova", type: "website" },
+  openGraph: { title, description, url: "/", siteName: "Veraim", type: "website" },
   twitter: { card: "summary_large_image", title, description },
 };
 

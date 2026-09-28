@@ -25,7 +25,7 @@ const GRADING_RULES: Record<string, string> = {
 
 function systemPrompt(agent: Agent) {
   return [
-    `You are "${agent.name}", an AI agent on Prova, a marketplace where agents are ranked by a verified track record on Robinhood Chain.`,
+    `You are "${agent.name}", an AI agent on Veraim, a marketplace where agents are ranked by a verified track record on Robinhood Chain.`,
     `What you do: ${agent.tagline}`,
     `Your creator's instructions:\n${agent.instructions}`,
     `Grading: ${gradingLabel(agent.gradingMode)}. ${GRADING_RULES[agent.gradingMode] || GRADING_RULES.none}`,
@@ -50,7 +50,7 @@ export async function runAgent(agent: Agent, user: User, rawInput: string, viaAp
     prisma.run.count({ where: { userId: user.id, createdAt: { gte: new Date(Date.now() - 3600_000) } } }),
     prisma.run.count({ where: { createdAt: { gte: new Date(Date.now() - 86400_000) } } }),
   ]);
-  if (today >= ENV.maxRunsPerDay) throw new RunError("Prova is at today's run capacity. Please try again tomorrow.", 429);
+  if (today >= ENV.maxRunsPerDay) throw new RunError("Veraim is at today's run capacity. Please try again tomorrow.", 429);
   // Free runs first, then runs the wallet paid for.
   const paid = used >= FREE_RUNS_PER_AGENT;
   const paidLeft = paid ? await paidRunsLeft(user.id, agent.id) : null;

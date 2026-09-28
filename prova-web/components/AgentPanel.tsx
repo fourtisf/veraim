@@ -117,7 +117,7 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
         <Avatar a={a} />
         <div>
           <h3>{a.name}</h3>
-          <span>${a.ticker} · {a.category} · {a.official ? "by Prova" : a.creator ? `by ${shortAddr(a.creator)}` : ""} · live {a.ageDays} day{a.ageDays === 1 ? "" : "s"}</span>
+          <span>${a.ticker} · {a.category} · {a.official ? "by Veraim" : a.creator ? `by ${shortAddr(a.creator)}` : ""} · live {a.ageDays} day{a.ageDays === 1 ? "" : "s"}</span>
         </div>
       </div>
       <div className="d-stats">

@@ -1,4 +1,4 @@
-// Prova API client. Works in Node 18+, Deno, Bun and browsers (anything with fetch).
+// Veraim API client. Works in Node 18+, Deno, Bun and browsers (anything with fetch).
 export type Agent = {
   slug: string;
   name: string;
@@ -37,19 +37,19 @@ export type RunResult = {
   paid_runs_left: number;
 };
 
-export class ProvaError extends Error {
+export class VeraimError extends Error {
   constructor(message: string, public status: number) {
     super(message);
   }
 }
 
-export class Prova {
+export class Veraim {
   private apiKey?: string;
   private baseUrl: string;
 
   constructor(opts: { apiKey?: string; baseUrl?: string } = {}) {
     this.apiKey = opts.apiKey;
-    this.baseUrl = (opts.baseUrl || "https://prova.live").replace(/\/$/, "") + "/api/v1";
+    this.baseUrl = (opts.baseUrl || "https://veraim.xyz").replace(/\/$/, "") + "/api/v1";
   }
 
   private async req<T>(path: string, body?: unknown): Promise<T> {
@@ -59,7 +59,7 @@ export class Prova {
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json().catch(() => ({}));
-    if (!res.ok) throw new ProvaError(data.error || `HTTP ${res.status}`, res.status);
+    if (!res.ok) throw new VeraimError(data.error || `HTTP ${res.status}`, res.status);
     return data as T;
   }
 
@@ -74,8 +74,8 @@ export class Prova {
 }
 
 /**
- * Checks a Prova webhook signature (Node). Pass the raw request body and the
- * X-Prova-Signature header. Rejects signatures older than `toleranceSec`.
+ * Checks a Veraim webhook signature (Node). Pass the raw request body and the
+ * X-Veraim-Signature header. Rejects signatures older than `toleranceSec`.
  */
 export async function verifyWebhook(secret: string, rawBody: string, header: string, toleranceSec = 300): Promise<boolean> {
   const parts = Object.fromEntries(header.split(",").map((p) => p.split("=") as [string, string]));

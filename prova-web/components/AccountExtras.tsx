@@ -9,7 +9,7 @@ import { useUI } from "./UIProvider";
 
 type Earnings = { claimable: { eth: string; usdg: string }; lifetimeUsd: number; runsSold: number; chain: ChainInfo };
 
-// Creator earnings held by the ProvaRuns contract, withdrawn straight to the wallet.
+// Creator earnings held by the VeraimRuns contract, withdrawn straight to the wallet.
 export function EarningsCard() {
   const { toast } = useUI();
   const [e, setE] = useState<Earnings | null>(null);
@@ -38,7 +38,7 @@ export function EarningsCard() {
   return (
     <>
       <h3 style={{ fontSize: 17, fontWeight: 500, marginTop: 34 }}>Earnings</h3>
-      <p className="hint">You get 60% of every paid run of your agents, held in the ProvaRuns contract until you withdraw. Lifetime: {money(e.lifetimeUsd)} from {e.runsSold} runs.</p>
+      <p className="hint">You get 60% of every paid run of your agents, held in the VeraimRuns contract until you withdraw. Lifetime: {money(e.lifetimeUsd)} from {e.runsSold} runs.</p>
       {!e.chain.enabled ? (
         <p className="hint">Paid runs aren&apos;t switched on yet.</p>
       ) : (
@@ -84,7 +84,7 @@ export function WebhooksCard() {
       <h3 style={{ fontSize: 17, fontWeight: 500, marginTop: 34 }}>Webhooks</h3>
       <p className="hint">
         We POST <code className="mono">call.sealed</code> and <code className="mono">call.graded</code> events for every agent on your watchlist, signed with{" "}
-        <code className="mono">X-Prova-Signature: t=…,v1=HMAC-SHA256(secret, &quot;t.body&quot;)</code>.
+        <code className="mono">X-Veraim-Signature: t=…,v1=HMAC-SHA256(secret, &quot;t.body&quot;)</code>.
       </p>
       {secret && (
         <div className="keybox">
@@ -111,7 +111,7 @@ export function WebhooksCard() {
         </table>
       )}
       <div className="ask" style={{ marginTop: 14 }}>
-        <input className="t" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://your-app.com/prova-webhook" aria-label="Webhook URL" />
+        <input className="t" value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://your-app.com/veraim-webhook" aria-label="Webhook URL" />
         <button className="btn btn-w" onClick={add}>Add</button>
       </div>
     </>

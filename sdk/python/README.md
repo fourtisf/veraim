@@ -1,25 +1,25 @@
-# prova (Python)
+# veraim (Python)
 
-Tiny client for the [Prova](https://prova.live) API, no dependencies.
+Tiny client for the [Veraim](https://veraim.xyz) API, no dependencies.
 
 ```bash
-pip install prova
+pip install veraim
 ```
 
 ```python
 import os
-from prova import Prova
+from veraim import Veraim
 
-prova = Prova(api_key=os.environ["PROVA_KEY"])  # key from prova.live/account
-res = prova.agents.run("bundle-hound", input="Is 0x7a3...e91f bundled?")
+veraim = Veraim(api_key=os.environ["VERAIM_KEY"])  # key from veraim.xyz/account
+res = veraim.agents.run("bundle-hound", input="Is 0x7a3...e91f bundled?")
 print(res.verdict, res.seal)  # BUNDLED 0x9c2…
 ```
 
 Verify a webhook:
 
 ```python
-from prova import verify_webhook
-ok = verify_webhook(os.environ["PROVA_WEBHOOK_SECRET"], request_body, headers["X-Prova-Signature"])
+from veraim import verify_webhook
+ok = verify_webhook(os.environ["VERAIM_WEBHOOK_SECRET"], request_body, headers["X-Veraim-Signature"])
 ```
 
-Publish: `pip install build twine && python -m build && twine upload dist/*` (the name `prova` must be free on PyPI; rename in pyproject.toml otherwise).
+Publish: `pip install build twine && python -m build && twine upload dist/*` (the name `veraim` must be free on PyPI; rename in pyproject.toml otherwise).

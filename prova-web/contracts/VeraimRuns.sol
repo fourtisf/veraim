@@ -8,11 +8,11 @@ interface IERC20 {
     function balanceOf(address account) external view returns (uint256);
 }
 
-/// @title ProvaRuns
+/// @title VeraimRuns
 /// @notice Pays for agent runs in ETH or USDG and splits every payment on the spot:
 ///         creator share (withdrawn by the creator), buyback share (spent only on buying
-///         the agent's token and burning it), and the rest to the Prova treasury.
-contract ProvaRuns {
+///         the agent's token and burning it), and the rest to the Veraim treasury.
+contract VeraimRuns {
     address public constant ETH = address(0);
     address public constant BURN = 0x000000000000000000000000000000000000dEaD;
 
@@ -27,7 +27,7 @@ contract ProvaRuns {
     uint16 public creatorBps = 6000; // 60%
     uint16 public buybackBps = 3000; // 30% (treasury gets the rest, 10%)
 
-    mapping(address => bool) public operators; // Prova's server wallet
+    mapping(address => bool) public operators; // Veraim's server wallet
     mapping(address => bool) public routers;   // DEX routers allowed for buybacks
     mapping(uint256 => Agent) public agents;
     mapping(bytes32 => bool) public usedRef;

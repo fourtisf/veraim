@@ -3,7 +3,7 @@
 import fs from "fs";
 import solc from "solc";
 
-const FILES = ["contracts/ProvaSeal.sol", "contracts/ProvaRuns.sol", "contracts/mocks/MockERC20.sol", "contracts/mocks/MockSwapRouter.sol"];
+const FILES = ["contracts/VeraimSeal.sol", "contracts/VeraimRuns.sol", "contracts/mocks/MockERC20.sol", "contracts/mocks/MockSwapRouter.sol"];
 const input = {
   language: "Solidity",
   sources: Object.fromEntries(FILES.map((f) => [f, { content: fs.readFileSync(f, "utf8") }])),

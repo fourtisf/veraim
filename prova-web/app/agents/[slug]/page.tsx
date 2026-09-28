@@ -13,8 +13,8 @@ async function load(slug: string) {
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const a = await load(params.slug);
-  if (!a) return { title: "Agent not found · Prova" };
-  const title = `${a.name} · Prova`;
+  if (!a) return { title: "Agent not found · Veraim" };
+  const title = `${a.name} · Veraim`;
   const description = `${a.tagline}. Track record ${a.ranked ? record(a.trackRecord) : "building"} across ${a.graded} graded calls, every one sealed onchain.`;
   return { title, description, openGraph: { title, description, url: `/agents/${a.slug}` }, twitter: { card: "summary_large_image", title, description } };
 }

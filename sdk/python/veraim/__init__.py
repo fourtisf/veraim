@@ -1,4 +1,4 @@
-"""Prova API client (no dependencies). https://prova.live"""
+"""Veraim API client (no dependencies). https://veraim.xyz"""
 import hashlib
 import hmac
 import json
@@ -7,10 +7,10 @@ import urllib.error
 import urllib.request
 from types import SimpleNamespace
 
-__all__ = ["Prova", "ProvaError", "verify_webhook"]
+__all__ = ["Veraim", "VeraimError", "verify_webhook"]
 
 
-class ProvaError(Exception):
+class VeraimError(Exception):
     def __init__(self, message, status):
         super().__init__(message)
         self.status = status
@@ -33,15 +33,15 @@ class _Agents:
         return SimpleNamespace(**self._c._req(f"/agents/{slug}/run", {"input": input}))
 
 
-class Prova:
-    def __init__(self, api_key=None, base_url="https://prova.live", timeout=120):
+class Veraim:
+    def __init__(self, api_key=None, base_url="https://veraim.xyz", timeout=120):
         self.api_key = api_key
         self.base_url = base_url.rstrip("/") + "/api/v1"
         self.timeout = timeout
         self.agents = _Agents(self)
 
     def _req(self, path, body=None):
-        headers = {"content-type": "application/json", "user-agent": "prova-python/0.1"}
+        headers = {"content-type": "application/json", "user-agent": "veraim-python/0.1"}
         if self.api_key:
             headers["authorization"] = f"Bearer {self.api_key}"
         data = json.dumps(body).encode() if body is not None else None
@@ -54,11 +54,11 @@ class Prova:
                 msg = json.loads(e.read()).get("error")
             except Exception:
                 msg = None
-            raise ProvaError(msg or f"HTTP {e.code}", e.code) from None
+            raise VeraimError(msg or f"HTTP {e.code}", e.code) from None
 
 
 def verify_webhook(secret, raw_body, header, tolerance_sec=300):
-    """Checks the X-Prova-Signature header of a webhook against the raw body (str or bytes)."""
+    """Checks the X-Veraim-Signature header of a webhook against the raw body (str or bytes)."""
     parts = dict(p.split("=", 1) for p in header.split(",") if "=" in p)
     try:
         t = int(parts["t"])

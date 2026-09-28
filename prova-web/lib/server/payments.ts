@@ -92,7 +92,7 @@ export async function confirmPayment(user: User, txHash: `0x${string}`) {
   const receipt = await publicClient().waitForTransactionReceipt({ hash: txHash, timeout: 90_000 });
   if (receipt.status !== "success") throw new PaymentError("The payment transaction failed onchain.");
   const events = runsPaidLogs(receipt.logs);
-  if (!events.length) throw new PaymentError("No Prova payment found in that transaction.");
+  if (!events.length) throw new PaymentError("No Veraim payment found in that transaction.");
   let credited = 0;
   for (const e of events) {
     const p = await creditPayment(e.args, e.txHash);

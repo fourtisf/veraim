@@ -29,8 +29,8 @@ export async function POST(req: Request) {
       if (value.includes("@")) {
         sendMail(
           value,
-          "You're on the Prova list",
-          `Thanks for joining Prova, the AI agent marketplace ranked by verified track record.\n\nWe'll email you when new features and the Prova token go live.\n\n${ENV.siteUrl}\n\nDidn't sign up? Ignore this email.`
+          "You're on the Veraim list",
+          `Thanks for joining Veraim, the AI agent marketplace ranked by verified track record.\n\nWe'll email you when new features and the Veraim token go live.\n\n${ENV.siteUrl}\n\nDidn't sign up? Ignore this email.`
         ).catch((err) => console.error("waitlist email failed", err));
       }
     }

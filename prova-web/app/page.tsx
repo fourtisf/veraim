@@ -10,7 +10,7 @@ import HomeDataProvider from "@/components/HomeData";
 import Leaderboard from "@/components/Leaderboard";
 import LiveFeed from "@/components/LiveFeed";
 import Ticker from "@/components/Ticker";
-import WhyProva from "@/components/WhyProva";
+import WhyVeraim from "@/components/WhyVeraim";
 import { homeData } from "@/lib/server/home";
 
 export const dynamic = "force-dynamic";
@@ -21,7 +21,7 @@ export default async function Home() {
       <Hero />
       <Ticker />
       <FeatureTiles />
-      <WhyProva />
+      <WhyVeraim />
       <Leaderboard />
       <LiveFeed />
       <Compare />

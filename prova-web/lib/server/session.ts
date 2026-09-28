@@ -8,8 +8,8 @@ import { hashApiKey } from "./apiKeys";
 
 // Wallet sign-in: the browser signs a one-time message, we check the signature
 // and keep the wallet in a signed, httpOnly cookie for 30 days.
-const SESSION = "prova_session";
-const CHALLENGE = "prova_challenge";
+const SESSION = "veraim_session";
+const CHALLENGE = "veraim_challenge";
 const DAY = 24 * 60 * 60;
 
 function secret() {
@@ -48,7 +48,7 @@ const cookieOpts = (maxAge: number) => ({
 
 function signInMessage(address: string, nonce: string, issuedAt: string) {
   const host = new URL(ENV.siteUrl).host;
-  return `${host} wants you to sign in with your wallet:\n${address}\n\nSign in to Prova. This does not send a transaction or cost gas.\n\nURI: ${ENV.siteUrl}\nNonce: ${nonce}\nIssued At: ${issuedAt}`;
+  return `${host} wants you to sign in with your wallet:\n${address}\n\nSign in to Veraim. This does not send a transaction or cost gas.\n\nURI: ${ENV.siteUrl}\nNonce: ${nonce}\nIssued At: ${issuedAt}`;
 }
 
 // Step 1: create the message for this address.
@@ -94,10 +94,10 @@ export async function currentUser() {
   return prisma.user.findUnique({ where: { id: s.uid } });
 }
 
-// For the public API: "Authorization: Bearer prova_…".
+// For the public API: "Authorization: Bearer veraim_…".
 export async function apiKeyUser(req: Request) {
   const token = req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
-  if (!token || !token.startsWith("prova_")) return null;
+  if (!token || !token.startsWith("veraim_")) return null;
   const key = await prisma.apiKey.findUnique({ where: { hash: hashApiKey(token) }, include: { user: true } });
   if (!key || key.revokedAt) return null;
   await prisma.apiKey.update({ where: { id: key.id }, data: { lastUsedAt: new Date() } });

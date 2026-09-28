@@ -1,4 +1,4 @@
-// Prova background worker (run with PM2 next to the website):
+// Veraim background worker (run with PM2 next to the website):
 //  - seals new claims onchain in batches
 //  - grades claims once their deadline passes, then records the result onchain
 //  - sends Telegram alerts and links Telegram accounts
@@ -146,11 +146,11 @@ async function telegramUpdates() {
         const user = code ? await prisma.user.findUnique({ where: { telegramLinkCode: code } }) : null;
         if (user) {
           await prisma.user.update({ where: { id: user.id }, data: { telegramChatId: chatId, telegramLinkCode: null } });
-          await sendTelegram(chatId, "Linked to your Prova wallet. You'll get a message for every new call from agents you turn alerts on for.");
-        } else await sendTelegram(chatId, "That link has expired. Open Prova, turn on an alert and try again.");
+          await sendTelegram(chatId, "Linked to your Veraim wallet. You'll get a message for every new call from agents you turn alerts on for.");
+        } else await sendTelegram(chatId, "That link has expired. Open Veraim, turn on an alert and try again.");
       } else if (text === "/stop") {
         await prisma.user.updateMany({ where: { telegramChatId: chatId }, data: { telegramChatId: null } });
-        await sendTelegram(chatId, "Alerts stopped. Turn them on again from any agent on Prova.");
+        await sendTelegram(chatId, "Alerts stopped. Turn them on again from any agent on Veraim.");
       } else if (text === "/start") {
         await sendTelegram(chatId, `Open ${ENV.siteUrl}, sign in with your wallet and turn on alerts for an agent to link this chat.`);
       }
@@ -212,7 +212,7 @@ function every(name: string, ms: number, job: () => Promise<void>) {
   setInterval(tick, ms);
 }
 
-log(`Prova worker started. Sealing ${sealingEnabled() ? "on (" + ENV.chain + ")" : "OFF: set SEALER_PRIVATE_KEY and SEAL_CONTRACT"}. Telegram ${telegramEnabled() ? "on" : "off"}. Payments ${moneyEnabled() ? "on" : "OFF: set RUNS_CONTRACT"}. Buybacks ${moneyEnabled() && ENV.swapRouter ? "on" : "off"}.`);
+log(`Veraim worker started. Sealing ${sealingEnabled() ? "on (" + ENV.chain + ")" : "OFF: set SEALER_PRIVATE_KEY and SEAL_CONTRACT"}. Telegram ${telegramEnabled() ? "on" : "off"}. Payments ${moneyEnabled() ? "on" : "OFF: set RUNS_CONTRACT"}. Buybacks ${moneyEnabled() && ENV.swapRouter ? "on" : "off"}.`);
 every("seal", 20_000, sealPending);
 every("grade", 60_000, async () => {
   await gradeDue();

@@ -5,14 +5,14 @@ import Avatar from "./Avatar";
 import { useHome } from "./HomeData";
 import { useUI } from "./UIProvider";
 
-// "prova.live/leaderboard" app window in the hero, showing the real top agents.
+// "veraim.xyz/leaderboard" app window in the hero, showing the real top agents.
 export default function ProductWindow() {
   const { agents, stats } = useHome();
   const { me, openAgent } = useUI();
   const top = agents.slice(0, 6);
   return (
     <div className="win">
-      <div className="win-bar"><i /><i /><i /><span className="url">prova.live/leaderboard</span></div>
+      <div className="win-bar"><i /><i /><i /><span className="url">veraim.xyz/leaderboard</span></div>
       <div className="win-body">
         <div className="side">
           <div className="on">Leaderboard<small>{stats.agentCount.toLocaleString("en-US")}</small></div>

@@ -7,7 +7,7 @@ export async function getJson<T = any>(url: string, opts: { ttlMs?: number; time
   if (hit && Date.now() - hit.at < ttlMs) return hit.data as T;
   const res = await fetch(url, {
     // Blockscout returns an unparseable page to requests without a browser-like User-Agent.
-    headers: { accept: "application/json", "user-agent": "Mozilla/5.0 (compatible; ProvaBot/1.0; +https://prova.live)", ...headers },
+    headers: { accept: "application/json", "user-agent": "Mozilla/5.0 (compatible; VeraimBot/1.0; +https://veraim.xyz)", ...headers },
     signal: AbortSignal.timeout(timeoutMs),
     cache: "no-store",
   });

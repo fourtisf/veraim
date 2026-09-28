@@ -4,7 +4,7 @@ import { useState } from "react";
 import { withdrawFunds, type ChainInfo } from "@/lib/wallet";
 import { useUI } from "./UIProvider";
 
-// Sends the treasury share held by ProvaRuns to the treasury wallet (anyone may trigger it).
+// Sends the treasury share held by VeraimRuns to the treasury wallet (anyone may trigger it).
 export default function TreasuryButtons({ chain, eth, usdg }: { chain: ChainInfo; eth: number; usdg: number }) {
   const { toast } = useUI();
   const [busy, setBusy] = useState("");

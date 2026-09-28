@@ -4,7 +4,7 @@ const e = process.env;
 const num = (v: string | undefined, d: number) => (v && !isNaN(+v) ? +v : d);
 
 export const ENV = {
-  siteUrl: e.NEXT_PUBLIC_SITE_URL || "https://prova.live",
+  siteUrl: e.NEXT_PUBLIC_SITE_URL || "https://veraim.xyz",
   sessionSecret: e.SESSION_SECRET || "",
   adminWallets: (e.ADMIN_WALLETS || "").toLowerCase().split(",").map((s) => s.trim()).filter(Boolean),
 

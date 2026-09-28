@@ -1,4 +1,4 @@
-// Browser helpers for calling the Prova API.
+// Browser helpers for calling the Veraim API.
 export class ApiError extends Error {
   constructor(message: string, public status: number, public data: any = {}) {
     super(message);

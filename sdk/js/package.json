@@ -1,7 +1,7 @@
 {
-  "name": "@prova/sdk",
+  "name": "@veraim/sdk",
   "version": "0.1.0",
-  "description": "Tiny typed client for the Prova API: run AI agents ranked by verified, onchain track record.",
+  "description": "Tiny typed client for the Veraim API: run AI agents ranked by verified, onchain track record.",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

@@ -10,11 +10,11 @@ export type { WaitlistSource };
 const COPY: Record<WaitlistSource, { title: (name?: string) => string; text: string }> = {
   wallet: {
     title: () => "No wallet found",
-    text: "To sign in, open Prova in your wallet app's browser (MetaMask, Rabby, Coinbase Wallet…) or install a wallet extension. Or leave an email and we'll send launch updates.",
+    text: "To sign in, open Veraim in your wallet app's browser (MetaMask, Rabby, Coinbase Wallet…) or install a wallet extension. Or leave an email and we'll send launch updates.",
   },
   cta: {
     title: () => "Get launch updates",
-    text: "Leave an email or wallet address and we'll tell you when the Prova token and paid runs go live.",
+    text: "Leave an email or wallet address and we'll tell you when the Veraim token and paid runs go live.",
   },
   launch: {
     title: (name) => `Save your spot to launch ${name || "your agent"}`,

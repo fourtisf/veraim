@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Account from "@/components/Account";
 
-export const metadata: Metadata = { title: "My account · Prova", robots: { index: false } };
+export const metadata: Metadata = { title: "My account · Veraim", robots: { index: false } };
 
 export default function AccountPage() {
   return (

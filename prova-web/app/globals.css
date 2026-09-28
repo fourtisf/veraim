@@ -21,8 +21,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:50;transition:background .3s,bor
 nav.solid{background:rgba(0,0,0,.7);backdrop-filter:blur(20px) saturate(160%);-webkit-backdrop-filter:blur(20px) saturate(160%);border-color:var(--b1)}
 nav .wrap{display:flex;align-items:center;height:64px;gap:44px}
 .logo{display:flex;align-items:center;gap:10px;font-weight:600;font-size:17px;letter-spacing:-.02em}
-.mark{width:24px;height:24px;border-radius:7px;background:linear-gradient(145deg,#F4E6CC,#9C8158);position:relative;box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 0 18px rgba(226,205,166,.25)}
-.mark:after{content:"";position:absolute;left:8px;top:5px;width:6px;height:10px;border:solid #0A0A0A;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.mark{width:24px;height:24px;flex-shrink:0;display:inline-block;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 120'%3E%3Cpath d='M22 20 L49 70 M98 20 L71 70' fill='none' stroke='%23EDEDEF' stroke-width='20' stroke-linecap='round'/%3E%3Ccircle cx='60' cy='96' r='13' fill='%23EDEDEF'/%3E%3C/svg%3E") center/contain no-repeat}
 .links{display:flex;gap:30px;font-size:14px;color:var(--t2)}
 .links a{transition:color .2s}.links a:hover{color:var(--t1)}
 .nr{margin-left:auto;display:flex;align-items:center;gap:8px}

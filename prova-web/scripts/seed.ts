@@ -1,4 +1,4 @@
-// Creates (or updates) Prova's official starter agents. Safe to run more than once.
+// Creates (or updates) Veraim's official starter agents. Safe to run more than once.
 // Run: npx tsx scripts/seed.ts
 import "dotenv/config";
 import { prisma } from "../lib/db";

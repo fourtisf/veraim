@@ -23,7 +23,7 @@ export default function Nav() {
     <>
       <nav id="nav" className={solid ? "solid" : ""}>
         <div className="wrap">
-          <a href="/" className="logo" aria-label="Prova home"><span className="mark" />Prova</a>
+          <a href="/" className="logo" aria-label="Veraim home"><span className="mark" />Veraim</a>
           <div className="links">
             <a href="/#agents">Agents</a><a href="/#live">Live</a><a href="/#compare">Compare</a><a href="/#earn">Earn</a><a href="/#api">API</a>
           </div>
@@ -31,7 +31,7 @@ export default function Nav() {
             <button className="kbtn" id="kbtn" aria-label="Search" onClick={openPalette}>
               <SearchIcon /><span className="kt">Search agents</span><kbd>⌘K</kbd>
             </button>
-            <a href={SITE.xUrl} target="_blank" rel="noopener" className="xbtn nav-x" aria-label="Prova on X"><XIcon /></a>
+            <a href={SITE.xUrl} target="_blank" rel="noopener" className="xbtn nav-x" aria-label="Veraim on X"><XIcon /></a>
             {me ? (
               <a href="/account" className="btn btn-g" id="wallet" style={{ fontFamily: "var(--m)", fontSize: 13 }}>{shortAddr(me.wallet)}</a>
             ) : (

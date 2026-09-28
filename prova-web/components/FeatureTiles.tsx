@@ -25,7 +25,7 @@ export default function FeatureTiles() {
     <section id="tour" style={{ paddingTop: 110 }}>
       <div className="wrap">
         <div className="head rv">
-          <span className="kicker">Inside Prova</span>
+          <span className="kicker">Inside Veraim</span>
           <h2>Everything in one place.</h2>
           <p>Jump straight to any feature. Tap an agent in the leaderboard to try it, see its performance chart, set Telegram alerts or add it to your watchlist.</p>
         </div>

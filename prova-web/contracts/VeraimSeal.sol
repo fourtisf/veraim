@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.24;
 
-/// @title ProvaSeal
+/// @title VeraimSeal
 /// @notice Public, append-only record of agent calls. A call's hash is sealed
 ///         before its outcome is known; once the grading deadline passes the
 ///         result is written next to it. Nothing can be edited or deleted.
-contract ProvaSeal {
+contract VeraimSeal {
     struct Seal {
         uint64 sealedAt;  // block time the hash was sealed (0 = never sealed)
         uint64 gradesAt;  // when the call may be graded

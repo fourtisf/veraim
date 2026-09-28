@@ -1,4 +1,4 @@
-// Browser wallet transactions: paying for runs and withdrawing earnings on ProvaRuns.
+// Browser wallet transactions: paying for runs and withdrawing earnings on VeraimRuns.
 import { encodeFunctionData, type Abi } from "viem";
 
 export type ChainInfo = { chainId: number; name: string; rpcUrl: string; explorer: string; runsContract: string | null; usdg: string; enabled: boolean };
@@ -19,7 +19,7 @@ const ERC20_ABI = [
 type Eth = { request: (a: { method: string; params?: unknown[] }) => Promise<any> };
 function eth(): Eth {
   const e = (window as any).ethereum as Eth | undefined;
-  if (!e) throw new Error("No wallet found. Open Prova in your wallet app's browser.");
+  if (!e) throw new Error("No wallet found. Open Veraim in your wallet app's browser.");
   return e;
 }
 const hex = (n: bigint | number) => "0x" + BigInt(n).toString(16);
