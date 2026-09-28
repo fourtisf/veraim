@@ -3,6 +3,10 @@
 #   bash deploy/update.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
+if ! grep -qs "^DATABASE_URL=\"postgres" .env; then
+  echo "Veraim isn't installed yet (no .env with DATABASE_URL). Run first:  DOMAIN=veraim.xyz bash deploy/install.sh"
+  exit 1
+fi
 git pull
 npm ci --no-audit --no-fund
 npx prisma migrate deploy

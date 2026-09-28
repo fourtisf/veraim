@@ -44,7 +44,7 @@ command -v pm2 >/dev/null || npm install -g pm2
 say "2/8 Installing the app's packages"
 npm ci --no-audit --no-fund
 
-if [ ! -f .env ]; then
+if ! grep -qs "^DATABASE_URL=\"postgres" .env; then
   say "3/8 Creating the settings file (.env)"
   DB_PASS=$(openssl rand -hex 24)
   if sudo -u postgres psql -tAc "SELECT 1 FROM pg_roles WHERE rolname='veraim'" | grep -q 1; then
