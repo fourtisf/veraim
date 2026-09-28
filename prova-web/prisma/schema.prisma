@@ -1,0 +1,18 @@
+// Database schema. Phase 1 only needs the waitlist.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Waitlist {
+  id            String   @id @default(cuid())
+  emailOrWallet String   @unique
+  source        String?  // "wallet" (Connect wallet button) or "launch" (builder's Launch agent)
+  createdAt     DateTime @default(now())
+
+  @@map("waitlist")
+}

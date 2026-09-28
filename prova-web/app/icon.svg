@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <!-- Same gold mark as the site logo (.mark in globals.css), scaled from 24px to 64px -->
+  <defs>
+    <linearGradient id="g" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#F4E6CC"/>
+      <stop offset="1" stop-color="#9C8158"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="18.7" fill="url(#g)"/>
+  <polyline points="16.13,28.56 25.56,37.98 42.53,21.01" fill="none" stroke="#0A0A0A" stroke-width="5.33" stroke-linecap="butt" stroke-linejoin="miter"/>
+</svg>
