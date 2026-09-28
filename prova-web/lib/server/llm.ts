@@ -18,7 +18,8 @@ export const AgentOutput = z.object({
 export type AgentOutput = z.infer<typeof AgentOutput>;
 
 // Provider model IDs for each builder option (override in .env).
-// Claude models go through the Anthropic API; the others through OpenRouter.
+// Claude models go through the Anthropic API when ANTHROPIC_API_KEY is set, otherwise through
+// OpenRouter (MODEL_CLAUDE_SONNET_OPENROUTER); the others always go through OpenRouter.
 const MODELS: Record<string, { provider: "anthropic" | "openrouter"; id: string }> = {
   "claude-sonnet": { provider: "anthropic", id: process.env.MODEL_CLAUDE_SONNET || "claude-sonnet-5" },
   gpt: { provider: "openrouter", id: process.env.MODEL_GPT || "openai/gpt-5-mini" },
@@ -26,18 +27,32 @@ const MODELS: Record<string, { provider: "anthropic" | "openrouter"; id: string 
   deepseek: { provider: "openrouter", id: process.env.MODEL_DEEPSEEK || "deepseek/deepseek-chat" },
 };
 
+const OPENROUTER_IDS: Record<string, string> = {
+  "claude-sonnet": process.env.MODEL_CLAUDE_SONNET_OPENROUTER || "anthropic/claude-sonnet-5",
+};
+
+// Where a model key actually runs right now, or null if no key can serve it.
+function route(key: string): { provider: "anthropic" | "openrouter"; id: string } | null {
+  const m = MODELS[key];
+  if (!m) return null;
+  if (m.provider === "anthropic") {
+    if (ENV.anthropicKey) return m;
+    if (ENV.openrouterKey && OPENROUTER_IDS[key]) return { provider: "openrouter", id: OPENROUTER_IDS[key] };
+    return null;
+  }
+  return ENV.openrouterKey ? m : null;
+}
+
 export class ModelError extends Error {}
 
 export function modelAvailable(key: string) {
-  const m = MODELS[key];
-  if (!m) return false;
-  return m.provider === "anthropic" ? !!ENV.anthropicKey : !!ENV.openrouterKey;
+  return !!route(key);
 }
 
 export async function runModel(key: string, system: string, user: string): Promise<AgentOutput> {
-  const m = MODELS[key];
-  if (!m) throw new ModelError(`Unknown model "${key}"`);
-  if (!modelAvailable(key)) throw new ModelError("This agent's model isn't connected yet. Try again soon.");
+  if (!MODELS[key]) throw new ModelError(`Unknown model "${key}"`);
+  const m = route(key);
+  if (!m) throw new ModelError("This agent's model isn't connected yet. Try again soon.");
   return m.provider === "anthropic" ? runClaude(m.id, system, user) : runOpenRouter(m.id, system, user);
 }
 
@@ -79,7 +94,7 @@ async function runOpenRouter(model: string, system: string, user: string): Promi
       model,
       max_tokens: 4000,
       messages: [
-        { role: "system", content: system },
+        { role: "system", content: `${system}\n\nReply with only a JSON object that matches the agent_output schema.` },
         { role: "user", content: user },
       ],
       response_format: { type: "json_schema", json_schema: { name: "agent_output", strict: true, schema: z.toJSONSchema(AgentOutput) } },
@@ -88,7 +103,10 @@ async function runOpenRouter(model: string, system: string, user: string): Promi
   });
   if (res.status === 429) throw new ModelError("The model is busy. Please try again in a minute.");
   if (res.status === 401 || res.status === 403) throw new ModelError("The model isn't connected correctly (API key).");
-  if (!res.ok) throw new ModelError(`Model error (${res.status}). Please try again.`);
+  if (!res.ok) {
+    console.error(`OpenRouter ${model} failed: ${res.status} ${(await res.text().catch(() => "")).slice(0, 500)}`);
+    throw new ModelError(`Model error (${res.status}). Please try again.`);
+  }
   const data = await res.json();
   const text: string = data.choices?.[0]?.message?.content || "";
   const json = text.slice(text.indexOf("{"), text.lastIndexOf("}") + 1);

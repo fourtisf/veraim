@@ -59,8 +59,8 @@ if [ ! -f .env ]; then
   echo "Answer a few questions (press Enter to skip the optional ones; you can edit .env later)."
   ask ADMIN_WALLET "Your wallet address, for the /admin page (0x...)"
   ask TREASURY_ADDRESS "Treasury wallet that receives Veraim's 10% (Enter = same as above)"
-  ask ANTHROPIC_API_KEY "Anthropic API key (sk-ant-..., runs the official agents)" secret
-  ask OPENROUTER_API_KEY "OpenRouter API key (optional)" secret
+  ask OPENROUTER_API_KEY "OpenRouter API key (sk-or-..., runs all agents; Enter to skip)" secret
+  ask ANTHROPIC_API_KEY "Anthropic API key (optional: Claude direct instead of via OpenRouter)" secret
   ask TELEGRAM_BOT_TOKEN "Telegram bot token from @BotFather (optional)" secret
   if [ -n "${TELEGRAM_BOT_TOKEN:-}" ]; then ask TELEGRAM_BOT_USERNAME "Telegram bot username, without @"; fi
 

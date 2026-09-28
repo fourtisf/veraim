@@ -45,7 +45,7 @@ export default async function AdminPage() {
     ["Onchain sealing (SEALER_PRIVATE_KEY + SEAL_CONTRACT)", sealingEnabled()],
     ["Paid runs (RUNS_CONTRACT)", paymentsEnabled()],
     ["Buybacks (SWAP_ROUTER + WETH_ADDRESS)", !!(ENV.swapRouter && ENV.weth)],
-    ["Claude models (ANTHROPIC_API_KEY)", modelAvailable("claude-sonnet")],
+    ["Claude models (ANTHROPIC_API_KEY or OPENROUTER_API_KEY)", modelAvailable("claude-sonnet")],
     ["Other models (OPENROUTER_API_KEY)", modelAvailable("gpt")],
     ["Telegram alerts (TELEGRAM_BOT_TOKEN + TELEGRAM_BOT_USERNAME)", telegramEnabled()],
     ["X mentions tool (X_BEARER_TOKEN)", !!process.env.X_BEARER_TOKEN],
