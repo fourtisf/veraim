@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import Script from "next/script";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
-import { SITE_URL } from "@/config/site";
+import { SITE_URL, X_HANDLE } from "@/config/site";
 import Effects from "@/components/Effects";
 import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title,
   description,
   openGraph: { title, description, url: "/", siteName: "Veraim", type: "website" },
-  twitter: { card: "summary_large_image", title, description },
+  twitter: { card: "summary_large_image", title, description, site: X_HANDLE, creator: X_HANDLE },
 };
 
 export const viewport: Viewport = {
