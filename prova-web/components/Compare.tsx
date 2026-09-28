@@ -1,32 +1,47 @@
 "use client";
 
-import { useState } from "react";
-import { AGENTS, k, series } from "@/lib/mock";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/client";
+import { k, record } from "@/lib/format";
 import LineChart from "./LineChart";
+import { useHome } from "./HomeData";
 
 const B_COLOR = "#9AA4FF";
 
 export default function Compare() {
-  const [aId, setA] = useState("hound");
-  const [bId, setB] = useState("tide");
-  const A = AGENTS.find((x) => x.id === aId)!;
-  const B = AGENTS.find((x) => x.id === bId)!;
+  const { agents } = useHome();
+  const [aSlug, setA] = useState(agents[0]?.slug || "");
+  const [bSlug, setB] = useState(agents[1]?.slug || agents[0]?.slug || "");
+  const [series, setSeries] = useState<Record<string, (number | null)[]>>({});
+
+  useEffect(() => {
+    for (const s of [aSlug, bSlug]) {
+      if (!s || series[s]) continue;
+      api<{ series: (number | null)[] }>(`/api/agents/${s}`).then((r) => setSeries((m) => ({ ...m, [s]: r.series }))).catch(() => {});
+    }
+  }, [aSlug, bSlug, series]);
+
+  const A = agents.find((x) => x.slug === aSlug);
+  const B = agents.find((x) => x.slug === bSlug);
+  if (!A || !B) return null;
 
   const metrics: [string, number, number, (v: number) => string][] = [
-    ["Track record", A.tr, B.tr, (v) => v + "%"],
-    ["Graded calls", A.g, B.g, String],
-    ["Runs / 7d", A.runs, B.runs, k],
-    ["Bought back", A.bb, B.bb, (v) => "$" + k(v)],
-    ["Market cap", A.mc, B.mc, (v) => "$" + v.toFixed(2) + "M"],
-    ["Days live", A.age, B.age, String],
+    ["Track record", A.trackRecord ?? 0, B.trackRecord ?? 0, (v) => (v ? `${Math.round(v)}%` : "—")],
+    ["Graded calls", A.graded, B.graded, String],
+    ["Runs / 7d", A.runs7d, B.runs7d, k],
+    ["Hits", A.hits, B.hits, String],
+    ["Pending calls", A.open, B.open, String],
+    ["Days live", A.ageDays, B.ageDays, String],
   ];
-  const d = A.tr - B.tr;
+  const both = A.trackRecord !== null && B.trackRecord !== null;
+  const d = both ? Math.round(A.trackRecord! - B.trackRecord!) : 0;
+  const hasChart = [series[A.slug], series[B.slug]].some((s) => s?.some((v) => v !== null));
 
   const select = (value: string, set: (v: string) => void, label: string, color: string) => (
     <div className="csel">
       <span className="sw8" style={{ background: color }} />
       <select value={value} onChange={(e) => set(e.target.value)} aria-label={label}>
-        {AGENTS.map((a) => <option key={a.id} value={a.id}>{a.n}</option>)}
+        {agents.map((a) => <option key={a.id} value={a.slug}>{a.name}</option>)}
       </select>
     </div>
   );
@@ -41,23 +56,27 @@ export default function Compare() {
         </div>
         <div className="cmp rv spot">
           <div className="cmp-sel">
-            {select(aId, setA, "First agent", "var(--gold)")}
+            {select(aSlug, setA, "First agent", "var(--gold)")}
             <span className="vsb">VS</span>
-            {select(bId, setB, "Second agent", B_COLOR)}
+            {select(bSlug, setB, "Second agent", B_COLOR)}
           </div>
           <div className="cmp-body">
             <div className="chartbox">
               <div className="lg">
-                <span><i style={{ background: "var(--gold)" }} />{A.n}</span>
-                <span><i style={{ background: B_COLOR }} />{B.n}</span>
+                <span><i style={{ background: "var(--gold)" }} />{A.name}</span>
+                <span><i style={{ background: B_COLOR }} />{B.name}</span>
                 <span style={{ marginLeft: "auto", color: "var(--t3)" }}>Track record · 30 days</span>
               </div>
-              <LineChart id="cmp" list={[{ d: series(A), c: "#E2CDA6", fill: true }, { d: series(B), c: B_COLOR }]} />
+              {hasChart ? (
+                <LineChart id="cmp" list={[{ d: series[A.slug] || [], c: "#E2CDA6", fill: true }, { d: series[B.slug] || [], c: B_COLOR }]} />
+              ) : (
+                <div className="empty" style={{ padding: "70px 12px" }}>No graded calls yet for these two. The chart fills in as calls are graded.</div>
+              )}
             </div>
             <div>
               <div>
                 {metrics.map(([label, x, y, f]) => {
-                  const mx = Math.max(x, y) || 1, wa = x >= y, wb = y >= x;
+                  const mx = Math.max(x, y) || 1, wa = x >= y && x > 0, wb = y >= x && y > 0;
                   return (
                     <div className="mrow" key={label}>
                       <div className="a">
@@ -75,8 +94,10 @@ export default function Compare() {
               </div>
               <div className="verdict">
                 {A.id === B.id ? "Pick two different agents to compare."
-                  : d === 0 ? "Dead even on track record. Look at volume and buybacks."
-                  : <><b>{d > 0 ? A.n : B.n}</b> has been right {Math.abs(d)} points more often across graded calls.</>}
+                  : !both ? "Not enough graded calls yet to call a winner. Records fill in as calls are graded."
+                  : d === 0 ? "Dead even on track record. Look at volume and graded calls."
+                  : <><b>{d > 0 ? A.name : B.name}</b> has been right {Math.abs(d)} points more often across graded calls{!(A.ranked && B.ranked) && " (not both ranked yet)"}.</>}
+                {" "}<span style={{ color: "var(--t3)" }}>Records: {record(A.trackRecord)} vs {record(B.trackRecord)}.</span>
               </div>
             </div>
           </div>

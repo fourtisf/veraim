@@ -1,21 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import { CATEGORIES, GRADING_OPTIONS, MODEL_OPTIONS, PRICE_OPTIONS, TOOL_OPTIONS as TOOLS, modelLabel } from "@/config/models";
+import { api } from "@/lib/client";
 import { useUI } from "./UIProvider";
 
 const STEPS = ["Identity", "Instructions", "Tools", "Launch"];
-const CATEGORIES = ["Security", "Trading calls", "Research", "Social"];
-const MODELS = ["Claude Sonnet", "GPT class", "Llama 70B (cheapest)", "DeepSeek"];
-const GRADING = ["Verdict vs 24h outcome", "Price call vs 7d price", "Not graded"];
-const PRICES = ["$0.02", "$0.05", "$0.10", "$0.25"];
-const TOOLS: [string, string][] = [
-  ["Holder map", "Top holders and linked wallets"],
-  ["Bundle scan", "First-block buys and funding"],
-  ["Whale flow", "Large buys and sells live"],
-  ["Dev history", "Deployer's past launches"],
-  ["Price feed", "Price, volume, liquidity"],
-  ["X mentions", "Who's posting about it"],
-];
+const GRADING = GRADING_OPTIONS.map((g) => g.label);
+const PRICES = PRICE_OPTIONS.map((p) => "$" + p.toFixed(2));
 
 function Seg({ name, options, value, onChange }: { name: string; options: string[]; value: string; onChange: (v: string) => void }) {
   return (
@@ -28,14 +20,15 @@ function Seg({ name, options, value, onChange }: { name: string; options: string
 }
 
 export default function Builder() {
-  const { openWaitlist } = useUI();
+  const { requireWallet, toast, openAgent, bumpData } = useUI();
   const [step, setStep] = useState(0);
+  const [launching, setLaunching] = useState(false);
   const [f, setF] = useState({
     name: "Bundle Hound",
     tag: "Sniffs out bundled launches before you buy",
     cat: "Security",
     prompt: "Given a token address, check holder distribution and funding wallets. Flag if more than 20% of supply was bought in the first block by linked wallets. Give a verdict: SAFE, CAUTION or BUNDLED, with one line of reasoning.",
-    model: MODELS[0],
+    model: MODEL_OPTIONS[0].key,
     grade: GRADING[0],
     tools: ["Holder map", "Bundle scan"],
     ticker: "HOUND",
@@ -50,6 +43,35 @@ export default function Builder() {
   const name = f.name || "Your agent";
   const ticker = (f.ticker || "TICKER").toUpperCase();
   const last = step === STEPS.length - 1;
+
+  // Creates the agent for the signed-in wallet. It goes live right away; its token launches later.
+  const launch = async () => {
+    if (launching || !(await requireWallet())) return;
+    setLaunching(true);
+    try {
+      const { slug } = await api<{ slug: string }>("/api/agents", {
+        body: {
+          name: f.name,
+          tagline: f.tag,
+          category: f.cat,
+          instructions: f.prompt,
+          model: f.model,
+          gradingMode: GRADING_OPTIONS.find((g) => g.label === f.grade)?.key,
+          tools: f.tools,
+          ticker: f.ticker,
+          price: +f.price.slice(1),
+          openingBuy: f.buy,
+        },
+      });
+      toast(`${f.name} is live. Try its first run`);
+      bumpData();
+      openAgent(slug);
+    } catch (err) {
+      toast((err as Error).message);
+    } finally {
+      setLaunching(false);
+    }
+  };
 
   return (
     <section id="build">
@@ -80,7 +102,7 @@ export default function Builder() {
               <label className="f" htmlFor="bPrompt">Instructions</label>
               <textarea className="t" id="bPrompt" {...input("prompt")} />
               <label className="f" htmlFor="bModel">Model</label>
-              <select className="t" id="bModel" {...input("model")}>{MODELS.map((m) => <option key={m}>{m}</option>)}</select>
+              <select className="t" id="bModel" {...input("model")}>{MODEL_OPTIONS.map((m) => <option key={m.key} value={m.key}>{m.label}</option>)}</select>
               <label className="f">What gets graded</label>
               <Seg name="grade" options={GRADING} value={f.grade} onChange={set("grade")} />
               <p className="hint">Ungraded agents can launch but won&apos;t appear on the leaderboard.</p>
@@ -105,13 +127,13 @@ export default function Builder() {
                 <div><label className="f" htmlFor="bPrice">Price per paid run</label><select className="t" id="bPrice" {...input("price")}>{PRICES.map((p) => <option key={p}>{p}</option>)}</select></div>
               </div>
               <label className="f" htmlFor="bBuy">Your opening buy (optional)</label><input className="t" id="bBuy" {...input("buy")} />
-              <p className="hint">Launch fee 0.002 ETH. Liquidity locks when the token graduates.</p>
+              <p className="hint">Your agent goes live as soon as you launch. Its token launches on Robinfun when that opens (fee 0.002 ETH, liquidity locks when the token graduates).</p>
             </div>
 
             <div className="nav-steps">
               <button className="btn btn-g" style={{ visibility: step ? "visible" : "hidden" }} onClick={() => setStep(step - 1)}>Back</button>
-              <button className={`btn ${last ? "btn-gold" : "btn-w"}`} onClick={() => (last ? openWaitlist("launch", f.name || "Agent") : setStep(step + 1))}>
-                {last ? "Launch agent" : "Continue"}
+              <button className={`btn ${last ? "btn-gold" : "btn-w"}`} disabled={launching} onClick={() => (last ? launch() : setStep(step + 1))}>
+                {last ? (launching ? "Launching…" : "Launch agent") : "Continue"}
               </button>
             </div>
           </div>
@@ -121,7 +143,7 @@ export default function Builder() {
               <div className="pc-top"><div className="av">{name[0] || "A"}</div><div><b>{name}</b><span>${ticker} · {f.cat}</span></div></div>
               <p className="pc-tag">{f.tag || "What your agent does, in one line."}</p>
               <div className="pc-chips">{f.tools.length ? f.tools.map((t) => <i key={t}>{t}</i>) : <i>No tools yet</i>}</div>
-              <div className="kv"><span>Model</span><b>{f.model}</b></div>
+              <div className="kv"><span>Model</span><b>{modelLabel(f.model)}</b></div>
               <div className="kv"><span>Graded on</span><b>{f.grade}</b></div>
               <div className="kv"><span>Price per run</span><b>{f.price} after 5 free</b></div>
               <div className="pc-score">

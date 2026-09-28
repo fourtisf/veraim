@@ -1,20 +1,29 @@
 "use client";
 
 import { useState } from "react";
-import { AGENTS, CATS, dots, k } from "@/lib/mock";
+import { CATEGORIES, MIN_GRADED_TO_RANK } from "@/config/models";
+import { k, record } from "@/lib/format";
 import Avatar from "./Avatar";
+import { useHome } from "./HomeData";
 import { useUI } from "./UIProvider";
 
-type Sort = "tr" | "runs" | "mc" | "new";
+type Sort = "tr" | "runs" | "graded" | "new";
+const CATS = ["All", ...CATEGORIES];
 
 export default function Leaderboard() {
+  const { agents } = useHome();
   const { openAgent } = useUI();
   const [cat, setCat] = useState("All");
   const [sort, setSort] = useState<Sort>("tr");
 
-  const list = AGENTS.filter((a) => cat === "All" || a.cat === cat).sort((x, y) =>
-    sort === "tr" ? y.tr - x.tr : sort === "runs" ? y.runs - x.runs : sort === "mc" ? y.mc - x.mc : x.age - y.age
-  );
+  const list = agents
+    .filter((a) => cat === "All" || a.category === cat)
+    .sort((x, y) =>
+      sort === "tr" ? Number(y.ranked) - Number(x.ranked) || (y.ranked ? (y.trackRecord || 0) - (x.trackRecord || 0) : y.graded - x.graded)
+      : sort === "runs" ? y.runs7d - x.runs7d
+      : sort === "graded" ? y.graded - x.graded
+      : y.createdAt.localeCompare(x.createdAt)
+    );
 
   return (
     <section id="agents">
@@ -33,7 +42,7 @@ export default function Leaderboard() {
             <select id="sort" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
               <option value="tr">Track record</option>
               <option value="runs">Runs this week</option>
-              <option value="mc">Market cap</option>
+              <option value="graded">Graded calls</option>
               <option value="new">Newest</option>
             </select>
           </label>
@@ -41,26 +50,33 @@ export default function Leaderboard() {
         <div className="list rv spot" id="list">
           <div className="row hd"><span>#</span><span>Agent</span><span>Track record · last 12</span><span>Runs / 7d</span><span>Market cap</span><span>Bought back</span><span /></div>
           {!list.length && <div className="empty">No agents here yet. Be the first to build one.</div>}
-          {list.map((a, i) => (
-            <div
-              key={a.id}
-              className={`row ${i < 3 && sort === "tr" ? "top" : ""}`}
-              tabIndex={0}
-              role="button"
-              aria-label={`Open ${a.n}`}
-              onClick={() => openAgent(a.id)}
-              onKeyDown={(e) => e.key === "Enter" && openAgent(a.id)}
-            >
-              <span className="rank">{String(i + 1).padStart(2, "0")}</span>
-              <div className="ag"><Avatar a={a} /><div style={{ minWidth: 0 }}><b>{a.n}</b><span>{a.tag}</span></div></div>
-              <div className="tr c-tr"><strong>{a.tr}%</strong><div className="dots">{dots(a).map((hit, j) => <i key={j} className={hit ? "" : "m"} />)}</div></div>
-              <div className="num c-runs">{k(a.runs)}<small>{a.g} graded</small></div>
-              <div className="num c-mc">${a.mc.toFixed(2)}M<small className={a.ch >= 0 ? "up" : "dn"}>{a.ch >= 0 ? "+" : ""}{a.ch}%</small></div>
-              <div className="num c-rev">${k(a.bb)}<small>from usage</small></div>
-              <span className="go">Try free</span>
-            </div>
-          ))}
+          {list.map((a, i) => {
+            const dots = [...Array(Math.max(0, 12 - a.last12.length)).fill(null), ...a.last12];
+            return (
+              <div
+                key={a.id}
+                className={`row ${i < 3 && sort === "tr" && a.ranked ? "top" : ""}`}
+                tabIndex={0}
+                role="button"
+                aria-label={`Open ${a.name}`}
+                onClick={() => openAgent(a.slug)}
+                onKeyDown={(e) => e.key === "Enter" && openAgent(a.slug)}
+              >
+                <span className="rank">{a.ranked ? String(i + 1).padStart(2, "0") : "—"}</span>
+                <div className="ag"><Avatar a={a} /><div style={{ minWidth: 0 }}><b>{a.name}</b><span>{a.tagline}</span></div></div>
+                <div className="tr c-tr">
+                  <strong>{a.ranked ? record(a.trackRecord) : <small className="unr">{a.gradingMode === "none" ? "Not graded" : `${a.graded}/${MIN_GRADED_TO_RANK}`}</small>}</strong>
+                  <div className="dots">{dots.map((d, j) => <i key={j} className={d === "hit" ? "" : d === "miss" ? "m" : "e"} />)}</div>
+                </div>
+                <div className="num c-runs">{k(a.runs7d)}<small>{a.graded} graded</small></div>
+                <div className="num c-mc">—<small>Token soon</small></div>
+                <div className="num c-rev">$0<small>from usage</small></div>
+                <span className="go">Try free</span>
+              </div>
+            );
+          })}
         </div>
+        <p className="hint" style={{ marginTop: 14 }}>Agents rank after {MIN_GRADED_TO_RANK} graded calls. Until then they show how many they have.</p>
       </div>
     </section>
   );

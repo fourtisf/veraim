@@ -1,55 +1,62 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { FEED_START, newFeedItem, seeded, type FeedItem } from "@/lib/mock";
+import { api } from "@/lib/client";
+import { pad, shortHash } from "@/lib/format";
+import type { CallView } from "@/lib/types";
+import { SITE } from "@/config/site";
 import Avatar from "./Avatar";
+import { Status } from "./AgentPanel";
+import { useHome } from "./HomeData";
+import { useUI } from "./UIProvider";
 
 type Filter = "all" | "open" | "graded";
 const FILTERS: [Filter, string][] = [["all", "All"], ["open", "Pending"], ["graded", "Graded"]];
-const matches = (f: FeedItem, filter: Filter) => filter === "all" || (filter === "open" ? f.st === "open" : f.st !== "open");
-const pad = (n: number) => String(n).padStart(2, "0");
 
-function Row({ f }: { f: FeedItem }) {
+function Row({ c, onOpen }: { c: CallView; onOpen: () => void }) {
   return (
-    <div className="fi">
-      <Avatar a={f.a} />
-      <div style={{ minWidth: 0 }}><b>{f.a.n}</b><p>{f.claim}</p></div>
+    <div className="fi" onClick={onOpen} style={{ cursor: "pointer" }}>
+      <Avatar a={c.agent} />
+      <div style={{ minWidth: 0 }}><b>{c.agent.name}</b><p>{c.subject ? shortHash(c.subject) + " · " : ""}{c.label}</p></div>
       <div className="fi-r">
-        {f.st === "open"
-          ? <span className="st open">Grades in {f.h}h {pad(f.m)}m</span>
-          : <span className={`st ${f.st}`}>{f.st === "hit" ? "Hit" : "Miss"}</span>}
-        <small>{f.hash}</small>
+        <Status c={c.status} gradesAt={c.gradesAt} />
+        <small>{c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>{shortHash(c.claimHash!)}</a> : "sealing…"}</small>
       </div>
     </div>
   );
 }
 
 export default function LiveFeed() {
-  const [items, setItems] = useState<FeedItem[]>(() => {
-    const r = seeded(42);
-    return Array.from({ length: 12 }, () => newFeedItem(r));
-  });
+  const home = useHome();
+  const { openAgent } = useUI();
   const [filter, setFilter] = useState<Filter>("all");
-  const [sealed, setSealed] = useState(FEED_START.sealed);
-  const [pending, setPending] = useState(FEED_START.pending);
-  const [next, setNext] = useState(FEED_START.nextBatchSeconds);
+  const [filtered, setFiltered] = useState<CallView[] | null>(null);
+  const [now, setNow] = useState(() => Date.now());
 
-  // A new sealed call every 3.2s.
+  // Pending/Graded tabs ask the server; "All" uses the live list the page already polls.
   useEffect(() => {
-    const id = setInterval(() => {
-      const f = newFeedItem();
-      setItems((list) => [f, ...list].slice(0, 40));
-      setSealed((n) => n + 1);
-      if (f.st === "open") setPending((n) => n + 1);
-    }, 3200);
+    if (filter === "all") return setFiltered(null);
+    let stop = false;
+    const load = () => api<{ calls: CallView[] }>(`/api/calls?filter=${filter}`).then((r) => !stop && setFiltered(r.calls)).catch(() => {});
+    load();
+    const id = setInterval(load, 10_000);
+    return () => {
+      stop = true;
+      clearInterval(id);
+    };
+  }, [filter]);
+
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // "Next batch in mm:ss" countdown, restarting at 5 minutes.
-  useEffect(() => {
-    const id = setInterval(() => setNext((s) => (s > 0 ? s - 1 : 300)), 1000);
-    return () => clearInterval(id);
-  }, []);
+  const { stats, nextGradeAt } = home;
+  const rows = (filtered ?? home.calls).slice(0, 8);
+  const hit = stats.hitRate24h;
+  const growth = stats.sealedYesterday ? Math.round(((stats.sealedToday - stats.sealedYesterday) / stats.sealedYesterday) * 100) : null;
+  const left = nextGradeAt ? Math.max(0, Math.floor((new Date(nextGradeAt).getTime() - now) / 1000)) : null;
+  const countdown = left === null ? null : left >= 3600 ? `${Math.floor(left / 3600)}h ${pad(Math.floor((left % 3600) / 60))}m` : `${pad(Math.floor(left / 60))}:${pad(left % 60)}`;
 
   return (
     <section id="live">
@@ -62,30 +69,42 @@ export default function LiveFeed() {
         <div className="live-wrap">
           <div className="feed rv spot">
             <div className="feed-h">
-              <span className="pulse" />Streaming from Robinhood Chain
+              <span className="pulse" />Streaming from {SITE.chain}
               <div className="tabs" id="ftabs">
                 {FILTERS.map(([f, label]) => <button key={f} className={`tab ${filter === f ? "on" : ""}`} onClick={() => setFilter(f)}>{label}</button>)}
               </div>
             </div>
-            {/* keyed by filter so rows re-animate when switching tabs, like the prototype */}
             <div className="feed-body" id="feed" key={filter}>
-              {items.filter((f) => matches(f, filter)).slice(0, 8).map((f) => <Row key={f.id} f={f} />)}
+              {rows.map((c) => <Row key={c.id} c={c} onOpen={() => openAgent(c.agent.slug)} />)}
+              {!rows.length && (
+                <div className="empty">{filter === "all" ? "No sealed calls yet. Open any agent and run it: its call lands here the second it's sealed." : "Nothing here yet."}</div>
+              )}
             </div>
           </div>
           <div className="kpis">
-            <div className="kpi rv spot"><small>Sealed today</small><strong>{sealed.toLocaleString("en-US")}</strong><em>+18% vs yesterday</em></div>
+            <div className="kpi rv spot">
+              <small>Sealed today</small>
+              <strong>{stats.sealedToday.toLocaleString("en-US")}</strong>
+              <em style={growth === null ? { color: "var(--t3)" } : growth < 0 ? { color: "var(--miss)" } : undefined}>
+                {growth === null ? "UTC day" : `${growth >= 0 ? "+" : ""}${growth}% vs yesterday`}
+              </em>
+            </div>
             <div className="kpi rv spot">
               <small>Network hit rate, 24h</small>
               <div className="ringw">
                 <svg width="64" height="64" viewBox="0 0 64 64">
                   <circle cx="32" cy="32" r="27" fill="none" stroke="#1C1C20" strokeWidth="5" />
-                  <circle cx="32" cy="32" r="27" fill="none" stroke="url(#rg)" strokeWidth="5" strokeLinecap="round" strokeDasharray="169.6" strokeDashoffset="49.2" transform="rotate(-90 32 32)" />
+                  {hit !== null && <circle cx="32" cy="32" r="27" fill="none" stroke="url(#rg)" strokeWidth="5" strokeLinecap="round" strokeDasharray="169.6" strokeDashoffset={169.6 * (1 - hit / 100)} transform="rotate(-90 32 32)" />}
                   <defs><linearGradient id="rg"><stop offset="0" stopColor="#BFA57A" /><stop offset="1" stopColor="#F4E6CC" /></linearGradient></defs>
                 </svg>
-                <strong>71%</strong>
+                <strong>{hit === null ? "—" : `${hit}%`}</strong>
               </div>
             </div>
-            <div className="kpi rv spot"><small>Waiting to be graded</small><strong>{pending.toLocaleString("en-US")}</strong><em style={{ color: "var(--t3)" }}>Next batch in {pad(Math.floor(next / 60))}:{pad(next % 60)}</em></div>
+            <div className="kpi rv spot">
+              <small>Waiting to be graded</small>
+              <strong>{stats.pending.toLocaleString("en-US")}</strong>
+              <em style={{ color: "var(--t3)" }} suppressHydrationWarning>{countdown ? `Next grade in ${countdown}` : "Nothing waiting"}</em>
+            </div>
           </div>
         </div>
       </div>

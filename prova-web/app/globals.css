@@ -2,7 +2,7 @@
 :root{
   --bg:#000;--s1:#070708;--s2:#0D0D0F;--s3:#141417;--s4:#1C1C20;
   --b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);--b3:rgba(255,255,255,.16);
-  --t1:#EDEDEF;--t2:#A0A0A8;--t3:#62626B;
+  --t1:#EDEDEF;--t2:#A0A0A8;--t3:#7E7E88;
   --gold:#E2CDA6;--gold2:#BFA57A;--goldglow:rgba(226,205,166,.16);
   --hit:#4ADE9A;--miss:#F2667E;--amber:#F0B85A;
   --f:var(--font-geist-sans),'Geist','Inter','Helvetica Neue',Arial,sans-serif;--m:var(--font-geist-mono),'Geist Mono',ui-monospace,Menlo,monospace;
@@ -511,3 +511,40 @@ input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radiu
 .wl .hint{text-align:center;margin-top:4px}
 .wl .ok{display:flex;gap:12px;align-items:center;margin-top:22px;padding:14px 16px;border-radius:12px;background:rgba(74,222,154,.06);box-shadow:inset 0 0 0 1px rgba(74,222,154,.25);font-size:14px;color:var(--t1)}
 .wl .ok .check svg path{animation-delay:0s}
+
+/* ===== core product ===== */
+.dots i.e{background:var(--s4);opacity:1}
+.unr{font-size:13px;color:var(--t3);font-weight:400;letter-spacing:0}
+.st{color:var(--t2);background:rgba(255,255,255,.06)}
+.claim a,.rec small a,.fi-r small a,.prose a{color:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:3px}
+.claim a:hover,.rec small a:hover,.fi-r small a:hover{color:var(--t1)}
+.feat .soon{font-style:normal;font-size:10.5px;font-family:var(--m);color:var(--gold);margin-left:8px;padding:1px 6px;border-radius:5px;background:rgba(226,205,166,.08);box-shadow:inset 0 0 0 1px rgba(226,205,166,.25);vertical-align:1px;font-weight:400}
+.hp{position:absolute!important;left:-9999px!important;width:1px;height:1px;opacity:0}
+.cta-wl{display:flex;gap:8px;max-width:440px;margin:28px auto 0;position:relative}
+.cta-wl .t{flex:1 1 auto;min-width:0;background:rgba(0,0,0,.4)}
+.cta-wl .ok-line{margin:0 auto;color:var(--t1);font-size:14px}
+.foot-links{display:flex;gap:22px;flex-wrap:wrap}
+.foot-note{flex-basis:100%;font-size:12px;color:var(--t3);margin-top:4px}
+.btn:disabled{opacity:.6;cursor:default}
+
+/* sub pages: agent page, account, admin, legal */
+.page{padding:120px 0 0;min-height:70vh}
+.page .panel{max-width:760px}
+.page-head{margin-bottom:28px}
+.page-head h1{font-size:clamp(34px,5vw,52px);text-align:left;margin:10px 0 0;max-width:none}
+.page-head p{color:var(--t2);margin-top:12px;max-width:620px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{text-align:left;font-weight:400;color:var(--t3);font-size:12px;padding:0 10px 10px;border-bottom:1px solid var(--b1)}
+.tbl td{padding:11px 10px;border-bottom:1px solid var(--b1);vertical-align:middle}
+.tbl code,.mono{font-family:var(--m);font-size:12.5px}
+.keybox{margin-top:14px;padding:14px;border-radius:12px;background:rgba(74,222,154,.06);box-shadow:inset 0 0 0 1px rgba(74,222,154,.25);font-family:var(--m);font-size:13px;word-break:break-all}
+.prose{max-width:760px;color:var(--t2);font-size:15.5px;line-height:1.75}
+.prose h2{font-size:22px;letter-spacing:-.02em;margin:36px 0 10px;background:none;color:var(--t1);-webkit-background-clip:initial;background-clip:initial}
+.prose p,.prose ul{margin-top:12px}
+.prose ul{padding-left:20px}
+.prose strong{color:var(--t1);font-weight:500}
+.prose code{font-family:var(--m);font-size:13px;color:var(--t1)}
+@media (max-width:980px){.grid2{grid-template-columns:1fr}}
+@media (max-width:560px){.cta-wl{flex-direction:column}.page{padding-top:96px}}
+.hint a,.verdict a{text-decoration:underline;text-underline-offset:3px}

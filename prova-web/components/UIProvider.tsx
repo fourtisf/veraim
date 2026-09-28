@@ -1,21 +1,29 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { api, ApiError, NoWalletError, signInWithWallet } from "@/lib/client";
+import type { Me } from "@/lib/types";
 import AgentDrawer from "./AgentDrawer";
 import CommandPalette from "./CommandPalette";
 import Toast from "./Toast";
 import WaitlistModal, { type WaitlistSource } from "./WaitlistModal";
 
-// Shared page state: toast, agent drawer, ⌘K palette, waitlist modal, watchlist and alerts.
+// Shared state for every page: signed-in wallet, toast, agent drawer, ⌘K palette, waitlist modal.
 type UI = {
+  me: Me;
+  meLoaded: boolean;
+  refreshMe: () => Promise<void>;
+  connect: () => Promise<boolean>;
+  requireWallet: () => Promise<boolean>;
+  signOut: () => Promise<void>;
   toast: (msg: string) => void;
-  openAgent: (id: string) => void;
+  openAgent: (slug: string) => void;
   openPalette: () => void;
   openWaitlist: (source: WaitlistSource, agentName?: string) => void;
-  watch: Set<string>;
-  alerts: Set<string>;
-  toggleWatch: (id: string) => boolean;
-  toggleAlert: (id: string) => boolean;
+  toggleWatch: (slug: string) => Promise<void>;
+  toggleAlert: (slug: string) => Promise<void>;
+  dataVersion: number; // bumps when runs/launches change data, so lists refetch
+  bumpData: () => void;
 };
 
 const Ctx = createContext<UI | null>(null);
@@ -26,49 +34,96 @@ export function useUI() {
   return ui;
 }
 
-const toggled = (set: Set<string>, id: string) => {
-  const next = new Set(set);
-  next.has(id) ? next.delete(id) : next.add(id);
-  return next;
-};
-
 export default function UIProvider({ children }: { children: ReactNode }) {
   const [toastMsg, setToastMsg] = useState("");
   const [toastOn, setToastOn] = useState(false);
   const toastTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  const [agentId, setAgentId] = useState<string | null>(null);
+  const [me, setMe] = useState<Me>(null);
+  const [meLoaded, setMeLoaded] = useState(false);
+  const [agentSlug, setAgentSlug] = useState<string | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openCount, setOpenCount] = useState(0);
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [waitlist, setWaitlist] = useState<{ source: WaitlistSource; agentName?: string } | null>(null);
-  const [watch, setWatch] = useState<Set<string>>(new Set());
-  const [alerts, setAlerts] = useState<Set<string>>(new Set());
+  const [dataVersion, setDataVersion] = useState(0);
+  const connecting = useRef<Promise<boolean> | null>(null);
 
   const toast = useCallback((msg: string) => {
     setToastMsg(msg);
     setToastOn(true);
     clearTimeout(toastTimer.current);
-    toastTimer.current = setTimeout(() => setToastOn(false), 2400);
+    toastTimer.current = setTimeout(() => setToastOn(false), 3200);
   }, []);
 
-  const openAgent = useCallback((id: string) => {
-    setAgentId(id);
-    setOpenCount((c) => c + 1); // fresh drawer state (tab, chat, free runs) on every open
+  const refreshMe = useCallback(async () => {
+    try {
+      setMe((await api<{ me: Me }>("/api/me")).me);
+    } catch {}
+    setMeLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    refreshMe();
+  }, [refreshMe]);
+
+  const connect = useCallback(() => {
+    connecting.current ??= (async () => {
+      try {
+        await signInWithWallet();
+        await refreshMe();
+        toast("Wallet connected");
+        return true;
+      } catch (err) {
+        if (err instanceof NoWalletError) setWaitlist({ source: "wallet" });
+        else if ((err as { code?: number }).code === 4001) toast("Signature cancelled");
+        else toast(err instanceof Error ? err.message : "Couldn't connect your wallet");
+        return false;
+      } finally {
+        connecting.current = null;
+      }
+    })();
+    return connecting.current;
+  }, [refreshMe, toast]);
+
+  const requireWallet = useCallback(async () => !!me || connect(), [me, connect]);
+
+  const signOut = useCallback(async () => {
+    await api("/api/auth/logout", { body: {} }).catch(() => {});
+    setMe(null);
+    toast("Signed out");
+  }, [toast]);
+
+  const openAgent = useCallback((slug: string) => {
+    setAgentSlug(slug);
+    setOpenCount((c) => c + 1); // fresh drawer state (tab, chat) on every open
     setDrawerOpen(true);
   }, []);
 
-  const toggleWatch = useCallback((id: string) => {
-    const on = !watch.has(id);
-    setWatch((s) => toggled(s, id));
-    return on;
-  }, [watch]);
+  const toggleWatch = useCallback(async (slug: string) => {
+    if (!(await requireWallet())) return;
+    try {
+      const { on } = await api<{ on: boolean }>(`/api/agents/${slug}/watch`, { body: {} });
+      setMe((m) => m && { ...m, watch: on ? [...m.watch, slug] : m.watch.filter((s) => s !== slug) });
+      toast(on ? "Added to watchlist" : "Removed from watchlist");
+    } catch (err) {
+      toast((err as Error).message);
+    }
+  }, [requireWallet, toast]);
 
-  const toggleAlert = useCallback((id: string) => {
-    const on = !alerts.has(id);
-    setAlerts((s) => toggled(s, id));
-    return on;
-  }, [alerts]);
+  const toggleAlert = useCallback(async (slug: string) => {
+    if (!(await requireWallet())) return;
+    try {
+      const { on, linkUrl } = await api<{ on: boolean; linkUrl?: string | null }>(`/api/agents/${slug}/alert`, { body: {} });
+      setMe((m) => m && { ...m, alerts: on ? [...m.alerts, slug] : m.alerts.filter((s) => s !== slug) });
+      if (on && linkUrl) {
+        window.open(linkUrl, "_blank", "noopener");
+        toast("Alerts on. Press Start in Telegram to finish linking");
+      } else toast(on ? "Alerts on. Every new call goes to Telegram" : "Alerts off");
+    } catch (err) {
+      toast(err instanceof ApiError ? err.message : "Couldn't update alerts");
+    }
+  }, [requireWallet, toast]);
 
   // ⌘K / Ctrl+K toggles the palette; Escape closes the drawer and modals.
   useEffect(() => {
@@ -90,22 +145,28 @@ export default function UIProvider({ children }: { children: ReactNode }) {
 
   const ui = useMemo<UI>(
     () => ({
+      me,
+      meLoaded,
+      refreshMe,
+      connect,
+      requireWallet,
+      signOut,
       toast,
       openAgent,
       openPalette: () => setPaletteOpen(true),
       openWaitlist: (source, agentName) => setWaitlist({ source, agentName }),
-      watch,
-      alerts,
       toggleWatch,
       toggleAlert,
+      dataVersion,
+      bumpData: () => setDataVersion((v) => v + 1),
     }),
-    [toast, openAgent, watch, alerts, toggleWatch, toggleAlert]
+    [me, meLoaded, refreshMe, connect, requireWallet, signOut, toast, openAgent, toggleWatch, toggleAlert, dataVersion]
   );
 
   return (
     <Ctx.Provider value={ui}>
       {children}
-      <AgentDrawer session={openCount} agentId={agentId} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <AgentDrawer session={openCount} slug={agentSlug} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <Toast msg={toastMsg} on={toastOn} />
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
       {waitlist && <WaitlistModal {...waitlist} onClose={() => setWaitlist(null)} />}

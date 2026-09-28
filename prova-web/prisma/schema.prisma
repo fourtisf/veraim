@@ -1,4 +1,4 @@
-// Database schema. Phase 1 only needs the waitlist.
+// Database schema for Prova.
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,10 +8,135 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// A wallet that signed in with "Connect wallet".
+model User {
+  id              String   @id @default(cuid())
+  wallet          String   @unique // lowercase 0x address
+  createdAt       DateTime @default(now())
+  telegramChatId  String?
+  telegramLinkCode String? @unique // one-time code for t.me/<bot>?start=<code>
+
+  runs    Run[]
+  watches Watch[]
+  alerts  Alert[]
+  agents  Agent[]
+  apiKeys ApiKey[]
+}
+
+model Agent {
+  id             String   @id @default(cuid())
+  seq            Int      @unique @default(autoincrement()) // numeric id used onchain
+  slug           String   @unique
+  name           String
+  tagline        String
+  category       String
+  ticker         String
+  model          String   // key from config/models.ts
+  instructions   String
+  tools          String[]
+  gradingMode    String   // "verdict24h" | "price7d" | "none"
+  pricePerRunUsd Float    @default(0.05)
+  openingBuy     String?
+  tokenAddress   String?  // set once the agent token is launched
+  official       Boolean  @default(false) // built by Prova
+  hidden         Boolean  @default(false) // hidden by an admin
+  creatorId      String?
+  creator        User?    @relation(fields: [creatorId], references: [id])
+  createdAt      DateTime @default(now())
+
+  calls   Call[]
+  runs    Run[]
+  watches Watch[]
+  alerts  Alert[]
+}
+
+// One answer from an agent. If it contains a gradable claim it is hashed,
+// sealed onchain, and graded after gradesAt.
+model Call {
+  id          String    @id @default(cuid())
+  agentId     String
+  agent       Agent     @relation(fields: [agentId], references: [id])
+  input       String
+  output      String
+  claimJson   String?   // canonical JSON of the claim that was hashed
+  claimLabel  String?   // short human label, e.g. "BUNDLED" or "$ORBIO LONG · 7d"
+  subject     String?   // token address the claim is about
+  entryJson   String?   // price/liquidity snapshot at call time
+  claimHash   String?   @unique
+  sealTx      String?
+  sealedAt    DateTime?
+  gradesAt    DateTime?
+  status      String    @default("ungraded") // ungraded | open | hit | miss | void
+  weight      Float     @default(1) // thin-liquidity calls count for less
+  gradedAt    DateTime?
+  outcomeJson String?
+  gradeTx     String?
+  alertedAt   DateTime?
+  createdAt   DateTime  @default(now())
+
+  run Run?
+
+  @@index([agentId, createdAt])
+  @@index([status, gradesAt])
+  @@index([createdAt])
+}
+
+model Run {
+  id        String   @id @default(cuid())
+  agentId   String
+  agent     Agent    @relation(fields: [agentId], references: [id])
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  paid      Boolean  @default(false)
+  amountUsd Float    @default(0)
+  viaApi    Boolean  @default(false)
+  callId    String?  @unique
+  call      Call?    @relation(fields: [callId], references: [id])
+  createdAt DateTime @default(now())
+
+  @@index([agentId, userId])
+  @@index([agentId, createdAt])
+}
+
+model Watch {
+  userId  String
+  agentId String
+  user    User   @relation(fields: [userId], references: [id])
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  @@id([userId, agentId])
+}
+
+model Alert {
+  userId  String
+  agentId String
+  user    User   @relation(fields: [userId], references: [id])
+  agent   Agent  @relation(fields: [agentId], references: [id])
+
+  @@id([userId, agentId])
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  prefix     String    // first characters, shown in the UI
+  hash       String    @unique // sha256 of the full key
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revokedAt  DateTime?
+}
+
+// Worker bookkeeping (e.g. Telegram update offset, last run times).
+model KeyValue {
+  key   String @id
+  value String
+}
+
 model Waitlist {
   id            String   @id @default(cuid())
   emailOrWallet String   @unique
-  source        String?  // "wallet" (Connect wallet button) or "launch" (builder's Launch agent)
+  source        String?  // "wallet", "launch" or "cta"
   createdAt     DateTime @default(now())
 
   @@map("waitlist")

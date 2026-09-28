@@ -1,7 +1,12 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { SITE_URL } from "@/config/site";
+import Effects from "@/components/Effects";
+import Footer from "@/components/Footer";
+import Nav from "@/components/Nav";
+import UIProvider from "@/components/UIProvider";
 import "./globals.css";
 
 const title = "Prova — AI agents ranked by proof";
@@ -23,6 +28,10 @@ export const viewport: Viewport = {
   themeColor: "#000000",
 };
 
+// Optional, cookie-free analytics (self-hosted Umami). Loads only when both are set in .env.
+const UMAMI_SRC = process.env.NEXT_PUBLIC_UMAMI_SRC;
+const UMAMI_ID = process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID;
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${GeistSans.variable} ${GeistMono.variable}`}>
@@ -30,7 +39,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <noscript>
           <style>{`.rv{opacity:1!important;transform:none!important;filter:none!important}`}</style>
         </noscript>
-        {children}
+        <UIProvider>
+          <Nav />
+          {children}
+          <Footer />
+          <Effects />
+        </UIProvider>
+        {UMAMI_SRC && UMAMI_ID && <Script src={UMAMI_SRC} data-website-id={UMAMI_ID} strategy="afterInteractive" />}
       </body>
     </html>
   );

@@ -1,21 +1,38 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AGENTS, PAGES } from "@/lib/mock";
-import { scrollToSection } from "@/lib/scroll";
+import { api } from "@/lib/client";
+import { record } from "@/lib/format";
+import type { AgentView } from "@/lib/types";
 import Avatar from "./Avatar";
 import { SearchIcon } from "./icons";
 import { useUI } from "./UIProvider";
 
+// Command palette "Go to" entries: [label, link, icon]
+const PAGES: [string, string, string][] = [
+  ["Leaderboard", "/#agents", "↗"],
+  ["Live calls", "/#live", "●"],
+  ["Compare agents", "/#compare", "⇄"],
+  ["Earnings calculator", "/#earn", "$"],
+  ["Build an agent", "/#build", "+"],
+  ["API docs", "/#api", "{}"],
+  ["My account & API keys", "/account", "◎"],
+  ["Methodology", "/methodology", "✓"],
+  ["FAQ", "/#faq", "?"],
+];
+
+let cached: AgentView[] = [];
+
 export default function CommandPalette({ onClose }: { onClose: () => void }) {
   const { openAgent } = useUI();
+  const [all, setAll] = useState<AgentView[]>(cached);
   const [q, setQ] = useState("");
   const [sel, setSel] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
   const query = q.toLowerCase().trim();
-  const agents = AGENTS.filter((a) => !query || (a.n + a.t + a.cat + a.tag).toLowerCase().includes(query));
+  const agents = all.filter((a) => !query || (a.name + a.ticker + a.category + a.tagline).toLowerCase().includes(query));
   const pages = PAGES.filter((p) => !query || p[0].toLowerCase().includes(query));
   const total = agents.length + pages.length;
   const cur = Math.min(sel, Math.max(0, total - 1));
@@ -23,9 +40,16 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
   const go = (i: number) => {
     if (i >= total) return;
     onClose();
-    if (i < agents.length) openAgent(agents[i].id);
-    else scrollToSection(pages[i - agents.length][1]);
+    if (i < agents.length) return openAgent(agents[i].slug);
+    const href = pages[i - agents.length][1];
+    const target = href.startsWith("/#") && window.location.pathname === "/" ? document.querySelector(href.slice(1)) : null;
+    if (target) target.scrollIntoView({ behavior: "smooth" });
+    else window.location.href = href;
   };
+
+  useEffect(() => {
+    api<{ agents: AgentView[] }>("/api/agents").then((r) => { cached = r.agents; setAll(r.agents); }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     const t = setTimeout(() => inputRef.current?.focus(), 20);
@@ -67,8 +91,8 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
           {agents.map((a, i) => (
             <div key={a.id} className={`ck-i ${i === cur ? "sel" : ""}`} onMouseEnter={() => setSel(i)} onClick={() => go(i)}>
               <Avatar a={a} />
-              <b>{a.n}</b>${a.t}
-              <span className="r">{a.tr}%</span>
+              <b>{a.name}</b>${a.ticker}
+              <span className="r">{a.ranked ? record(a.trackRecord) : `${a.graded} graded`}</span>
             </div>
           ))}
           {pages.length > 0 && <div className="ck-g">Go to</div>}

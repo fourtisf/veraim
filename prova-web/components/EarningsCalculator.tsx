@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, type CSSProperties } from "react";
-import { money } from "@/lib/mock";
+import { money } from "@/lib/format";
 
 const PRICES = ["0.02", "0.05", "0.10", "0.25"];
 

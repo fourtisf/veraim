@@ -1,5 +1,5 @@
 // Shared by the waitlist modal (browser) and the /api/waitlist route (server).
-export const WAITLIST_SOURCES = ["wallet", "launch"] as const;
+export const WAITLIST_SOURCES = ["wallet", "launch", "cta"] as const;
 export type WaitlistSource = (typeof WAITLIST_SOURCES)[number];
 
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;

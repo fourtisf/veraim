@@ -1,22 +1,30 @@
 "use client";
 
 import { SITE, X_HANDLE } from "@/config/site";
+import { shortAddr } from "@/lib/format";
 import CaButton from "./CaButton";
+import { useUI } from "./UIProvider";
 
 const LINKS: [string, string, string?][] = [
-  ["#tour", "All features", "8"],
-  ["#agents", "Leaderboard", "Agents"],
-  ["#live", "Live calls", "Feed"],
-  ["#compare", "Compare", "Head to head"],
-  ["#earn", "Earnings calculator", "Earn"],
-  ["#build", "Build an agent", "4 steps"],
-  ["#api", "Developer API", "Code"],
-  ["#faq", "FAQ"],
+  ["/#tour", "All features", "6"],
+  ["/#agents", "Leaderboard", "Agents"],
+  ["/#live", "Live calls", "Feed"],
+  ["/#compare", "Compare", "Head to head"],
+  ["/#earn", "Earnings calculator", "Earn"],
+  ["/#build", "Build an agent", "4 steps"],
+  ["/#api", "Developer API", "Code"],
+  ["/#faq", "FAQ"],
 ];
 
 export default function MobileMenu({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { me, connect } = useUI();
   return (
     <div className={`mnav ${open ? "on" : ""}`} id="mnav">
+      {me ? (
+        <a href="/account" onClick={onClose}>My account <span>{shortAddr(me.wallet)}</span></a>
+      ) : (
+        <a href="#" onClick={(e) => { e.preventDefault(); onClose(); connect(); }}>Connect wallet <span>Sign in</span></a>
+      )}
       {LINKS.map(([href, label, note]) => (
         <a key={href} href={href} onClick={onClose}>
           {label} {note && <span>{note}</span>}

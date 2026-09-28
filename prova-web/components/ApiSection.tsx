@@ -3,13 +3,50 @@
 import { useEffect, useRef, useState } from "react";
 import { copyText } from "@/lib/clipboard";
 import { highlight } from "@/lib/highlight";
-import { CODE, CODE_LANGS } from "@/lib/mock";
+import { SITE_URL } from "@/config/site";
 
-const FEATURES = [
-  ["REST API", "One endpoint per agent"],
-  ["MCP server", "Use agents inside Claude and IDEs"],
-  ["Signed webhooks", "New calls pushed to you"],
-  ["JS and Python SDKs", "Typed, tiny, ready"],
+const BASE = `${SITE_URL}/api/v1`;
+
+const CODE: Record<string, string> = {
+  curl: `curl ${BASE}/agents/bundle-hound/run \\
+  -H "Authorization: Bearer $PROVA_KEY" \\
+  -H "Content-Type: application/json" \\
+  -d '{"input": "Is 0x7a3...e91f bundled?"}'
+
+# → { "verdict": "BUNDLED", "seal": "0x9c2…a41",
+#     "status": "open", "grades_at": "…" }`,
+  js: `const res = await fetch("${BASE}/agents/bundle-hound/run", {
+  method: "POST",
+  headers: {
+    Authorization: \`Bearer \${process.env.PROVA_KEY}\`,
+    "Content-Type": "application/json",
+  },
+  body: JSON.stringify({ input: "Is 0x7a3...e91f bundled?" }),
+});
+
+const { verdict, seal } = await res.json();
+console.log(verdict, seal); // BUNDLED 0x9c2…a41`,
+  py: `import os, requests
+
+res = requests.post(
+    "${BASE}/agents/bundle-hound/run",
+    headers={"Authorization": f"Bearer {os.environ['PROVA_KEY']}"},
+    json={"input": "Is 0x7a3...e91f bundled?"},
+).json()
+print(res["verdict"], res["seal"])  # BUNDLED 0x9c2…a41`,
+  mcp: `# MCP server: coming soon.
+# Until then, any MCP client can call the REST API above.
+# Public, no key needed:
+curl ${BASE}/agents
+curl ${BASE}/agents/bundle-hound/calls`,
+};
+const LANGS: [string, string][] = [["curl", "cURL"], ["js", "JavaScript"], ["py", "Python"], ["mcp", "MCP"]];
+
+const FEATURES: [string, string, boolean][] = [
+  ["REST API", "One endpoint per agent", true],
+  ["Public records", "Every call, seal and grade", true],
+  ["MCP server", "Use agents inside Claude and IDEs", false],
+  ["Signed webhooks", "New calls pushed to you", false],
 ];
 
 export default function ApiSection() {
@@ -35,12 +72,15 @@ export default function ApiSection() {
             <p>Every public agent is an API. Call it from your bot, dashboard or trading tool, and get the seal back with every answer.</p>
           </div>
           <div className="feat rv">
-            {FEATURES.map(([b, s]) => <div className="spot" key={b}><b>{b}</b><span>{s}</span></div>)}
+            {FEATURES.map(([b, s, live]) => (
+              <div className="spot" key={b}><b>{b}{!live && <em className="soon">Soon</em>}</b><span>{s}</span></div>
+            ))}
           </div>
+          <p className="hint" style={{ marginTop: 16 }}><a href="/account" style={{ color: "var(--gold)" }}>Get an API key →</a> Connect your wallet to create one.</p>
         </div>
         <div className="code rv">
           <div className="code-h" id="langs">
-            {CODE_LANGS.map(([id, label]) => (
+            {LANGS.map(([id, label]) => (
               <button key={id} className={`lang ${lang === id ? "on" : ""}`} onClick={() => setLang(id)}>{label}</button>
             ))}
             <button className="cpy" onClick={copy}>{copied ? "Copied" : "Copy"}</button>

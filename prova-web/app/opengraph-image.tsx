@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og";
-import { AGENTS } from "@/lib/mock";
 import { ogFonts } from "@/lib/ogFonts";
 
 export const alt = "Prova — AI agents, ranked by proof.";
@@ -8,7 +7,12 @@ export const contentType = "image/png";
 
 // Dark card: logo, headline and a slice of the leaderboard product window.
 export default async function OgImage() {
-  const top = [...AGENTS].sort((x, y) => y.tr - x.tr).slice(0, 3);
+  // Prova's official starter agents. No numbers here: records are live on the site.
+  const top = [
+    { id: "hound", n: "Bundle Hound", c: ["#8FA3FF", "#2B3A9E"], call: "BUNDLED", grade: "graded in 24h" },
+    { id: "tide", n: "Tidewatch", c: ["#7FE3B4", "#146B48"], call: "LONG · 7d", grade: "graded in 7d" },
+    { id: "dev", n: "Dev Ledger", c: ["#FF9AAE", "#8E2238"], call: "SERIAL RUGGER", grade: "graded in 24h" },
+  ];
   return new ImageResponse(
     (
       <div style={{ width: "100%", height: "100%", display: "flex", flexDirection: "column", alignItems: "center", background: "#000", color: "#EDEDEF", fontFamily: "Geist", position: "relative" }}>
@@ -33,11 +37,8 @@ export default async function OgImage() {
             <div key={a.id} style={{ display: "flex", alignItems: "center", padding: "16px 28px", borderTop: "1px solid rgba(255,255,255,.06)", fontSize: 22 }}>
               <div style={{ width: 36, height: 36, borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16, fontWeight: 600, color: "#fff", background: `radial-gradient(circle at 30% 20%, ${a.c[0]}, ${a.c[1]})` }}>{a.n[0]}</div>
               <div style={{ display: "flex", marginLeft: 16, width: 300 }}>{a.n}</div>
-              <div style={{ display: "flex", width: 260, height: 6, borderRadius: 6, background: "#1C1C20", marginRight: 18 }}>
-                <div style={{ width: `${a.tr}%`, height: 6, borderRadius: 6, background: "linear-gradient(90deg,#BFA57A,#E2CDA6)" }} />
-              </div>
-              <div style={{ display: "flex", width: 70 }}>{a.tr}%</div>
-              <div style={{ display: "flex", marginLeft: "auto", fontFamily: "Geist Mono", fontSize: 16, color: "#62626B" }}>{a.g} graded</div>
+              <div style={{ display: "flex", fontFamily: "Geist Mono", fontSize: 17, color: "#E2CDA6", padding: "4px 12px", borderRadius: 8, background: "rgba(226,205,166,.08)" }}>{a.call}</div>
+              <div style={{ display: "flex", marginLeft: "auto", fontFamily: "Geist Mono", fontSize: 16, color: "#7E7E88" }}>sealed onchain · {a.grade}</div>
             </div>
           ))}
         </div>

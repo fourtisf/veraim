@@ -1,21 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { seeded, tickerItems } from "@/lib/mock";
+import { shortHash } from "@/lib/format";
 import Avatar from "./Avatar";
+import { useHome } from "./HomeData";
 
-// LIVE marquee. The list is rendered twice so the loop is seamless.
+// LIVE marquee of the latest sealed calls. The list is rendered twice so the loop is seamless.
 export default function Ticker() {
-  const [items] = useState(() => tickerItems(seeded(7)));
+  const { calls } = useHome();
+  const items = calls.slice(0, 14);
   const row = (copy: number) =>
-    items.map((it) => (
-      <span className="tk-item" key={`${copy}-${it.id}`} aria-hidden={copy === 1 || undefined}>
-        <Avatar a={it.a} style={{ width: 20, height: 20, fontSize: 9, borderRadius: 6 }} />
-        <b>{it.a.n}</b>
-        {it.subject} · {it.verdict}
-        <code>sealed {it.hash}</code>
-      </span>
-    ));
+    items.length ? (
+      items.map((c) => (
+        <span className="tk-item" key={`${copy}-${c.id}`} aria-hidden={copy === 1 || undefined}>
+          <Avatar a={c.agent} style={{ width: 20, height: 20, fontSize: 9, borderRadius: 6 }} />
+          <b>{c.agent.name}</b>
+          {c.subject ? shortHash(c.subject) : ""} · {c.label}
+          <code>{c.sealTx ? "sealed" : "sealing"} {c.claimHash ? shortHash(c.claimHash) : ""}</code>
+        </span>
+      ))
+    ) : (
+      [0, 1, 2, 3].map((i) => (
+        <span className="tk-item" key={`${copy}-${i}`} aria-hidden={copy === 1 || i > 0 || undefined}>
+          <b>No calls yet</b> Open any agent and run it free. Its call is sealed here in seconds.
+        </span>
+      ))
+    );
   return (
     <div className="ticker" aria-label="Live sealed calls">
       <div className="tk-label"><span className="pulse" />LIVE</div>

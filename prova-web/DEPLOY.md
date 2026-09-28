@@ -1,7 +1,6 @@
 # Deploying Prova to the Hostinger VPS
 
-This guide puts the Prova site live on your domain with HTTPS. Copy and paste each command in order.
-Lines that start with `#` are notes, so don't paste those.
+This guide puts Prova live on your domain with HTTPS: the website, the database, the worker that seals and grades calls, and the contract on Robinhood Chain. Copy and paste each command in order. Lines that start with `#` are notes, so don't paste those.
 
 Wherever you see `prova.live`, use your real domain instead.
 
@@ -10,12 +9,12 @@ Wherever you see `prova.live`, use your real domain instead.
 ## What you need first
 
 1. **SSH access to the VPS.** You'll need its IP address and the root (or sudo) password or key from the Hostinger panel.
-2. **The domain pointing at the VPS.** In your domain's DNS settings, add:
-   - an `A` record for `@` with the VPS IP address
-   - an `A` record for `www` with the same IP address
-
-   DNS changes can take anywhere from a few minutes to a few hours to reach everyone.
+2. **The domain pointing at the VPS.** In your domain's DNS settings, add an `A` record for `@` and one for `www`, both set to the VPS IP.
 3. **Access to the GitHub repository** (`fourtisf/prova`).
+4. **An Anthropic API key** from https://console.anthropic.com (Settings → API keys). This runs the official agents, which use Claude. Add a little credit.
+5. *(Optional)* **An OpenRouter API key** from https://openrouter.ai/keys, for agents built with GPT, Llama or DeepSeek.
+6. **A new wallet just for sealing.** Create a fresh wallet in MetaMask or Rabby (Add account → Create new) and export its private key. Don't reuse your main wallet: this key sits on the server. Send it about **0.01 ETH on Robinhood Chain** for gas. Sealing is batched, so this lasts a long time.
+7. **Your own wallet address** (the one you'll use on the site), so you can open the admin page.
 
 ---
 
@@ -30,8 +29,6 @@ ssh root@YOUR_VPS_IP
 The rest of this guide runs **on the VPS**.
 
 ## Step 2: Check the tools that are already installed
-
-Your other projects already run with PM2, Nginx and Certbot, so most of this should be in place. Check with:
 
 ```bash
 node -v        # needs v18.17 or newer (v20 recommended)
@@ -60,7 +57,7 @@ apt-get install -y postgresql
 
 ## Step 3: Create the database
 
-This creates a database called `prova` and a user called `prova`. Choose a strong password and use it in place of `CHANGE_ME` here and in Step 5.
+Choose a strong password and use it in place of `CHANGE_ME` here and in Step 5.
 
 ```bash
 sudo -u postgres psql -c "CREATE USER prova WITH PASSWORD 'CHANGE_ME';"
@@ -78,84 +75,152 @@ cd /var/www/prova/prova-web
 
 ## Step 5: Add the settings file
 
+First make a session secret and copy what it prints:
+
+```bash
+openssl rand -hex 32
+```
+
+Then create the settings file:
+
 ```bash
 cp .env.example .env
 nano .env
 ```
 
-In the editor:
+Fill in these lines. Every setting is explained in the file.
 
-- On the `DATABASE_URL` line, replace `CHANGE_ME` with the password you chose in Step 3.
-- Set `NEXT_PUBLIC_SITE_URL` to your domain, for example `https://prova.live`.
+| Setting | What to put |
+|---|---|
+| `DATABASE_URL` | Replace `CHANGE_ME` with your password from Step 3 |
+| `NEXT_PUBLIC_SITE_URL` | `https://prova.live` (your domain) |
+| `SESSION_SECRET` | The long code `openssl` just printed |
+| `ADMIN_WALLETS` | Your own wallet address |
+| `ANTHROPIC_API_KEY` | Your Anthropic key |
+| `OPENROUTER_API_KEY` | Your OpenRouter key (optional) |
+| `CHAIN` | `robinhood` |
+| `SEALER_PRIVATE_KEY` | The private key of the sealing wallet (starts with `0x`) |
 
-Save and exit with `Ctrl+O`, `Enter`, then `Ctrl+X`.
+Leave `SEAL_CONTRACT` empty for now. Save and exit with `Ctrl+O`, `Enter`, then `Ctrl+X`.
 
-## Step 6: Install, set up the database, build
+Then lock the file so only root can read it:
+
+```bash
+chmod 600 .env
+```
+
+## Step 6: Install and set up the database
 
 ```bash
 cd /var/www/prova/prova-web
 npm ci
 npx prisma migrate deploy
-npm run build
+npm run seed
 ```
 
-`npm ci` installs everything the build needs. Don't add `--omit=dev`, because the build tools are in the dev list.
-`prisma migrate deploy` creates the `waitlist` table.
-The build takes a minute or two.
+- `npm ci` installs everything the build needs. Don't add `--omit=dev`.
+- `prisma migrate deploy` creates the tables.
+- `npm run seed` adds Prova's four official agents: Bundle Hound, Tidewatch, Dev Ledger and Deepstack. They start with no calls; their records build up from real use.
 
-## Step 7: Start the site with PM2
+## Step 7: Put the seal contract on Robinhood Chain
+
+This deploys `ProvaSeal`, the public contract that stores every call's hash and result. You only do this once.
+
+```bash
+npm run contract:deploy
+```
+
+It prints `SEAL_CONTRACT=0x…`. Open `.env` again (`nano .env`), paste that address into `SEAL_CONTRACT`, then save.
+
+If it says the wallet has no ETH, send a little ETH on Robinhood Chain to the address it shows and try again.
+
+## Step 8: Build and start
 
 ```bash
 cd /var/www/prova/prova-web
+npm run build
 pm2 start ecosystem.config.js
 pm2 save
 ```
 
-The site now runs on port **3100** of the VPS. Check it's working:
+This starts two processes:
+
+- **`prova-web`**: the website, on port 3100.
+- **`prova-worker`**: seals new calls onchain, grades them when their time is up, and sends Telegram alerts.
+
+Check both say `online`:
 
 ```bash
+pm2 status
 curl -I http://127.0.0.1:3100
 # expect: HTTP/1.1 200 OK
+pm2 logs prova-worker --lines 5
+# expect: "Prova worker started. Sealing on (robinhood)."
 ```
 
 If another project already uses port 3100, change `3100` to a free port in both `ecosystem.config.js` and `deploy/nginx.conf`.
 
 If PM2 isn't set to start on reboot yet, run `pm2 startup`, then copy and run the command it prints.
 
-## Step 8: Connect the domain with Nginx
+## Step 9: Connect the domain with Nginx
 
 ```bash
 cp /var/www/prova/prova-web/deploy/nginx.conf /etc/nginx/sites-available/prova
 nano /etc/nginx/sites-available/prova
-# replace every "prova.live" with your domain, then save and exit (Ctrl+O, Enter, Ctrl+X)
+# replace "prova.live" with your domain on the server_name line, then save and exit
 
 ln -s /etc/nginx/sites-available/prova /etc/nginx/sites-enabled/prova
 nginx -t
 systemctl reload nginx
 ```
 
-`nginx -t` must say `syntax is ok` and `test is successful`. If it doesn't, fix the file before reloading.
+`nginx -t` must say `syntax is ok` and `test is successful`.
 
-Now open `http://prova.live` in a browser. You should see the site. It won't have the padlock yet.
-
-## Step 9: Turn on HTTPS
+## Step 10: Turn on HTTPS
 
 ```bash
 certbot --nginx -d prova.live -d www.prova.live
 ```
 
-When Certbot asks, enter your email and agree to the terms. If it asks about redirecting HTTP to HTTPS, choose **redirect**.
-Certbot renews the certificate automatically.
+When Certbot asks, enter your email and agree to the terms. If it asks about redirecting, choose **redirect**.
 
-Open `https://prova.live`. It should load with the padlock. Click the **CA** box: it should say "Copied".
+## Step 11: Check it works
+
+1. Open `https://prova.live`. It should load with the padlock.
+2. Click **Connect wallet** and sign the message. The button changes to your address.
+3. Open **Bundle Hound**, paste a real token address from Robinhood Chain, and press **Run**. After 20–40 seconds you get an answer, and it says "sealing onchain…".
+4. About a minute later, open the agent's **Receipts** tab. The call shows a "seal ↗" link to the explorer.
+5. Open `https://prova.live/admin`. The "Setup checks" box shows which features are on.
+
+---
+
+## Optional features
+
+### Telegram alerts
+
+1. In Telegram, message **@BotFather**, send `/newbot` and follow the steps. It gives you a token and a username like `ProvaAlertsBot`.
+2. Put them in `.env` as `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` (without the `@`).
+3. Restart: `pm2 restart all`
+
+Users then turn on the Telegram switch on any agent, press **Start** in the bot, and get every new call from that agent.
+
+### Waitlist confirmation emails
+
+Set `SMTP_URL` and `MAIL_FROM` in `.env` using your email provider's SMTP details, then run `pm2 restart all`.
+
+### X mentions tool
+
+Set `X_BEARER_TOKEN` (from the X developer portal) and run `pm2 restart all`. Without it, agents that use "X mentions" say that data isn't connected.
+
+### Analytics
+
+To see visitor numbers without cookies, run a self-hosted Umami (https://umami.is/docs). Put its script URL and website ID in `NEXT_PUBLIC_UMAMI_SRC` and `NEXT_PUBLIC_UMAMI_WEBSITE_ID`, then rebuild (see "Update the site").
 
 ---
 
 ## Everyday tasks
 
-### Change the X link, Telegram link or contract address
-
-All three are in one file:
+### Change the X link, Telegram link, contract address or launch date
 
 ```bash
 cd /var/www/prova/prova-web
@@ -166,12 +231,13 @@ nano config/site.ts
 export const SITE = {
   xUrl: "https://x.com/yourhandle",
   telegramUrl: "https://t.me/yourgroup",
-  contractAddress: "0x…full address…", // leave "" to show "Coming soon"
+  contractAddress: "0x…", // Prova token CA. Leave "" to show "Coming soon"
   chain: "Robinhood Chain",
+  launchDate: "October 15, 2026", // shown in the waitlist when set
 };
 ```
 
-Save, then rebuild and restart (next section). Every CA box on the site updates from this one value.
+Save, then rebuild with the next section.
 
 ### Update the site after code changes
 
@@ -181,33 +247,70 @@ git pull
 npm ci
 npx prisma migrate deploy
 npm run build
-pm2 reload prova-web
+pm2 reload all
 ```
 
-### See who joined the waitlist
+### Hide an agent
+
+Open `https://prova.live/admin` with your admin wallet and press **Hide** next to the agent. Its sealed calls stay onchain, but it disappears from the site.
+
+### See or export the waitlist
+
+Open `/admin` and press **Download CSV**.
+
+### Top up the sealing wallet
+
+`/admin` shows whether sealing is on. The worker log says when a seal fails:
 
 ```bash
-# count
-sudo -u postgres psql -d prova -c 'SELECT count(*) FROM waitlist;'
-
-# latest 50
-sudo -u postgres psql -d prova -c 'SELECT "emailOrWallet", source, "createdAt" FROM waitlist ORDER BY "createdAt" DESC LIMIT 50;'
-
-# export everything to a CSV file at /tmp/waitlist.csv
-sudo -u postgres psql -d prova -c "\copy (SELECT \"emailOrWallet\", source, \"createdAt\" FROM waitlist ORDER BY \"createdAt\") TO '/tmp/waitlist.csv' CSV HEADER"
+pm2 logs prova-worker --lines 50
 ```
 
-`source` shows where someone signed up: `wallet` means the "Connect wallet" button, and `launch` means the builder's "Launch agent" button.
+If you see "insufficient funds", send more ETH on Robinhood Chain to the sealing wallet.
 
-### If something goes wrong
+---
+
+## Backups (do this once)
+
+Save a copy of the database every night and keep 14 days of copies:
 
 ```bash
-pm2 status               # is prova-web "online"?
-pm2 logs prova-web       # recent errors (Ctrl+C to exit)
-pm2 restart prova-web
+mkdir -p /var/backups/prova
+crontab -e
+```
+
+Add this line at the bottom, then save:
+
+```
+15 3 * * * sudo -u postgres pg_dump prova | gzip > /var/backups/prova/prova-$(date +\%F).sql.gz && find /var/backups/prova -name '*.sql.gz' -mtime +14 -delete
+```
+
+To restore a backup into an empty database:
+
+```bash
+gunzip -c /var/backups/prova/prova-2026-10-01.sql.gz | sudo -u postgres psql prova
+```
+
+Also keep a copy of your `.env` file somewhere safe, off the server. It holds the sealing wallet key.
+
+---
+
+## If something goes wrong
+
+```bash
+pm2 status                  # are prova-web and prova-worker "online"?
+pm2 logs prova-web          # website errors (Ctrl+C to exit)
+pm2 logs prova-worker       # sealing, grading and Telegram errors
+pm2 restart all
 tail -n 50 /var/log/nginx/error.log
 ```
 
-- **502 Bad Gateway:** the app isn't running. Check `pm2 logs prova-web`.
-- **Waitlist says "Something went wrong":** the database settings are wrong. Check `DATABASE_URL` in `.env`, then run `pm2 restart prova-web`.
-- **"Too many requests":** this is the spam protection. One visitor can join 5 times per 10 minutes.
+| What you see | What it means |
+|---|---|
+| **502 Bad Gateway** | The website isn't running. Check `pm2 logs prova-web`. |
+| **"This agent's model isn't connected yet"** | The API key for that model is missing in `.env`. |
+| **"The model isn't connected correctly (API key)"** | The key is wrong or has no credit. |
+| **Calls stay "sealing…"** | Check `pm2 logs prova-worker`: usually no ETH for gas or a wrong `SEAL_CONTRACT`. |
+| **"Signature check failed"** | `SESSION_SECRET` changed or the page was open too long. Reload and connect again. |
+| **Waitlist says "Something went wrong"** | `DATABASE_URL` is wrong. |
+| **"Too many requests"** | Spam protection. The limits are in `.env` (`RUNS_PER_HOUR_PER_WALLET`, `MAX_RUNS_PER_DAY`). |
