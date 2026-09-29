@@ -8,7 +8,7 @@ const FPS = 30;
 const ffmpeg = process.env.FFMPEG || "ffmpeg";
 const browser = await chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1920, height: 1080 } });
-await page.goto("file://" + path.join(dir, "ad.html"));
+await page.goto("file://" + path.join(dir, process.env.PAGE || "ad.html"));
 await page.evaluate(() => document.fonts.ready);
 const prev = process.argv.indexOf("--preview");
 if (prev > 0) {

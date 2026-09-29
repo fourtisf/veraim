@@ -1,0 +1,242 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Veraim ad: ask any token</title>
+<style>
+@font-face{font-family:Geist;src:url(Geist-Variable.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"Geist Mono";src:url(GeistMono-Variable.woff2) format("woff2");font-weight:100 900}
+:root{--s3:#141417;--s4:#1C1C20;--b1:rgba(255,255,255,.06);--b2:rgba(255,255,255,.1);--t1:#EDEDEF;--t2:#A0A0A8;--t3:#7E7E88;--gold:#E2CDA6;--gold2:#BFA57A;--hit:#4ADE9A;--miss:#F2667E;--amber:#F0B85A}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antialiased;letter-spacing:-.02em}
+.mono{font-family:"Geist Mono",monospace;letter-spacing:0}
+#bg{position:absolute;inset:-60px;background:radial-gradient(900px 520px at 50% 0%,rgba(226,205,166,.13),transparent 70%),linear-gradient(rgba(255,255,255,.035) 1px,transparent 1px) 0 0/96px 96px,linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px) 0 0/96px 96px;-webkit-mask-image:radial-gradient(1100px 760px at 50% 40%,#000 30%,transparent 100%)}
+#glow{position:absolute;width:1200px;height:1200px;left:360px;top:-60px;border-radius:50%;background:radial-gradient(closest-side,rgba(226,205,166,.18),transparent);opacity:0}
+.scene{position:absolute;inset:0;opacity:0}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.big{font-size:108px;font-weight:600;letter-spacing:-.045em;line-height:1.02}
+.w{display:inline-block}
+.dim{color:var(--t3)}
+.chip{position:absolute;padding:14px 26px;border-radius:999px;font-size:30px;font-weight:500;background:rgba(255,255,255,.05);box-shadow:inset 0 0 0 1px var(--b2);color:var(--t2);white-space:nowrap}
+.feat{display:grid;grid-template-columns:660px 820px;gap:120px;align-items:center;justify-content:center;height:100%}
+.num{font-size:26px;color:var(--gold);margin-bottom:26px;display:flex;align-items:center;gap:16px}
+.num:after{content:"";width:64px;height:1px;background:var(--gold2)}
+.ft{font-size:80px;font-weight:600;letter-spacing:-.045em;line-height:1.04}
+.fs{font-size:32px;color:var(--t2);line-height:1.4;margin-top:30px;letter-spacing:-.015em}
+.card{background:linear-gradient(180deg,#111114,#0A0A0C);border-radius:32px;box-shadow:inset 0 0 0 1px var(--b2),0 40px 120px rgba(0,0,0,.6);padding:40px;position:relative}
+.vlogo{width:64px;height:64px;border-radius:18px;background:#000;box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);display:grid;place-items:center;flex-shrink:0}
+.row{display:flex;align-items:center;gap:20px}
+.label{font-size:22px;color:var(--t3)}
+.tag{display:inline-flex;align-items:center;gap:10px;padding:8px 18px;border-radius:999px;font-size:22px;font-weight:600;letter-spacing:.03em}
+.risky{color:var(--miss);background:rgba(242,102,126,.12);box-shadow:inset 0 0 0 1px rgba(242,102,126,.3)}
+.hit{color:var(--hit);background:rgba(74,222,154,.12);box-shadow:inset 0 0 0 1px rgba(74,222,154,.3)}
+.tr{display:grid;grid-template-columns:44px 1fr 150px 110px 170px;gap:14px;align-items:center;padding:18px 8px;border-top:1px solid var(--b1);font-size:24px}
+.tr:first-child{border-top:0}
+.tr .ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:20px;color:#111}
+.btn{height:46px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:500;box-shadow:inset 0 0 0 1px var(--b2)}
+.bubble{border-radius:22px;padding:20px 26px;font-size:28px;line-height:1.4;display:inline-block;max-width:640px}
+.agent{border-radius:24px;padding:30px;background:linear-gradient(180deg,#111114,#0A0A0C);box-shadow:inset 0 0 0 1px var(--b2)}
+.agent b{display:block;font-size:30px;font-weight:600;margin-top:22px}
+.agent span{display:block;font-size:24px;color:var(--t2);margin-top:8px}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="glow"></div>
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="mk" viewBox="0 0 120 120"><path d="M22 20 L49 70 M98 20 L71 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/><circle cx="60" cy="96" r="13" fill="#EDEDEF"/></symbol></defs></svg>
+
+<!-- 1 hook -->
+<div class="scene center" id="s1">
+  <div id="chips"></div>
+  <div class="big" id="s1a"><span class="w">A</span> <span class="w">new</span> <span class="w">token</span> <span class="w">just</span> <span class="w">launched.</span></div>
+  <div class="big dim" id="s1b" style="margin-top:14px"><span class="w">Safe,</span> <span class="w">or</span> <span class="w">a</span> <span class="w" style="color:var(--miss)">rug?</span></div>
+</div>
+
+<!-- 2 -->
+<div class="scene center" id="s2">
+  <div class="big" style="font-size:136px"><span class="w">Don't</span> <span class="w">guess.</span> <span class="w" style="color:var(--gold)">Ask.</span></div>
+</div>
+
+<!-- 3 logo -->
+<div class="scene center" id="s3">
+  <div id="lockup" style="display:flex;align-items:center;gap:18px">
+    <svg width="200" height="200" viewBox="0 0 120 120">
+      <path id="p1" d="M22 20 L49 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/>
+      <path id="p2" d="M98 20 L71 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/>
+      <circle id="dot" cx="60" cy="96" r="13" fill="#EDEDEF"/>
+    </svg>
+    <div id="wmwrap" style="overflow:hidden;width:0"><div id="wm" style="font-size:176px;font-weight:600;letter-spacing:-.055em;white-space:nowrap;padding-right:10px">Veraim</div></div>
+  </div>
+  <div id="tagline" style="font-size:46px;color:var(--t2);margin-top:44px">Ask any token. <span style="color:var(--t1)">AI answers in seconds.</span></div>
+</div>
+
+<!-- 4 pick a token -->
+<div class="scene" id="s4">
+  <div class="feat">
+    <div><div class="num mono">01</div>
+      <div class="ft"><span class="w">Pick</span> <span class="w">any</span> <span class="w">token.</span></div>
+      <div class="fs">The top tokens on Robinhood Chain,<br>live, with one click to ask.</div></div>
+    <div class="card" id="c4" style="padding:26px 34px">
+      <div class="tr label" style="font-size:19px;letter-spacing:.06em;text-transform:uppercase"><span>#</span><span>Token</span><span>Market cap</span><span>24h</span><span></span></div>
+      <div id="rows4"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 5 ask -->
+<div class="scene" id="s5">
+  <div class="feat">
+    <div><div class="num mono">02</div>
+      <div class="ft"><span class="w">Get</span> <span class="w">a</span> <span class="w">clear</span> <span class="w">answer.</span></div>
+      <div class="fs">Live holders, dev history and<br>whale flow, read by AI in seconds.</div></div>
+    <div class="card" id="c5" style="height:600px;display:flex;flex-direction:column">
+      <div class="row"><div class="vlogo"><svg width="34" height="34"><use href="#mk"/></svg></div><div><div style="font-size:32px;font-weight:600">Veraim Safety Agent</div><div class="label">Security · Official Veraim AI</div></div></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:20px;padding-top:20px">
+        <div id="q5" class="bubble" style="align-self:flex-end;background:#EDEDEF;color:#000;border-radius:22px 22px 6px 22px">Is <b class="mono">$NOVA</b> safe to buy?</div>
+        <div id="wait5" class="mono" style="font-size:22px;color:var(--t2)">Reading live onchain data… 1s</div>
+        <div id="a5" style="align-self:flex-start">
+          <div class="bubble" style="background:var(--s4);border-radius:22px 22px 22px 6px"><span class="tag risky" style="font-size:20px;margin-bottom:12px">RISKY</span><br>Top 5 wallets were funded by one address and hold 38% of supply. The dev sold in the first hour.</div>
+          <div class="mono" style="font-size:19px;color:var(--gold);margin-top:10px;letter-spacing:.04em">BUNDLED · GRADED IN 24H</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 6 four agents -->
+<div class="scene" id="s6">
+  <div class="feat">
+    <div><div class="num mono">03</div>
+      <div class="ft"><span class="w">Four</span> <span class="w">AI</span> <span class="w">agents.</span><br><span class="w">One</span> <span class="w">job</span> <span class="w">each.</span></div>
+      <div class="fs">Free to try. Web, Telegram or API.</div></div>
+    <div id="grid6" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <div class="agent"><div class="vlogo"><svg width="34" height="34"><use href="#mk"/></svg></div><b>Safety Agent</b><span>Bundled launch or rug?</span></div>
+      <div class="agent"><div class="vlogo"><svg width="34" height="34"><use href="#mk"/></svg></div><b>Dev Agent</b><span>Has this dev rugged before?</span></div>
+      <div class="agent"><div class="vlogo"><svg width="34" height="34"><use href="#mk"/></svg></div><b>Whale Agent</b><span>Are whales buying or selling?</span></div>
+      <div class="agent"><div class="vlogo"><svg width="34" height="34"><use href="#mk"/></svg></div><b>Research Agent</b><span>A one-page brief on any token</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- 7 graded -->
+<div class="scene" id="s7">
+  <div class="feat">
+    <div><div class="num mono">04</div>
+      <div class="ft"><span class="w">See</span> <span class="w">who's</span> <span class="w">actually</span> <span class="w">right.</span></div>
+      <div class="fs">24 hours later the market grades<br>every call: <span style="color:var(--hit)">hit</span> or <span style="color:var(--miss)">miss</span>.</div></div>
+    <div class="card">
+      <div class="row" style="justify-content:space-between"><div><div style="font-size:30px;font-weight:600"><span class="mono">$NOVA</span> · <span style="color:var(--miss)">RISKY</span></div><div class="label">Price after the call</div></div><div class="mono" id="timer7" style="font-size:38px">00:00:00</div></div>
+      <svg width="740" height="280" viewBox="0 0 740 280" style="margin-top:26px;display:block">
+        <defs><linearGradient id="f7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2667E" stop-opacity=".28"/><stop offset="1" stop-color="#F2667E" stop-opacity="0"/></linearGradient><clipPath id="cl7"><rect id="clr7" x="0" y="0" width="0" height="280"/></clipPath></defs>
+        <g clip-path="url(#cl7)"><path id="ar7" fill="url(#f7)"/><path id="ln7" fill="none" stroke="#F2667E" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></g>
+        <circle id="hd7" r="9" fill="#F2667E"/>
+      </svg>
+      <div class="row" style="justify-content:space-between;margin-top:24px"><div style="font-size:30px">Price <span class="mono" id="pct7" style="color:var(--miss);font-weight:600">0%</span></div>
+        <div id="res7" class="tag hit" style="font-size:30px;padding:12px 26px">✓ HIT</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- 8 CTA -->
+<div class="scene center" id="s8">
+  <div id="cta-lock" style="display:flex;align-items:center;gap:12px"><svg width="120" height="120"><use href="#mk"/></svg><div style="font-size:112px;font-weight:600;letter-spacing:-.055em">Veraim</div></div>
+  <div id="cta-line" class="big" style="font-size:88px;margin-top:56px"><span class="w">Ask</span> <span class="w">before</span> <span class="w">you</span> <span class="w" style="color:var(--gold)">ape.</span></div>
+  <div id="cta-url" style="margin-top:64px;display:flex;align-items:center;gap:26px">
+    <div style="height:84px;padding:0 44px;border-radius:22px;background:#EDEDEF;color:#000;display:flex;align-items:center;font-size:40px;font-weight:600">veraim.xyz</div>
+    <div style="display:flex;align-items:center;gap:12px;font-size:28px;color:var(--t2)"><span style="width:14px;height:14px;border-radius:50%;background:var(--hit);box-shadow:0 0 18px var(--hit)"></span>Free to try</div>
+  </div>
+</div>
+
+<div id="note" class="mono" style="position:absolute;left:140px;bottom:64px;font-size:18px;letter-spacing:.08em;color:var(--t3);opacity:0">ILLUSTRATIVE EXAMPLE · NOT FINANCIAL ADVICE</div>
+<svg width="1920" height="1080" style="position:absolute;inset:0;opacity:.06;pointer-events:none"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+<div id="fade" style="position:absolute;inset:0;background:#000;opacity:1"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eo = (x) => 1 - Math.pow(1 - x, 3), eo5 = (x) => 1 - Math.pow(1 - x, 5);
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const back = (x) => 1 + 2.7 * Math.pow(x - 1, 3) + 1.7 * Math.pow(x - 1, 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+
+const S = { s1: [0, 3.6], s2: [3.4, 6.2], s3: [6.0, 10.0], s4: [9.8, 14.8], s5: [14.6, 21.2], s6: [21.0, 25.6], s7: [25.4, 30.4], s8: [30.2, 35.5] };
+const DURATION = 35.5;
+
+const alpha = (t, [a, b], fi = .45, fo = .45, last = false) => Math.min(eo(prog(t, a, a + fi)), last ? 1 : 1 - eio(prog(t, b - fo, b)));
+function words(el, t, start, st = .07, d = .6) {
+  [...el.querySelectorAll(".w")].forEach((w, i) => { const x = eo(prog(t, start + i * st, start + i * st + d)); w.style.opacity = x; w.style.transform = `translateY(${(1 - x) * 40}px)`; w.style.filter = `blur(${(1 - x) * 12}px)`; });
+}
+function show(el, t, s, d = .6, dy = 30) { const x = eo(prog(t, s, s + d)); el.style.opacity = x; el.style.transform = `translateY(${(1 - x) * dy}px)`; return x; }
+function motion(el, t, [a, b]) { const x = prog(t, a, b), o = eio(prog(t, b - .45, b)); el.style.transform = `scale(${1 + x * .03}) translateY(${-o * 30}px)`; el.style.filter = o > 0 ? `blur(${o * 10}px)` : "none"; }
+
+const CHIPS = [["+420% in 1h", 170, 170], ["BUY NOW", 1460, 150], ["Bundled?", 250, 830], ["Honeypot?", 1380, 860], ["Dev wallet?", 820, 110], ["100x soon", 900, 920], ["Rug?", 120, 520], ["Safe?", 1600, 520]];
+const chipEls = CHIPS.map(([s, x, y]) => { const c = document.createElement("div"); c.className = "chip"; c.textContent = s; c.style.left = x + "px"; c.style.top = y + "px"; $("chips").appendChild(c); return c; });
+
+const TOK = [["NOVA", "$412M", "+4.7%", "#C9F27A"], ["ORBIT", "$288M", "−0.5%", "#8FA3FF"], ["KITE", "$173M", "−9.6%", "#FFD08A"], ["MOSS", "$69M", "−3.9%", "#8FE3F0"], ["FLUX", "$41M", "+2.1%", "#FF9AAE"]];
+const rowEls = TOK.map(([s, mc, ch, c], i) => {
+  const r = document.createElement("div"); r.className = "tr";
+  r.innerHTML = `<span class="mono" style="color:var(--t3);font-size:20px">0${i + 1}</span><span class="row" style="gap:14px"><span class="ic" style="background:${c}">${s[0]}</span><b style="font-weight:600">$${s}</b></span><span>${mc}</span><span style="color:${ch.startsWith("+") ? "var(--hit)" : "var(--miss)"}">${ch}</span><span class="btn">Is it safe?</span>`;
+  $("rows4").appendChild(r); return r;
+});
+
+const PTS = [0, .05, -.02, .08, .03, -.06, -.14, -.1, -.22, -.3, -.26, -.38, -.45, -.41, -.52, -.58, -.55, -.62];
+const W7 = 740, py = (v) => 50 + (-v / .62) * 190, px = (i) => i / (PTS.length - 1) * W7;
+let d7 = ""; PTS.forEach((v, i) => d7 += (i ? "L" : "M") + px(i).toFixed(1) + " " + py(v).toFixed(1) + " ");
+$("ln7").setAttribute("d", d7); $("ar7").setAttribute("d", d7 + `L${W7} 280 L0 280 Z`);
+const at7 = (x) => { const f = x * (PTS.length - 1), i = Math.min(PTS.length - 2, Math.floor(f)), r = f - i; return { x: px(i + r), v: lerp(PTS[i], PTS[i + 1], r) }; };
+
+window.render = function (t) {
+  $("fade").style.opacity = 1 - eo(prog(t, 0, .5)) + eio(prog(t, DURATION - .6, DURATION));
+  $("bg").style.transform = `translate(${-t * 4}px,${-t * 2}px)`;
+  $("note").style.opacity = .8 * Math.min(eo(prog(t, S.s4[0] + .6, S.s4[0] + 1.2)), 1 - eio(prog(t, S.s7[1] - .6, S.s7[1])));
+
+  const s1 = $("s1"); s1.style.opacity = alpha(t, S.s1, .3, .5); motion(s1, t, S.s1);
+  words($("s1a"), t, .2); words($("s1b"), t, 1.5, .1);
+  chipEls.forEach((c, i) => { const x = eo(prog(t, .1 + i * .12, 1 + i * .12)); c.style.opacity = x * .55; c.style.transform = `translate(${Math.sin(t * .7 + i) * 14}px,${Math.cos(t * .6 + i) * 12 - (1 - x) * 30}px)`; c.style.filter = `blur(${2.5 + i % 3}px)`; });
+
+  const s2 = $("s2"); s2.style.opacity = alpha(t, S.s2, .4, .4); motion(s2, t, S.s2); words(s2.querySelector(".big"), t, S.s2[0] + .15, .16, .7);
+
+  const s3 = $("s3"), t3 = S.s3[0]; s3.style.opacity = alpha(t, S.s3, .2, .5); motion(s3, t, S.s3);
+  $("glow").style.opacity = .9 * Math.min(eo(prog(t, t3, t3 + 1.2)), 1 - eio(prog(t, S.s3[1] - .6, S.s3[1]))) + .5 * eo(prog(t, S.s8[0], S.s8[0] + 1.5));
+  for (const [id, o] of [["p1", .2], ["p2", .3]]) { $(id).style.strokeDasharray = 57; $(id).style.strokeDashoffset = 57 * (1 - eio(prog(t, t3 + o, t3 + o + .7))); }
+  const dx = prog(t, t3 + .95, t3 + 1.45); $("dot").style.transformOrigin = "60px 96px"; $("dot").style.transform = `translateY(${(1 - back(dx)) * -70}px) scale(${dx > 0 ? back(dx) : 0})`; $("dot").style.opacity = dx > 0 ? 1 : 0;
+  const wx = eo5(prog(t, t3 + 1.5, t3 + 2.3)); $("wmwrap").style.width = wx * 600 + "px"; $("wm").style.transform = `translateX(${(1 - wx) * -60}px)`;
+  show($("tagline"), t, t3 + 2.2, .8, 24);
+
+  const s4 = $("s4"), t4 = S.s4[0]; s4.style.opacity = alpha(t, S.s4); motion(s4, t, S.s4);
+  show(s4.querySelector(".num"), t, t4 + .1); words(s4.querySelector(".ft"), t, t4 + .2); show(s4.querySelector(".fs"), t, t4 + .8); show($("c4"), t, t4 + .2, .8, 60);
+  rowEls.forEach((r, i) => show(r, t, t4 + .7 + i * .12, .5, 18));
+  const pick = prog(t, t4 + 3.0, t4 + 3.3), press = t > t4 + 3.6 && t < t4 + 3.85;
+  rowEls[0].style.background = `rgba(226,205,166,${.08 * eo(pick)})`; rowEls[0].style.borderRadius = "14px";
+  const b0 = rowEls[0].querySelector(".btn"); b0.style.background = pick > .5 ? "#EDEDEF" : "transparent"; b0.style.color = pick > .5 ? "#000" : ""; b0.style.transform = `scale(${press ? .92 : 1})`;
+
+  const s5 = $("s5"), t5 = S.s5[0]; s5.style.opacity = alpha(t, S.s5); motion(s5, t, S.s5);
+  show(s5.querySelector(".num"), t, t5 + .1); words(s5.querySelector(".ft"), t, t5 + .2); show(s5.querySelector(".fs"), t, t5 + .8); show($("c5"), t, t5 + .2, .8, 60);
+  show($("q5"), t, t5 + 1.0, .5, 20);
+  const w = t - (t5 + 1.6), ansT = t5 + 4.2;
+  $("wait5").style.opacity = t > t5 + 1.5 && t < ansT ? 1 : 0;
+  $("wait5").textContent = (w < 1.2 ? "Reading live onchain data… " : "Thinking… ") + Math.max(1, Math.ceil(w * 2.2)) + "s";
+  const ax = prog(t, ansT, ansT + .5); $("a5").style.display = ax > 0 ? "block" : "none"; $("a5").style.opacity = eo(ax); $("a5").style.transform = `translateY(${(1 - eo(ax)) * 24}px)`;
+
+  const s6 = $("s6"), t6 = S.s6[0]; s6.style.opacity = alpha(t, S.s6); motion(s6, t, S.s6);
+  show(s6.querySelector(".num"), t, t6 + .1); words(s6.querySelector(".ft"), t, t6 + .2, .06); show(s6.querySelector(".fs"), t, t6 + 1);
+  [...$("grid6").children].forEach((c, i) => { const x = show(c, t, t6 + .5 + i * .18, .6, 40); c.style.transform += ` scale(${lerp(.96, 1, x)})`; });
+
+  const s7 = $("s7"), t7 = S.s7[0]; s7.style.opacity = alpha(t, S.s7); motion(s7, t, S.s7);
+  show(s7.querySelector(".num"), t, t7 + .1); words(s7.querySelector(".ft"), t, t7 + .2); show(s7.querySelector(".fs"), t, t7 + .8); show(s7.querySelector(".card"), t, t7 + .2, .8, 60);
+  const cx = eio(prog(t, t7 + .8, t7 + 3.3)); $("clr7").setAttribute("width", cx * W7 + 6);
+  const hp = at7(cx); $("hd7").setAttribute("cx", hp.x); $("hd7").setAttribute("cy", py(hp.v));
+  const secs = Math.round(cx * 86400); $("timer7").textContent = [secs / 3600 | 0, (secs / 60 | 0) % 60, secs % 60].map((n) => String(n).padStart(2, "0")).join(":");
+  $("pct7").textContent = (hp.v > 0 ? "+" : "") + Math.round(hp.v * 100) + "%"; $("pct7").style.color = hp.v >= 0 ? "var(--hit)" : "var(--miss)";
+  const rx = prog(t, t7 + 3.4, t7 + 3.8); $("res7").style.opacity = rx > 0 ? 1 : 0; $("res7").style.transform = `scale(${rx > 0 ? back(rx) : .6})`;
+
+  const s8 = $("s8"), t8 = S.s8[0]; s8.style.opacity = alpha(t, S.s8, .5, .5, true);
+  const lx = show($("cta-lock"), t, t8 + .2, .9, 30); $("cta-lock").style.transform += ` scale(${lerp(.94, 1, lx)})`;
+  words($("cta-line"), t, t8 + .9, .12, .7); show($("cta-url"), t, t8 + 2, .8, 24);
+};
+window.DURATION = DURATION;
+render(0);
+</script>
+</body>
+</html>
