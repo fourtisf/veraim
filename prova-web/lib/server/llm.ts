@@ -74,6 +74,7 @@ async function runClaude(model: string, system: string, user: string): Promise<A
     return res.parsed_output;
   } catch (err) {
     if (err instanceof ModelError) throw err;
+    if (err instanceof Anthropic.APIError) console.error(`Anthropic ${model} failed: ${err.status} ${err.message.slice(0, 300)}`);
     if (err instanceof Anthropic.RateLimitError) throw new ModelError("The model is busy. Please try again in a minute.");
     if (err instanceof Anthropic.AuthenticationError) throw new ModelError("The model isn't connected correctly (API key).");
     if (err instanceof Anthropic.APIError) throw new ModelError(`Model error (${err.status}). Please try again.`);
@@ -101,10 +102,12 @@ async function runOpenRouter(model: string, system: string, user: string): Promi
     }),
     signal: AbortSignal.timeout(90_000),
   });
-  if (res.status === 429) throw new ModelError("The model is busy. Please try again in a minute.");
-  if (res.status === 401 || res.status === 403) throw new ModelError("The model isn't connected correctly (API key).");
   if (!res.ok) {
+    // OpenRouter's own reason (bad key, no credits, unknown model…) goes to the server log.
     console.error(`OpenRouter ${model} failed: ${res.status} ${(await res.text().catch(() => "")).slice(0, 500)}`);
+    if (res.status === 429) throw new ModelError("The model is busy. Please try again in a minute.");
+    if (res.status === 401 || res.status === 403) throw new ModelError("The model isn't connected correctly (API key).");
+    if (res.status === 402) throw new ModelError("The AI account is out of credits.");
     throw new ModelError(`Model error (${res.status}). Please try again.`);
   }
   const data = await res.json();

@@ -9,6 +9,8 @@ import { AUTOPILOT_WALLET } from "./system";
 import { questionFor, topTokens } from "./topTokens";
 
 const DAY = 86_400_000;
+const RETRY_AFTER_FAIL = 30 * 60_000;
+const lastFail = new Map<string, number>(); // agent id -> time of its last failed run
 
 export async function autopilotTick(log: (...a: unknown[]) => void = console.log) {
   const perDay = ENV.autopilotPerAgentPerDay;
@@ -31,6 +33,7 @@ export async function autopilotTick(log: (...a: unknown[]) => void = console.log
     const today = week.filter((r) => Date.now() - r.createdAt.getTime() < DAY);
     if (today.length >= perDay) continue;
     if (week[0] && Date.now() - week[0].createdAt.getTime() < DAY / perDay) continue; // spread over the day
+    if (Date.now() - (lastFail.get(agent.id) || 0) < RETRY_AFTER_FAIL) continue; // back off after a failure
 
     // Biggest token this agent hasn't looked at for the longest time.
     const lastAsked = (addr: string) => {
@@ -42,7 +45,8 @@ export async function autopilotTick(log: (...a: unknown[]) => void = console.log
       const { call } = await runAgent(agent, user, questionFor(agent, token));
       log(`autopilot: ${agent.name} on $${token.symbol} → ${call.label || call.status}`);
     } catch (err) {
-      log(`autopilot: ${agent.name} on $${token.symbol} failed:`, (err as Error).message);
+      lastFail.set(agent.id, Date.now());
+      log(`autopilot: ${agent.name} on $${token.symbol} failed (retrying in 30 min):`, (err as Error).message);
     }
   }
 }
