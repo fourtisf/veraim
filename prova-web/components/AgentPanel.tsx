@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FREE_RUNS_PER_AGENT, MIN_GRADED_TO_RANK } from "@/config/models";
+import { FREE_RUNS_PER_AGENT } from "@/config/models";
 import { SITE } from "@/config/site";
 import { api, ApiError } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
@@ -146,18 +146,6 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
           </span>
         </div>
       </div>
-      <div className="d-stats">
-        <div><small>Track record</small><b className="g">{a.ranked ? record(a.trackRecord) : "—"}</b></div>
-        <div><small>Graded calls</small><b>{a.graded}</b></div>
-        {a.official
-          ? <div><small>Calls this week</small><b>{a.calls7d}</b></div>
-          : <div><small>Bought back</small><b>{money(a.boughtBackUsd)}</b></div>}
-      </div>
-      {!a.ranked && a.gradingMode !== "none" && (
-        <p className="free" style={{ marginTop: -12, marginBottom: 16 }}>
-          Ranks after {MIN_GRADED_TO_RANK} graded calls ({a.graded}/{MIN_GRADED_TO_RANK}){a.trackRecord !== null && `. Record so far: ${record(a.trackRecord)}`}.
-        </p>
-      )}
       <div className="d-actions">
         <button className={`swt ${alertOn ? "on" : ""}`} aria-pressed={alertOn} onClick={() => toggleAlert(a.slug)}>
           Telegram alert on every new call<i />
