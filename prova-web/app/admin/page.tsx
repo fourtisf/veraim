@@ -5,6 +5,7 @@ import { currentUser, isAdmin } from "@/lib/server/session";
 import { agentViews, siteStats } from "@/lib/server/views";
 import { chainInfo, paymentsEnabled, publicClient, RUNS_ABI, sealingEnabled } from "@/lib/server/chain";
 import { ENV } from "@/lib/server/env";
+import { AUTOPILOT_WALLET } from "@/lib/server/system";
 import TreasuryButtons from "@/components/TreasuryButtons";
 import { money } from "@/lib/format";
 import { modelAvailable } from "@/lib/server/llm";
@@ -24,8 +25,8 @@ export default async function AdminPage() {
     agentViews({ hidden: false }),
     agentViews({ hidden: true }),
     prisma.waitlist.findMany({ orderBy: { createdAt: "desc" }, take: 100 }),
-    prisma.user.count(),
-    prisma.run.count(),
+    prisma.user.count({ where: { wallet: { not: AUTOPILOT_WALLET } } }),
+    prisma.run.count({ where: { user: { wallet: { not: AUTOPILOT_WALLET } } } }),
   ]);
   const stats = await siteStats(visible);
   const [paid, bought] = await Promise.all([
@@ -49,6 +50,7 @@ export default async function AdminPage() {
     ["Other models (OPENROUTER_API_KEY)", modelAvailable("gpt")],
     ["Telegram alerts (TELEGRAM_BOT_TOKEN + TELEGRAM_BOT_USERNAME)", telegramEnabled()],
     ["X mentions tool (X_BEARER_TOKEN)", !!process.env.X_BEARER_TOKEN],
+    [`Autopilot, ${ENV.autopilotPerAgentPerDay} runs per official agent a day (AUTOPILOT_RUNS_PER_AGENT_PER_DAY)`, ENV.autopilotPerAgentPerDay > 0],
     ["Waitlist emails (SMTP_URL + MAIL_FROM)", !!(process.env.SMTP_URL && process.env.MAIL_FROM)],
   ];
 

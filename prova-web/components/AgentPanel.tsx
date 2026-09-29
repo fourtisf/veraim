@@ -12,6 +12,12 @@ import BuyRuns from "./BuyRuns";
 import LinkToken from "./LinkToken";
 import LineChart from "./LineChart";
 import { useUI } from "./UIProvider";
+import { questionFor } from "@/lib/tokenQuestion";
+
+type PopularToken = { address: string; symbol: string; marketCapUsd: number };
+let popularCache: Promise<PopularToken[]> | null = null;
+const loadPopular = () =>
+  (popularCache ??= fetch("/api/tokens/top").then((r) => r.json()).then((d) => d.tokens || []).catch(() => ((popularCache = null), [])));
 
 const TABS: [string, string][] = [["try", "Try it"], ["perf", "Performance"], ["rec", "Receipts"], ["tok", "Token"]];
 
@@ -47,6 +53,10 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [pending, setPending] = useState(false);
   const [q, setQ] = useState("");
+  const [popular, setPopular] = useState<PopularToken[]>([]);
+  useEffect(() => {
+    loadPopular().then(setPopular);
+  }, []);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const load = useCallback(async () => {
@@ -160,9 +170,20 @@ export default function AgentPanel({ slug, initial }: { slug: string; initial?: 
           ))}
           {pending && <div className="typing">Pulling live data and thinking… this can take 20–40 seconds.</div>}
         </div>
-        <div className="chips">
-          {examples.map((s) => <button key={s} onClick={() => setQ(s.replace("0x…", "0x"))}>{s}</button>)}
-        </div>
+        {popular.length > 0 ? (
+          <div className="chips" aria-label="Popular tokens">
+            <span className="chips-l">Top by market cap</span>
+            {popular.map((t) => (
+              <button key={t.address} onClick={() => run(questionFor(a, t))} disabled={pending} title={t.address}>
+                ${t.symbol} <span>{money(t.marketCapUsd)}</span>
+              </button>
+            ))}
+          </div>
+        ) : (
+          <div className="chips">
+            {examples.map((s) => <button key={s} onClick={() => setQ(s.replace("0x…", "0x"))}>{s}</button>)}
+          </div>
+        )}
         <div className="ask">
           <input className="t" value={q} maxLength={500} onChange={(e) => setQ(e.target.value)} onKeyDown={(e) => e.key === "Enter" && run(q)} placeholder={`Ask ${a.name}…`} aria-label={`Ask ${a.name}`} />
           <button className="btn btn-w" onClick={() => run(q)} disabled={pending}>Run</button>

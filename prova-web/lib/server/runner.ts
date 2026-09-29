@@ -1,4 +1,5 @@
 import type { Agent, User } from "@prisma/client";
+import { AUTOPILOT_WALLET } from "./system";
 import { prisma } from "@/lib/db";
 import { FREE_RUNS_PER_AGENT, gradingLabel } from "@/config/models";
 import { buildClaim } from "./claims";
@@ -41,6 +42,7 @@ function systemPrompt(agent: Agent) {
 // Runs an agent once for a signed-in wallet: free-run and rate checks, live tools,
 // the model, then (if the answer is a gradable claim) a hash that the worker seals onchain.
 export async function runAgent(agent: Agent, user: User, rawInput: string, viaApi = false) {
+  const system = user.wallet === AUTOPILOT_WALLET; // no free-run or hourly limits
   const input = rawInput.trim().slice(0, 500);
   if (!input) throw new RunError("Ask the agent something first.");
   if (agent.hidden) throw new RunError("This agent is not available.", 404);
@@ -52,10 +54,10 @@ export async function runAgent(agent: Agent, user: User, rawInput: string, viaAp
   ]);
   if (today >= ENV.maxRunsPerDay) throw new RunError("Veraim is at today's run capacity. Please try again tomorrow.", 429);
   // Free runs first, then runs the wallet paid for.
-  const paid = used >= FREE_RUNS_PER_AGENT;
+  const paid = !system && used >= FREE_RUNS_PER_AGENT;
   const paidLeft = paid ? await paidRunsLeft(user.id, agent.id) : null;
   if (paid && !paidLeft) throw new RunError(`You've used your ${FREE_RUNS_PER_AGENT} free runs of ${agent.name}. Buy runs to keep going.`, 402);
-  if (lastHour >= ENV.runsPerHourPerWallet) throw new RunError("You've hit the hourly run limit. Try again a bit later.", 429);
+  if (!system && lastHour >= ENV.runsPerHourPerWallet) throw new RunError("You've hit the hourly run limit. Try again a bit later.", 429);
 
   const token = await resolveToken(input);
   let market = null;

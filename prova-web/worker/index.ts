@@ -2,6 +2,7 @@
 //  - seals new claims onchain in batches
 //  - grades claims once their deadline passes, then records the result onchain
 //  - sends Telegram alerts and links Telegram accounts
+//  - autopilot: official agents analyse the biggest live tokens (when switched on)
 import "dotenv/config";
 import { BaseError, ContractFunctionRevertedError, parseEventLogs } from "viem";
 import type { Prisma } from "@prisma/client";
@@ -13,6 +14,7 @@ import { escapeHtml, sendTelegram, telegramEnabled, tg } from "@/lib/server/tele
 import { tokenMarket } from "@/lib/server/tools/dexscreener";
 import { deliverWebhook } from "@/lib/server/webhooks";
 import { toCallView } from "@/lib/server/views";
+import { autopilotTick } from "@/lib/server/autopilot";
 import { indexPayments, moneyEnabled, refreshMarkets, registerAgents, registerTokens, runBuybacks } from "./money";
 
 const log = (...a: unknown[]) => console.log(new Date().toISOString(), ...a);
@@ -228,3 +230,4 @@ every("payments", 15_000, async () => {
 });
 every("buybacks", ENV.buybackEveryMinutes * 60_000, runBuybacks);
 every("markets", 5 * 60_000, refreshMarkets);
+every("autopilot", 10 * 60_000, () => autopilotTick(log));

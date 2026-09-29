@@ -1,4 +1,5 @@
 import type { Agent, Call } from "@prisma/client";
+import { AUTOPILOT_WALLET } from "./system";
 import { prisma } from "@/lib/db";
 import { MIN_GRADED_TO_RANK, gradingLabel, modelLabel } from "@/config/models";
 import type { AgentView, CallStatus, CallView, SiteStats } from "@/lib/types";
@@ -49,7 +50,7 @@ export async function agentViews(where: { hidden?: boolean; id?: string; slug?: 
   const ids = agents.map((a) => a.id);
   const [byStatus, runs7d, paid7d, bought, last] = await Promise.all([
     prisma.call.groupBy({ by: ["agentId", "status"], where: { agentId: { in: ids } }, _count: true, _sum: { weight: true } }),
-    prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, createdAt: { gte: new Date(Date.now() - 7 * DAY) } }, _count: true }),
+    prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, createdAt: { gte: new Date(Date.now() - 7 * DAY) }, user: { wallet: { not: AUTOPILOT_WALLET } } }, _count: true }),
     prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, paid: true, createdAt: { gte: new Date(Date.now() - 7 * DAY) } }, _count: true }),
     prisma.buyback.groupBy({ by: ["agentId"], where: { agentId: { in: ids } }, _sum: { amountUsd: true } }),
     prisma.$queryRaw<{ agentId: string; status: string }[]>`

@@ -42,6 +42,10 @@ export const ENV = {
   runsPerHourPerIp: num(e.RUNS_PER_HOUR_PER_IP, 40),
   maxRunsPerDay: num(e.MAX_RUNS_PER_DAY, 2000), // cost guard across all users
 
+  // Autopilot: official agents analyse the biggest live tokens on their own (0 = off)
+  autopilotPerAgentPerDay: num(e.AUTOPILOT_RUNS_PER_AGENT_PER_DAY, 0),
+  autopilotTokens: (e.AUTOPILOT_TOKENS || "").split(",").map((s) => s.trim()).filter((s) => /^0x[0-9a-fA-F]{40}$/.test(s)),
+
   // Optional integrations
   telegramToken: e.TELEGRAM_BOT_TOKEN || "",
   telegramBot: e.TELEGRAM_BOT_USERNAME || "",
