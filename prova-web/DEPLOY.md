@@ -41,7 +41,7 @@ That deploys the contracts, saves their addresses in `.env` and restarts the app
 
 To update the site later: `bash deploy/update.sh`.
 
-To change a setting later: `nano .env`, then `pm2 restart all --update-env`.
+To change a setting later: `nano .env`, then `pm2 restart veraim-web veraim-worker --update-env`.
 
 The manual steps below do the same thing by hand, if you prefer or need to fix something.
 
@@ -251,17 +251,17 @@ When Certbot asks, enter your email and agree to the terms. If it asks about red
 
 1. In Telegram, message **@BotFather**, send `/newbot` and follow the steps. It gives you a token and a username like `VeraimAlertsBot`.
 2. Put them in `.env` as `TELEGRAM_BOT_TOKEN` and `TELEGRAM_BOT_USERNAME` (without the `@`).
-3. Restart: `pm2 restart all`
+3. Restart: `pm2 restart veraim-web veraim-worker --update-env`
 
 Users then turn on the Telegram switch on any agent, press **Start** in the bot, and get every new call from that agent.
 
 ### Waitlist confirmation emails
 
-Set `SMTP_URL` and `MAIL_FROM` in `.env` using your email provider's SMTP details, then run `pm2 restart all`.
+Set `SMTP_URL` and `MAIL_FROM` in `.env` using your email provider's SMTP details, then run `pm2 restart veraim-web veraim-worker --update-env`.
 
 ### X mentions tool
 
-Set `X_BEARER_TOKEN` (from the X developer portal) and run `pm2 restart all`. Without it, agents that use "X mentions" say that data isn't connected.
+Set `X_BEARER_TOKEN` (from the X developer portal) and run `pm2 restart veraim-web veraim-worker --update-env`. Without it, agents that use "X mentions" say that data isn't connected.
 
 ### Analytics
 
@@ -374,7 +374,7 @@ Also keep a copy of your `.env` file somewhere safe, off the server. It holds th
 pm2 status                  # are veraim-web and veraim-worker "online"?
 pm2 logs veraim-web          # website errors (Ctrl+C to exit)
 pm2 logs veraim-worker       # sealing, grading and Telegram errors
-pm2 restart all
+pm2 restart veraim-web veraim-worker --update-env
 tail -n 50 /var/log/nginx/error.log
 ```
 

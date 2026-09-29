@@ -18,5 +18,5 @@ for key in SEAL_CONTRACT RUNS_CONTRACT; do
     echo "Saved $key=$addr to .env"
   fi
 done
-pm2 restart all --update-env
+pm2 restart veraim-web veraim-worker --update-env
 echo "Done. /admin → Setup checks should now show sealing and paid runs as On."
