@@ -19,6 +19,12 @@ export function timeAgo(iso: string, now = Date.now()) {
   return Math.floor(s / 86400) + "d";
 }
 
+// "just now" or "5m ago".
+export const ago = (iso: string, now = Date.now()) => {
+  const t = timeAgo(iso, now);
+  return t === "just now" ? t : `${t} ago`;
+};
+
 // "5h 03m" until a time (or "now").
 export function until(iso: string, now = Date.now()) {
   const s = Math.max(0, (new Date(iso).getTime() - now) / 1000);

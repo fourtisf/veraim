@@ -47,6 +47,7 @@ export type CallView = {
   output: string;
   label: string | null;
   subject: string | null;
+  symbol: string | null; // token symbol at the time of the call
   status: CallStatus;
   claimHash: string | null;
   sealTx: string | null;

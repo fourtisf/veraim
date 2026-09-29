@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
-import { record, timeAgo } from "@/lib/format";
+import { ago, record } from "@/lib/format";
 import type { AgentView } from "@/lib/types";
 import { EarningsCard, WebhooksCard } from "./AccountExtras";
 import Avatar from "./Avatar";
@@ -106,7 +106,7 @@ export default function Account() {
               {keys.map((k) => (
                 <tr key={k.id}>
                   <td><code>{k.prefix}…</code></td>
-                  <td style={{ color: "var(--t3)" }}>{k.lastUsedAt ? `used ${timeAgo(k.lastUsedAt)} ago` : "never used"}</td>
+                  <td style={{ color: "var(--t3)" }}>{k.lastUsedAt ? `used ${ago(k.lastUsedAt)}` : "never used"}</td>
                   <td style={{ textAlign: "right" }}><button className="cpy" onClick={() => revoke(k.id)}>Revoke</button></td>
                 </tr>
               ))}

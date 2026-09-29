@@ -5,7 +5,7 @@ import { FREE_RUNS_PER_AGENT } from "@/config/models";
 import { SITE } from "@/config/site";
 import { api, ApiError } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
-import { k, money, record, shortAddr, shortHash, timeAgo, until } from "@/lib/format";
+import { ago, k, money, record, shortAddr, shortHash, until } from "@/lib/format";
 import type { AgentView, CallStatus, CallView } from "@/lib/types";
 import Avatar from "./Avatar";
 import BuyRuns from "./BuyRuns";
@@ -21,7 +21,7 @@ const loadPopular = () =>
 
 const TABS: [string, string][] = [["try", "Try it"], ["perf", "Performance"], ["rec", "Receipts"], ["tok", "Token"]];
 
-export type AgentDetail = { agent: AgentView; calls: CallView[]; series: (number | null)[]; freeRunsLeft: number | null; paidRunsLeft?: number | null; paymentsEnabled?: boolean };
+export type AgentDetail = { agent: AgentView; calls: CallView[]; series: (number | null)[]; freeRunsLeft: number | null; paidRunsLeft?: number | null; paymentsEnabled?: boolean; sealingEnabled?: boolean };
 type Msg = { u: boolean; text: string; call?: CallView; error?: boolean };
 
 export function Status({ c, gradesAt }: { c: CallStatus; gradesAt?: string | null }) {
@@ -122,13 +122,8 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
     : "Free runs used. Paid runs open soon.";
   const isCreator = !!me && (a.creator ? a.creator === me.wallet : me.admin);
   const examples = a.gradingMode === "price7d" ? ["LONG or SHORT on $TICKER?", "What are whales doing with 0x…?"] : ["Is 0x… bundled?", "Check the deployer of 0x…"];
-  const graded = data.calls.filter((c) => c.status === "hit" || c.status === "miss");
-  let best = 0, cur = 0;
-  for (const c of [...graded].reverse()) {
-    cur = c.status === "hit" ? cur + 1 : 0;
-    best = Math.max(best, cur);
-  }
-  const week = data.calls.filter((c) => Date.now() - new Date(c.createdAt).getTime() < 7 * 86400_000).length;
+  const openCalls = data.calls.filter((c) => c.status === "open" && c.gradesAt);
+  const nextGrade = openCalls.map((c) => c.gradesAt!).sort()[0] || null;
   const alertOn = !!me?.alerts.includes(a.slug);
   const starOn = !!me?.watch.includes(a.slug);
   const agentUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/agents/${a.slug}`;
@@ -204,12 +199,15 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
         {data.calls.length ? (
           <div className="rec">
             {data.calls.map((c) => (
-              <div key={c.id}>
-                <div>
-                  <b>{c.label || c.input.slice(0, 60)}</b>
+              <div key={c.id} className="rc">
+                <div className="rc-main">
+                  <b>
+                    {c.symbol ? `$${c.symbol}` : c.subject ? shortAddr(c.subject) : "Question"}
+                    {c.label && <span className="rc-lab">{c.label}</span>}
+                  </b>
                   <small>
-                    {c.subject ? shortHash(c.subject) + " · " : ""}{timeAgo(c.createdAt)} ago
-                    {c.claimHash && <> · {c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener">seal {shortHash(c.claimHash)} ↗</a> : "sealing…"}</>}
+                    {ago(c.createdAt)}
+                    {c.claimHash && <> · {c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener">sealed {shortHash(c.claimHash)} ↗</a> : data.sealingEnabled ? "sealing onchain…" : "not sealed yet"}</>}
                     {c.priceChangePct !== null && <> · price {c.priceChangePct > 0 ? "+" : ""}{c.priceChangePct}%</>}
                   </small>
                 </div>
@@ -218,7 +216,7 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
             ))}
           </div>
         ) : (
-          <div className="rec"><div><div><b>No calls yet</b><small>Run this agent to make its first sealed call.</small></div></div></div>
+          <div className="rec"><div className="rc"><div className="rc-main"><b>No calls yet</b><small>Ask this agent about a token to make its first call.</small></div></div></div>
         )}
         <p className="free">Each call is sealed onchain before the result is known, so it can&apos;t be edited or deleted.</p>
       </div>
@@ -232,13 +230,15 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
           {data.series.some((v) => v !== null) ? (
             <LineChart id={`perf-${a.slug}`} list={[{ d: data.series, c: "#E2CDA6", fill: true }]} w={480} h={170} />
           ) : (
-            <div className="empty" style={{ padding: "40px 12px" }}>The chart starts with the first graded call.</div>
+            <div className="empty" style={{ padding: "40px 12px" }}>
+              {nextGrade ? `First result in ${until(nextGrade)}. The chart starts with the first graded call.` : "The chart starts with the first graded call."}
+            </div>
           )}
         </div>
         <div className="pstats">
-          <div><small>Best streak</small><b>{best} hit{best === 1 ? "" : "s"}</b></div>
-          <div><small>Time to grade</small><b>{a.gradingMode === "price7d" ? "7d" : a.gradingMode === "verdict24h" ? "24h" : "—"}</b></div>
-          <div><small>Calls this week</small><b>{week}</b></div>
+          <div><small>Awaiting grade</small><b>{openCalls.length}</b></div>
+          <div><small>Hits / misses</small><b>{a.hits} / {a.misses}</b></div>
+          <div><small>Graded after</small><b>{a.gradingMode === "price7d" ? "7 days" : a.gradingMode === "verdict24h" ? "24 hours" : "—"}</b></div>
         </div>
       </div>
 

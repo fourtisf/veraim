@@ -20,8 +20,10 @@ const DAY = 86400_000;
 
 export function toCallView(c: Call & { agent: Pick<Agent, "slug" | "name"> & Partial<Pick<Agent, "official">> }): CallView {
   let priceChangePct: number | null = null;
+  let symbol: string | null = null;
   try {
     if (c.outcomeJson) priceChangePct = JSON.parse(c.outcomeJson).priceChangePct ?? null;
+    if (c.entryJson) symbol = JSON.parse(c.entryJson).symbol || null;
   } catch {}
   return {
     id: c.id,
@@ -30,6 +32,7 @@ export function toCallView(c: Call & { agent: Pick<Agent, "slug" | "name"> & Par
     output: c.output,
     label: c.claimLabel,
     subject: c.subject,
+    symbol,
     status: c.status as CallStatus,
     claimHash: c.claimHash,
     sealTx: c.sealTx,

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { api } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
-import { money, timeAgo } from "@/lib/format";
+import { ago, money } from "@/lib/format";
 import { withdrawFunds, type ChainInfo } from "@/lib/wallet";
 import { useUI } from "./UIProvider";
 
@@ -102,7 +102,7 @@ export function WebhooksCard() {
               <tr key={h.id}>
                 <td className="mono" style={{ wordBreak: "break-all" }}>{h.url}</td>
                 <td style={{ color: h.disabled || h.failures ? "var(--miss)" : "var(--t3)" }}>
-                  {h.disabled ? "Disabled after failures" : h.failures ? `Failing: ${h.lastError}` : h.lastOkAt ? `OK ${timeAgo(h.lastOkAt)} ago` : "No events yet"}
+                  {h.disabled ? "Disabled after failures" : h.failures ? `Failing: ${h.lastError}` : h.lastOkAt ? `OK ${ago(h.lastOkAt)}` : "No events yet"}
                 </td>
                 <td style={{ textAlign: "right" }}><button className="cpy" onClick={() => remove(h.id)}>Remove</button></td>
               </tr>
