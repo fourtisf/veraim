@@ -167,6 +167,7 @@ export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
     pending,
     calls24h,
     waitlistCount,
+    sealingEnabled: !!(ENV.sealerKey && ENV.sealContract), // same check as chain.ts, without loading viem here
   };
 }
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/client";
-import { pad, shortHash } from "@/lib/format";
+import { pad, shortAddr, shortHash } from "@/lib/format";
 import type { CallView } from "@/lib/types";
 import { SITE } from "@/config/site";
 import Avatar from "./Avatar";
@@ -13,14 +13,14 @@ import { useUI } from "./UIProvider";
 type Filter = "all" | "open" | "graded";
 const FILTERS: [Filter, string][] = [["all", "All"], ["open", "Pending"], ["graded", "Graded"]];
 
-function Row({ c, onOpen }: { c: CallView; onOpen: () => void }) {
+function Row({ c, onOpen, sealing }: { c: CallView; onOpen: () => void; sealing: boolean }) {
   return (
     <div className="fi" onClick={onOpen} style={{ cursor: "pointer" }}>
       <Avatar a={c.agent} />
-      <div style={{ minWidth: 0 }}><b>{c.agent.name}</b><p>{c.subject ? shortHash(c.subject) + " · " : ""}{c.label}</p></div>
+      <div style={{ minWidth: 0 }}><b>{c.agent.name}</b><p>{c.symbol ? `$${c.symbol} · ` : c.subject ? shortAddr(c.subject) + " · " : ""}{c.label}</p></div>
       <div className="fi-r">
         <Status c={c.status} gradesAt={c.gradesAt} />
-        <small>{c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>{shortHash(c.claimHash!)}</a> : "sealing…"}</small>
+        <small>{c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>{shortHash(c.claimHash!)}</a> : sealing ? "sealing…" : "not sealed yet"}</small>
       </div>
     </div>
   );
@@ -75,20 +75,28 @@ export default function LiveFeed() {
               </div>
             </div>
             <div className="feed-body" id="feed" key={filter}>
-              {rows.map((c) => <Row key={c.id} c={c} onOpen={() => openAgent(c.agent.slug)} />)}
+              {rows.map((c) => <Row key={c.id} c={c} sealing={stats.sealingEnabled} onOpen={() => openAgent(c.agent.slug)} />)}
               {!rows.length && (
                 <div className="empty">{filter === "all" ? "No sealed calls yet. Open any agent and run it: its call lands here the second it's sealed." : "Nothing here yet."}</div>
               )}
             </div>
           </div>
           <div className="kpis">
-            <div className="kpi rv spot">
-              <small>Sealed today</small>
-              <strong>{stats.sealedToday.toLocaleString("en-US")}</strong>
-              <em style={growth === null ? { color: "var(--t3)" } : growth < 0 ? { color: "var(--miss)" } : undefined}>
-                {growth === null ? "UTC day" : `${growth >= 0 ? "+" : ""}${growth}% vs yesterday`}
-              </em>
-            </div>
+            {stats.sealingEnabled ? (
+              <div className="kpi rv spot">
+                <small>Sealed today</small>
+                <strong>{stats.sealedToday.toLocaleString("en-US")}</strong>
+                <em style={growth === null ? { color: "var(--t3)" } : growth < 0 ? { color: "var(--miss)" } : undefined}>
+                  {growth === null ? "UTC day" : `${growth >= 0 ? "+" : ""}${growth}% vs yesterday`}
+                </em>
+              </div>
+            ) : (
+              <div className="kpi rv spot">
+                <small>Calls, last 24h</small>
+                <strong>{stats.calls24h.toLocaleString("en-US")}</strong>
+                <em style={{ color: "var(--t3)" }}>made by agents</em>
+              </div>
+            )}
             <div className="kpi rv spot">
               <small>Network hit rate, 24h</small>
               <div className="ringw">
@@ -99,6 +107,7 @@ export default function LiveFeed() {
                 </svg>
                 <strong>{hit === null ? "—" : `${hit}%`}</strong>
               </div>
+              {hit === null && <em style={{ color: "var(--t3)" }} suppressHydrationWarning>{countdown ? `First results in ${countdown}` : "Starts with the first graded call"}</em>}
             </div>
             <div className="kpi rv spot">
               <small>Waiting to be graded</small>

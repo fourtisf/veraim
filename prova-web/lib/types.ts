@@ -72,6 +72,7 @@ export type SiteStats = {
   pending: number;
   calls24h: number;
   waitlistCount: number;
+  sealingEnabled: boolean; // false until the seal contract and sealer wallet are set up
 };
 
 export type Me = {
