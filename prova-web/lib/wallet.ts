@@ -1,5 +1,6 @@
 // Browser wallet transactions: paying for runs and withdrawing earnings on VeraimRuns.
 import { encodeFunctionData, type Abi } from "viem";
+import { activeProvider, type Eip1193 } from "./walletProviders";
 
 export type ChainInfo = { chainId: number; name: string; rpcUrl: string; explorer: string; runsContract: string | null; usdg: string; enabled: boolean };
 export type Quote = { ref: string; quantity: number; asset: "ETH" | "USDG"; amount: string; amountUsd: number; agentSeq: number };
@@ -16,10 +17,9 @@ const ERC20_ABI = [
   { type: "function", name: "allowance", stateMutability: "view", inputs: [{ type: "address" }, { type: "address" }], outputs: [{ type: "uint256" }] },
 ] as const satisfies Abi;
 
-type Eth = { request: (a: { method: string; params?: unknown[] }) => Promise<any> };
-function eth(): Eth {
-  const e = (window as any).ethereum as Eth | undefined;
-  if (!e) throw new Error("No wallet found. Open Veraim in your wallet app's browser.");
+function eth(): Eip1193 {
+  const e = activeProvider();
+  if (!e) throw new Error("No wallet connected. Click Connect wallet first.");
   return e;
 }
 const hex = (n: bigint | number) => "0x" + BigInt(n).toString(16);

@@ -1,14 +1,16 @@
 "use client";
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
-import { api, ApiError, NoWalletError, signInWithWallet } from "@/lib/client";
+import { api, ApiError, signInWithWallet } from "@/lib/client";
+import { activeProvider, clearActiveWallet, setActiveWallet, startDiscovery, type WalletOption } from "@/lib/walletProviders";
 import type { Me } from "@/lib/types";
 import AgentDrawer from "./AgentDrawer";
 import CommandPalette from "./CommandPalette";
 import Toast from "./Toast";
+import WalletModal from "./WalletModal";
 import WaitlistModal, { type WaitlistSource } from "./WaitlistModal";
 
-// Shared state for every page: signed-in wallet, toast, agent drawer, ⌘K palette, waitlist modal.
+// Shared state for every page: signed-in wallet, wallet picker, toast, agent drawer, ⌘K palette, waitlist modal.
 type UI = {
   me: Me;
   meLoaded: boolean;
@@ -47,7 +49,9 @@ export default function UIProvider({ children }: { children: ReactNode }) {
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [waitlist, setWaitlist] = useState<{ source: WaitlistSource; agentName?: string } | null>(null);
   const [dataVersion, setDataVersion] = useState(0);
+  const [walletOpen, setWalletOpen] = useState(false);
   const connecting = useRef<Promise<boolean> | null>(null);
+  const settle = useRef<((ok: boolean) => void) | null>(null);
 
   const toast = useCallback((msg: string) => {
     setToastMsg(msg);
@@ -67,32 +71,54 @@ export default function UIProvider({ children }: { children: ReactNode }) {
     refreshMe();
   }, [refreshMe]);
 
+  useEffect(() => startDiscovery(), []);
+
+  // Opens the wallet picker; resolves true once signed in, false if the picker is closed.
   const connect = useCallback(() => {
-    connecting.current ??= (async () => {
-      try {
-        await signInWithWallet();
-        await refreshMe();
-        toast("Wallet connected");
-        return true;
-      } catch (err) {
-        if (err instanceof NoWalletError) setWaitlist({ source: "wallet" });
-        else if ((err as { code?: number }).code === 4001) toast("Signature cancelled");
-        else toast(err instanceof Error ? err.message : "Couldn't connect your wallet");
-        return false;
-      } finally {
-        connecting.current = null;
-      }
-    })();
+    connecting.current ??= new Promise<boolean>((resolve) => {
+      settle.current = resolve;
+      setWalletOpen(true);
+    }).finally(() => {
+      connecting.current = null;
+    });
     return connecting.current;
-  }, [refreshMe, toast]);
+  }, []);
+
+  const closeWallet = useCallback((ok: boolean) => {
+    setWalletOpen(false);
+    settle.current?.(ok);
+    settle.current = null;
+  }, []);
+
+  const pickWallet = useCallback(async (w: WalletOption) => {
+    await signInWithWallet(w.provider);
+    setActiveWallet(w);
+    await refreshMe();
+    toast(`Connected with ${w.name}`);
+    closeWallet(true);
+  }, [refreshMe, toast, closeWallet]);
 
   const requireWallet = useCallback(async () => !!me || connect(), [me, connect]);
 
   const signOut = useCallback(async () => {
     await api("/api/auth/logout", { body: {} }).catch(() => {});
+    clearActiveWallet();
     setMe(null);
     toast("Signed out");
   }, [toast]);
+
+  // Switching accounts in the wallet signs out, so actions never run as the wrong wallet.
+  const myWallet = me?.wallet;
+  useEffect(() => {
+    const p = myWallet ? activeProvider() : null;
+    if (!p?.on) return;
+    const onAccounts = (accounts: string[]) => {
+      if (!accounts[0] || accounts[0].toLowerCase() === myWallet!.toLowerCase()) return; // locked or same wallet
+      signOut().then(() => toast("Wallet changed. Connect again to continue."));
+    };
+    p.on("accountsChanged", onAccounts);
+    return () => p.removeListener?.("accountsChanged", onAccounts);
+  }, [myWallet, signOut, toast]);
 
   const openAgent = useCallback((slug: string) => {
     setAgentSlug(slug);
@@ -137,11 +163,12 @@ export default function UIProvider({ children }: { children: ReactNode }) {
         setDrawerOpen(false);
         setPaletteOpen(false);
         setWaitlist(null);
+        if (settle.current) closeWallet(false);
       }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, []);
+  }, [closeWallet]);
 
   const ui = useMemo<UI>(
     () => ({
@@ -169,6 +196,7 @@ export default function UIProvider({ children }: { children: ReactNode }) {
       <AgentDrawer session={openCount} slug={agentSlug} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <Toast msg={toastMsg} on={toastOn} />
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
+      {walletOpen && <WalletModal onPick={pickWallet} onClose={() => closeWallet(false)} />}
       {waitlist && <WaitlistModal {...waitlist} onClose={() => setWaitlist(null)} />}
     </Ctx.Provider>
   );
