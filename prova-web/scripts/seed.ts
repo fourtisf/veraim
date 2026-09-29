@@ -1,4 +1,5 @@
 // Creates (or updates) Veraim's official starter agents. Safe to run more than once.
+// Slugs stay the same as before (bundle-hound, …) so links and call history keep working.
 // Run: npx tsx scripts/seed.ts
 import "dotenv/config";
 import { prisma } from "../lib/db";
@@ -6,8 +7,8 @@ import { prisma } from "../lib/db";
 const AGENTS = [
   {
     slug: "bundle-hound",
-    name: "Bundle Hound",
-    ticker: "HOUND",
+    name: "Veraim Safety Agent",
+    ticker: "VSAFE",
     tagline: "Flags bundled launches before you buy",
     category: "Security",
     gradingMode: "verdict24h",
@@ -18,8 +19,8 @@ const AGENTS = [
   },
   {
     slug: "tidewatch",
-    name: "Tidewatch",
-    ticker: "TIDE",
+    name: "Veraim Whale Agent",
+    ticker: "VWHALE",
     tagline: "Calls whale entries on Robinhood Chain",
     category: "Trading calls",
     gradingMode: "price7d",
@@ -30,8 +31,8 @@ const AGENTS = [
   },
   {
     slug: "dev-ledger",
-    name: "Dev Ledger",
-    ticker: "DEVL",
+    name: "Veraim Dev Agent",
+    ticker: "VDEV",
     tagline: "Scores a deployer from every past launch",
     category: "Security",
     gradingMode: "verdict24h",
@@ -42,8 +43,8 @@ const AGENTS = [
   },
   {
     slug: "deepstack",
-    name: "Deepstack",
-    ticker: "DEEP",
+    name: "Veraim Research Agent",
+    ticker: "VRES",
     tagline: "A one-page research brief on any token",
     category: "Research",
     gradingMode: "price7d",

@@ -165,7 +165,7 @@ npm run seed
 
 - `npm ci` installs everything the build needs. Don't add `--omit=dev`.
 - `prisma migrate deploy` creates the tables.
-- `npm run seed` adds Veraim's four official agents: Bundle Hound, Tidewatch, Dev Ledger and Deepstack. They start with no calls; their records build up from real use.
+- `npm run seed` adds Veraim's four official agents: Veraim Safety Agent, Veraim Whale Agent, Veraim Dev Agent and Veraim Research Agent. They start with no calls; their records build up from real use.
 
 ## Step 7: Put the contracts on Robinhood Chain
 
@@ -238,7 +238,7 @@ When Certbot asks, enter your email and agree to the terms. If it asks about red
 
 1. Open `https://veraim.xyz`. It should load with the padlock.
 2. Click **Connect wallet** and sign the message. The button changes to your address.
-3. Open **Bundle Hound**, paste a real token address from Robinhood Chain, and press **Run**. After 20–40 seconds you get an answer, and it says "sealing onchain…".
+3. Open **Veraim Safety Agent**, paste a real token address from Robinhood Chain, and press **Run**. After 20–40 seconds you get an answer, and it says "sealing onchain…".
 4. About a minute later, open the agent's **Receipts** tab. The call shows a "seal ↗" link to the explorer.
 5. Use up the 5 free runs of one agent. A **Buy runs** box appears. Buy 1 run with a little ETH: your wallet asks to switch to Robinhood Chain, then to confirm. "1 run added" appears.
 6. Open `https://veraim.xyz/admin`. The "Setup checks" box shows which features are on, and "Money" shows the payment.

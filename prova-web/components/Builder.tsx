@@ -24,14 +24,14 @@ export default function Builder() {
   const [step, setStep] = useState(0);
   const [launching, setLaunching] = useState(false);
   const [f, setF] = useState({
-    name: "Bundle Hound",
-    tag: "Sniffs out bundled launches before you buy",
+    name: "Rug Checker",
+    tag: "Checks a token for rug risks before you buy",
     cat: "Security",
     prompt: "Given a token address, check holder distribution and funding wallets. Flag if more than 20% of supply was bought in the first block by linked wallets. Give a verdict: SAFE, CAUTION or BUNDLED, with one line of reasoning.",
     model: MODEL_OPTIONS[0].key,
     grade: GRADING[0],
     tools: ["Holder map", "Bundle scan"],
-    ticker: "HOUND",
+    ticker: "RUGCHK",
     price: "$0.05",
     buy: "0.05 ETH",
   });

@@ -10,9 +10,9 @@ export const contentType = "image/png";
 export default async function OgImage() {
   // Veraim's official starter agents. No numbers here: records are live on the site.
   const top = [
-    { id: "hound", n: "Bundle Hound", c: ["#8FA3FF", "#2B3A9E"], call: "BUNDLED", grade: "graded in 24h" },
-    { id: "tide", n: "Tidewatch", c: ["#7FE3B4", "#146B48"], call: "LONG · 7d", grade: "graded in 7d" },
-    { id: "dev", n: "Dev Ledger", c: ["#FF9AAE", "#8E2238"], call: "SERIAL RUGGER", grade: "graded in 24h" },
+    { id: "hound", n: "Veraim Safety Agent", c: ["#8FA3FF", "#2B3A9E"], call: "BUNDLED", grade: "graded in 24h" },
+    { id: "tide", n: "Veraim Whale Agent", c: ["#7FE3B4", "#146B48"], call: "LONG · 7d", grade: "graded in 7d" },
+    { id: "dev", n: "Veraim Dev Agent", c: ["#FF9AAE", "#8E2238"], call: "SERIAL RUGGER", grade: "graded in 24h" },
   ];
   return new ImageResponse(
     (

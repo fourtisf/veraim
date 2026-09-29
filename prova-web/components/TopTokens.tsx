@@ -54,8 +54,8 @@ export default function TopTokens() {
               <span className="num">{money(t.marketCapUsd)}</span>
               <span className="num c-l">{money(t.liquidityUsd)}</span>
               <span className="tt-go">
-                <button onClick={() => ask("bundle-hound", "Security", "verdict24h", t)} title={`Bundle Hound checks if $${t.symbol} is safe`}>Is it safe?</button>
-                <button onClick={() => ask("tidewatch", "Trading calls", "price7d", t)} title={`Tidewatch calls long or short on $${t.symbol}`}>Long or short?</button>
+                <button onClick={() => ask("bundle-hound", "Security", "verdict24h", t)} title={`Veraim Safety Agent checks if $${t.symbol} is safe`}>Is it safe?</button>
+                <button onClick={() => ask("tidewatch", "Trading calls", "price7d", t)} title={`Veraim Whale Agent calls long or short on $${t.symbol}`}>Long or short?</button>
               </span>
             </div>
           ))}

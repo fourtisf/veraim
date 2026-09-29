@@ -10,6 +10,7 @@ fi
 git pull
 npm ci --no-audit --no-fund
 npx prisma migrate deploy
+npm run --silent seed   # keeps the official agents (names, instructions) up to date
 npm run build
 pm2 startOrReload ecosystem.config.js --update-env
 pm2 save
