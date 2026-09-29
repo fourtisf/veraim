@@ -33,7 +33,7 @@ body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antiali
 .hit{color:var(--hit);background:rgba(74,222,154,.12);box-shadow:inset 0 0 0 1px rgba(74,222,154,.3)}
 .tr{display:grid;grid-template-columns:44px 1fr 150px 110px 170px;gap:14px;align-items:center;padding:18px 8px;border-top:1px solid var(--b1);font-size:24px}
 .tr:first-child{border-top:0}
-.tr .ic{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:20px;color:#111}
+.tr .ic{width:44px;height:44px;border-radius:50%;object-fit:cover;box-shadow:0 0 0 1px rgba(255,255,255,.1)}
 .btn{height:46px;border-radius:12px;display:grid;place-items:center;font-size:20px;font-weight:500;box-shadow:inset 0 0 0 1px var(--b2)}
 .bubble{border-radius:22px;padding:20px 26px;font-size:28px;line-height:1.4;display:inline-block;max-width:640px}
 .agent{border-radius:24px;padding:30px;background:linear-gradient(180deg,#111114,#0A0A0C);box-shadow:inset 0 0 0 1px var(--b2)}
@@ -75,7 +75,7 @@ body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antiali
   <div class="feat">
     <div><div class="num mono">01</div>
       <div class="ft"><span class="w">Pick</span> <span class="w">any</span> <span class="w">token.</span></div>
-      <div class="fs">The top tokens on Robinhood Chain,<br>live, with one click to ask.</div></div>
+      <div class="fs">The top tokens on Robinhood Chain, live.<br>Click one, or paste any address.</div></div>
     <div class="card" id="c4" style="padding:26px 34px">
       <div class="tr label" style="font-size:19px;letter-spacing:.06em;text-transform:uppercase"><span>#</span><span>Token</span><span>Market cap</span><span>24h</span><span></span></div>
       <div id="rows4"></div>
@@ -88,11 +88,11 @@ body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antiali
   <div class="feat">
     <div><div class="num mono">02</div>
       <div class="ft"><span class="w">Get</span> <span class="w">a</span> <span class="w">clear</span> <span class="w">answer.</span></div>
-      <div class="fs">Live holders, dev history and<br>whale flow, read by AI in seconds.</div></div>
+      <div class="fs">Live holders, dev history and whale<br>flow on any token, read by AI in seconds.</div></div>
     <div class="card" id="c5" style="height:600px;display:flex;flex-direction:column">
       <div class="row"><div class="vlogo"><svg width="34" height="34"><use href="#mk"/></svg></div><div><div style="font-size:32px;font-weight:600">Veraim Safety Agent</div><div class="label">Security · Official Veraim AI</div></div></div>
       <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:20px;padding-top:20px">
-        <div id="q5" class="bubble" style="align-self:flex-end;background:#EDEDEF;color:#000;border-radius:22px 22px 6px 22px">Is <b class="mono">$NOVA</b> safe to buy?</div>
+        <div id="q5" class="bubble" style="align-self:flex-end;background:#EDEDEF;color:#000;border-radius:22px 22px 6px 22px">Is <b class="mono">0x9a3…f21</b> safe to buy?</div>
         <div id="wait5" class="mono" style="font-size:22px;color:var(--t2)">Reading live onchain data… 1s</div>
         <div id="a5" style="align-self:flex-start">
           <div class="bubble" style="background:var(--s4);border-radius:22px 22px 22px 6px"><span class="tag risky" style="font-size:20px;margin-bottom:12px">RISKY</span><br>Top 5 wallets were funded by one address and hold 38% of supply. The dev sold in the first hour.</div>
@@ -125,7 +125,7 @@ body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antiali
       <div class="ft"><span class="w">See</span> <span class="w">who's</span> <span class="w">actually</span> <span class="w">right.</span></div>
       <div class="fs">24 hours later the market grades<br>every call: <span style="color:var(--hit)">hit</span> or <span style="color:var(--miss)">miss</span>.</div></div>
     <div class="card">
-      <div class="row" style="justify-content:space-between"><div><div style="font-size:30px;font-weight:600"><span class="mono">$NOVA</span> · <span style="color:var(--miss)">RISKY</span></div><div class="label">Price after the call</div></div><div class="mono" id="timer7" style="font-size:38px">00:00:00</div></div>
+      <div class="row" style="justify-content:space-between"><div><div style="font-size:30px;font-weight:600"><span class="mono">0x9a3…f21</span> · <span style="color:var(--miss)">RISKY</span></div><div class="label">Price after the call</div></div><div class="mono" id="timer7" style="font-size:38px">00:00:00</div></div>
       <svg width="740" height="280" viewBox="0 0 740 280" style="margin-top:26px;display:block">
         <defs><linearGradient id="f7" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F2667E" stop-opacity=".28"/><stop offset="1" stop-color="#F2667E" stop-opacity="0"/></linearGradient><clipPath id="cl7"><rect id="clr7" x="0" y="0" width="0" height="280"/></clipPath></defs>
         <g clip-path="url(#cl7)"><path id="ar7" fill="url(#f7)"/><path id="ln7" fill="none" stroke="#F2667E" stroke-width="5" stroke-linejoin="round" stroke-linecap="round"/></g>
@@ -147,6 +147,7 @@ body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antiali
   </div>
 </div>
 
+<div id="note4" class="mono" style="position:absolute;left:140px;bottom:64px;font-size:18px;letter-spacing:.08em;color:var(--t3);opacity:0">MARKET DATA FROM VERAIM.XYZ · 29 SEP 2026</div>
 <div id="note" class="mono" style="position:absolute;left:140px;bottom:64px;font-size:18px;letter-spacing:.08em;color:var(--t3);opacity:0">ILLUSTRATIVE EXAMPLE · NOT FINANCIAL ADVICE</div>
 <svg width="1920" height="1080" style="position:absolute;inset:0;opacity:.06;pointer-events:none"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
 <div id="fade" style="position:absolute;inset:0;background:#000;opacity:1"></div>
@@ -173,10 +174,11 @@ function motion(el, t, [a, b]) { const x = prog(t, a, b), o = eio(prog(t, b - .4
 const CHIPS = [["+420% in 1h", 170, 170], ["BUY NOW", 1460, 150], ["Bundled?", 250, 830], ["Honeypot?", 1380, 860], ["Dev wallet?", 820, 110], ["100x soon", 900, 920], ["Rug?", 120, 520], ["Safe?", 1600, 520]];
 const chipEls = CHIPS.map(([s, x, y]) => { const c = document.createElement("div"); c.className = "chip"; c.textContent = s; c.style.left = x + "px"; c.style.top = y + "px"; $("chips").appendChild(c); return c; });
 
-const TOK = [["NOVA", "$412M", "+4.7%", "#C9F27A"], ["ORBIT", "$288M", "−0.5%", "#8FA3FF"], ["KITE", "$173M", "−9.6%", "#FFD08A"], ["MOSS", "$69M", "−3.9%", "#8FE3F0"], ["FLUX", "$41M", "+2.1%", "#FF9AAE"]];
+// Real top tokens on veraim.xyz (DexScreener, 29 Sep 2026).
+const TOK = [["VIRTUAL", "$536.1M", "+4.7%", "virtual"], ["PONS", "$366.3M", "−0.5%", "pons"], ["AI", "$201.0M", "−11.4%", "ai"], ["CASHCAT", "$172.0M", "−9.6%", "cashcat"], ["ORBIO", "$68.6M", "−3.9%", "orbio"]];
 const rowEls = TOK.map(([s, mc, ch, c], i) => {
   const r = document.createElement("div"); r.className = "tr";
-  r.innerHTML = `<span class="mono" style="color:var(--t3);font-size:20px">0${i + 1}</span><span class="row" style="gap:14px"><span class="ic" style="background:${c}">${s[0]}</span><b style="font-weight:600">$${s}</b></span><span>${mc}</span><span style="color:${ch.startsWith("+") ? "var(--hit)" : "var(--miss)"}">${ch}</span><span class="btn">Is it safe?</span>`;
+  r.innerHTML = `<span class="mono" style="color:var(--t3);font-size:20px">0${i + 1}</span><span class="row" style="gap:14px"><img class="ic" src="tokens/${c}.png" alt=""><b style="font-weight:600">$${s}</b></span><span>${mc}</span><span style="color:${ch.startsWith("+") ? "var(--hit)" : "var(--miss)"}">${ch}</span><span class="btn">Is it safe?</span>`;
   $("rows4").appendChild(r); return r;
 });
 
@@ -189,7 +191,8 @@ const at7 = (x) => { const f = x * (PTS.length - 1), i = Math.min(PTS.length - 2
 window.render = function (t) {
   $("fade").style.opacity = 1 - eo(prog(t, 0, .5)) + eio(prog(t, DURATION - .6, DURATION));
   $("bg").style.transform = `translate(${-t * 4}px,${-t * 2}px)`;
-  $("note").style.opacity = .8 * Math.min(eo(prog(t, S.s4[0] + .6, S.s4[0] + 1.2)), 1 - eio(prog(t, S.s7[1] - .6, S.s7[1])));
+  $("note4").style.opacity = .8 * Math.min(eo(prog(t, S.s4[0] + .6, S.s4[0] + 1.2)), 1 - eio(prog(t, S.s4[1] - .5, S.s4[1])));
+  $("note").style.opacity = .8 * Math.min(eo(prog(t, S.s5[0] + .3, S.s5[0] + .9)), 1 - eio(prog(t, S.s7[1] - .6, S.s7[1])));
 
   const s1 = $("s1"); s1.style.opacity = alpha(t, S.s1, .3, .5); motion(s1, t, S.s1);
   words($("s1a"), t, .2); words($("s1b"), t, 1.5, .1);
@@ -207,9 +210,9 @@ window.render = function (t) {
   const s4 = $("s4"), t4 = S.s4[0]; s4.style.opacity = alpha(t, S.s4); motion(s4, t, S.s4);
   show(s4.querySelector(".num"), t, t4 + .1); words(s4.querySelector(".ft"), t, t4 + .2); show(s4.querySelector(".fs"), t, t4 + .8); show($("c4"), t, t4 + .2, .8, 60);
   rowEls.forEach((r, i) => show(r, t, t4 + .7 + i * .12, .5, 18));
-  const pick = prog(t, t4 + 3.0, t4 + 3.3), press = t > t4 + 3.6 && t < t4 + 3.85;
-  rowEls[0].style.background = `rgba(226,205,166,${.08 * eo(pick)})`; rowEls[0].style.borderRadius = "14px";
-  const b0 = rowEls[0].querySelector(".btn"); b0.style.background = pick > .5 ? "#EDEDEF" : "transparent"; b0.style.color = pick > .5 ? "#000" : ""; b0.style.transform = `scale(${press ? .92 : 1})`;
+  // a soft highlight sweeps down the list, like a cursor browsing
+  const sweep = (t - (t4 + 1.8)) / .55;
+  rowEls.forEach((r, i) => { const a = Math.max(0, 1 - Math.abs(sweep - i)); r.style.background = `rgba(226,205,166,${.07 * a})`; r.style.borderRadius = "14px"; });
 
   const s5 = $("s5"), t5 = S.s5[0]; s5.style.opacity = alpha(t, S.s5); motion(s5, t, S.s5);
   show(s5.querySelector(".num"), t, t5 + .1); words(s5.querySelector(".ft"), t, t5 + .2); show(s5.querySelector(".fs"), t, t5 + .8); show($("c5"), t, t5 + .2, .8, 60);
