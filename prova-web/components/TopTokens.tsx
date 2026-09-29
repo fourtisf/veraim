@@ -35,7 +35,7 @@ export default function TopTokens() {
           <p>The biggest tokens on {SITE.chain} right now. Pick one and an agent checks it for you. Every answer is sealed onchain and graded by the market.</p>
         </div>
         <div className="list tt rv">
-          <div className="tt-row hd"><span>#</span><span>Token</span><span className="c-p">Price</span><span>24h</span><span>Market cap</span><span className="c-l">Liquidity</span><span /></div>
+          <div className="tt-row hd"><span>#</span><span>Token</span><span className="c-p">Price</span><span>24h</span><span>Market cap</span><span className="c-l">Liquidity</span><span className="tt-ask">Ask an agent</span></div>
           {!tokens && <div className="empty">Loading live market data…</div>}
           {tokens?.map((t, i) => (
             <div className="tt-row" key={t.address}>
@@ -54,8 +54,8 @@ export default function TopTokens() {
               <span className="num">{money(t.marketCapUsd)}</span>
               <span className="num c-l">{money(t.liquidityUsd)}</span>
               <span className="tt-go">
-                <button onClick={() => ask("bundle-hound", "Security", "verdict24h", t)}>Safe?</button>
-                <button onClick={() => ask("tidewatch", "Trading calls", "price7d", t)}>Long or short?</button>
+                <button onClick={() => ask("bundle-hound", "Security", "verdict24h", t)} title={`Bundle Hound checks if $${t.symbol} is safe`}>Is it safe?</button>
+                <button onClick={() => ask("tidewatch", "Trading calls", "price7d", t)} title={`Tidewatch calls long or short on $${t.symbol}`}>Long or short?</button>
               </span>
             </div>
           ))}

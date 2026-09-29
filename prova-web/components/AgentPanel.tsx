@@ -52,12 +52,14 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
   const [tab, setTab] = useState("try");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [pending, setPending] = useState(false);
-  const [q, setQ] = useState(ask || "");
+  const [q, setQ] = useState("");
   const [popular, setPopular] = useState<PopularToken[]>([]);
   useEffect(() => {
     loadPopular().then(setPopular);
   }, []);
   const chatRef = useRef<HTMLDivElement>(null);
+  const runRef = useRef<(text: string) => void>();
+  const asked = useRef(false);
 
   const load = useCallback(async () => {
     try {
@@ -76,6 +78,14 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
     const c = chatRef.current;
     if (c) c.scrollTop = c.scrollHeight;
   }, [msgs, pending]);
+
+  // Opened with a question (e.g. "Safe?" on a token): ask it right away, in view.
+  useEffect(() => {
+    if (!ask || !data || asked.current) return;
+    asked.current = true;
+    chatRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    runRef.current?.(ask);
+  }, [ask, data]);
 
   if (!data) return <div className="empty">{loadError || "Loading…"}</div>;
   const a = data.agent;
@@ -99,6 +109,8 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
       setPending(false);
     }
   };
+
+  runRef.current = run;
 
   const left = data.freeRunsLeft;
   const paidLeft = data.paidRunsLeft || 0;
