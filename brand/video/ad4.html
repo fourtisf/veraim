@@ -1,0 +1,182 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Veraim: $VERAIM launch, product tour</title>
+<style>
+@font-face{font-family:Geist;src:url(Geist-Variable.woff2) format("woff2");font-weight:100 900}
+@font-face{font-family:"Geist Mono";src:url(GeistMono-Variable.woff2) format("woff2");font-weight:100 900}
+:root{--b2:rgba(255,255,255,.1);--t1:#EDEDEF;--t2:#A0A0A8;--t3:#7E7E88;--gold:#E2CDA6;--gold2:#BFA57A;--hit:#4ADE9A}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#000}
+body{font-family:Geist,sans-serif;color:var(--t1);-webkit-font-smoothing:antialiased;letter-spacing:-.02em}
+.mono{font-family:"Geist Mono",monospace;letter-spacing:0}
+#bg{position:absolute;inset:-60px;background:radial-gradient(900px 520px at 50% 0%,rgba(226,205,166,.12),transparent 70%),linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px) 0 0/96px 96px,linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px) 0 0/96px 96px;-webkit-mask-image:radial-gradient(1200px 800px at 50% 40%,#000 30%,transparent 100%)}
+#glow{position:absolute;width:1400px;height:1400px;left:260px;top:-160px;border-radius:50%;background:radial-gradient(closest-side,rgba(226,205,166,.2),transparent);opacity:0}
+.scene{position:absolute;inset:0;opacity:0}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.w{display:inline-block}
+/* browser frame */
+.browser{position:absolute;left:600px;top:128px;width:1240px;border-radius:22px;overflow:hidden;background:#0A0A0C;box-shadow:0 0 0 1px rgba(255,255,255,.12),0 50px 140px rgba(0,0,0,.75),0 0 120px rgba(226,205,166,.06)}
+.bar{height:48px;display:flex;align-items:center;gap:9px;padding:0 18px;background:#111114;border-bottom:1px solid rgba(255,255,255,.07)}
+.bar i{width:12px;height:12px;border-radius:50%;background:#2a2a30}
+.url{margin:0 auto;height:30px;padding:0 18px;border-radius:9px;background:#0A0A0C;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);display:flex;align-items:center;gap:8px;font-family:"Geist Mono",monospace;font-size:15px;color:var(--t2)}
+.vp{position:relative;width:1240px;height:775px;overflow:hidden}
+.zoom{position:absolute;left:0;top:0;width:1440px;height:900px;transform-origin:0 0}
+.zoom img{width:1440px;height:900px;display:block}
+.cap{position:absolute;left:110px;top:0;height:1080px;width:440px;display:flex;flex-direction:column;justify-content:center}
+.num{font-size:24px;color:var(--gold);margin-bottom:24px;display:flex;align-items:center;gap:16px}
+.num:after{content:"";width:60px;height:1px;background:var(--gold2)}
+.ttl{font-size:72px;font-weight:600;letter-spacing:-.045em;line-height:1.04}
+.sub{font-size:28px;color:var(--t2);line-height:1.42;margin-top:26px;letter-spacing:-.012em}
+.cursor{position:absolute;left:0;top:0;width:34px;height:34px;opacity:0;filter:drop-shadow(0 4px 10px rgba(0,0,0,.6));pointer-events:none}
+.ring{position:absolute;width:60px;height:60px;border-radius:50%;box-shadow:0 0 0 3px rgba(226,205,166,.9);opacity:0;pointer-events:none}
+.note{position:absolute;left:110px;bottom:56px;font-family:"Geist Mono",monospace;font-size:17px;letter-spacing:.09em;color:var(--t3);opacity:0}
+.coin{position:relative;width:400px;height:400px;border-radius:50%;background:conic-gradient(from 200deg,#8a7650,#F4E6CC,#BFA57A,#6f5f3e,#E2CDA6,#8a7650);padding:13px;box-shadow:0 0 120px rgba(226,205,166,.35),0 40px 100px rgba(0,0,0,.7)}
+.coin .face{width:100%;height:100%;border-radius:50%;background:radial-gradient(circle at 35% 25%,#1a1a1e,#050506 70%);display:grid;place-items:center;overflow:hidden;position:relative;box-shadow:inset 0 0 0 2px rgba(255,255,255,.08)}
+.coin .shine{position:absolute;inset:-40%;background:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.22) 50%,transparent 58%)}
+.pill{display:inline-flex;align-items:center;gap:12px;height:58px;padding:0 26px;border-radius:999px;font-size:24px;color:var(--t2);background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px var(--b2)}
+.dot{width:13px;height:13px;border-radius:50%;background:var(--hit);box-shadow:0 0 18px var(--hit)}
+</style>
+</head>
+<body>
+<div id="bg"></div><div id="glow"></div>
+<svg width="0" height="0" style="position:absolute"><defs><symbol id="mk" viewBox="0 0 120 120"><path d="M22 20 L49 70 M98 20 L71 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/><circle cx="60" cy="96" r="13" fill="#EDEDEF"/></symbol></defs></svg>
+
+<!-- intro -->
+<div class="scene center" id="s1">
+  <div style="display:flex;align-items:center;gap:18px">
+    <svg width="190" height="190" viewBox="0 0 120 120">
+      <path id="p1" d="M22 20 L49 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/>
+      <path id="p2" d="M98 20 L71 70" fill="none" stroke="#EDEDEF" stroke-width="20" stroke-linecap="round"/>
+      <circle id="dot" cx="60" cy="96" r="13" fill="#EDEDEF"/>
+    </svg>
+    <div id="wmwrap" style="overflow:hidden;width:0"><div id="wm" style="font-size:168px;font-weight:600;letter-spacing:-.055em;white-space:nowrap;padding-right:10px">Veraim</div></div>
+  </div>
+  <div id="tag1" style="font-size:44px;color:var(--t2);margin-top:40px">AI that checks <span style="color:var(--t1)">every token</span> on Robinhood Chain.</div>
+</div>
+
+<div id="tour"></div>
+
+<!-- launch -->
+<div class="scene" id="s7">
+  <div style="display:flex;align-items:center;justify-content:center;gap:110px;height:100%">
+    <div class="coin" id="coin"><div class="face"><svg width="200" height="200"><use href="#mk"/></svg><div class="shine" id="shine"></div></div></div>
+    <div>
+      <div id="l1" class="mono" style="font-size:26px;color:var(--gold);letter-spacing:.14em">NOW LIVE</div>
+      <div id="l2" style="font-size:180px;font-weight:600;letter-spacing:-.055em;line-height:1;margin-top:16px">$VERAIM</div>
+      <div id="l3" style="font-size:40px;color:var(--t2);margin-top:24px;max-width:760px;line-height:1.3">The token behind the AI that checks every token.</div>
+      <div id="l4" style="display:flex;gap:14px;margin-top:40px;align-items:center">
+        <span class="pill"><span class="dot"></span>Live on Robinhood Chain</span>
+        <span style="height:58px;padding:0 30px;border-radius:16px;background:#EDEDEF;color:#000;display:flex;align-items:center;font-size:30px;font-weight:600">veraim.xyz</span>
+      </div>
+    </div>
+  </div>
+  <div id="nfa" class="mono" style="position:absolute;left:0;right:0;bottom:52px;text-align:center;font-size:17px;letter-spacing:.1em;color:var(--t3);opacity:0">NOT FINANCIAL ADVICE · DYOR</div>
+</div>
+
+<svg width="1920" height="1080" style="position:absolute;inset:0;opacity:.05;pointer-events:none"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency=".9" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>
+<div id="fade" style="position:absolute;inset:0;background:#000;opacity:1"></div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const prog = (t, a, b) => clamp((t - a) / (b - a));
+const eo = (x) => 1 - Math.pow(1 - x, 3), eo5 = (x) => 1 - Math.pow(1 - x, 5);
+const eio = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+const back = (x) => 1 + 2.7 * Math.pow(x - 1, 3) + 1.7 * Math.pow(x - 1, 2);
+const lerp = (a, b, x) => a + (b - a) * x;
+
+const K = 1240 / 1440; // screenshot px -> viewport px at zoom 1
+// Tour scenes: screenshot, caption, camera from/to (x, y = top-left in screenshot px, z = zoom), cursor path, click time.
+const TOUR = [
+  { id: "hero", t: [4.0, 9.4], img: "shots/hero.png", url: "veraim.xyz", n: "01", title: "Meet Veraim.", sub: "AI agents that check Robinhood Chain tokens for you, in seconds.",
+    cam: [{ x: 0, y: 0, z: 1 }, { x: 170, y: 60, z: 1.28 }] },
+  { id: "tokens", t: [9.2, 15.4], img: "shots/tokens.png", url: "veraim.xyz/#tokens", n: "02", title: "Every top token, live.", sub: "Price, market cap and liquidity for the biggest tokens on Robinhood Chain.",
+    cam: [{ x: 0, y: 0, z: 1 }, { x: 166, y: 200, z: 1.3 }], cur: [[1300, 820], [1085, 533]], curT: [1.9, 4.2], click: 4.6, note: "LIVE MARKET DATA ON VERAIM.XYZ" },
+  { id: "chat", t: [15.2, 22.0], img: "shots/chat.png", url: "veraim.xyz", n: "03", title: "Ask. Get a clear answer.", sub: "Paste any token. The AI reads holders, dev history and whale flow, then gives a verdict.",
+    cam: [{ x: 0, y: 0, z: 1 }, { x: 870, y: 170, z: 1.72 }], note: "ILLUSTRATIVE EXAMPLE · NOT FINANCIAL ADVICE" },
+  { id: "agents", t: [21.8, 27.0], img: "shots/agents.png", url: "veraim.xyz/#agents", n: "04", title: "Four official AI agents.", sub: "Safety, Dev, Whale and Research. Every call graded by the market. Free to try.",
+    cam: [{ x: 0, y: 0, z: 1 }, { x: 166, y: 205, z: 1.3 }] },
+  { id: "wallet", t: [26.8, 31.8], img: "shots/wallet.png", url: "veraim.xyz", n: "05", title: "Any wallet, one click.", sub: "MetaMask, Rabby, Phantom, OKX, Coinbase and more. No gas to sign in.",
+    cam: [{ x: 0, y: 0, z: 1 }, { x: 440, y: 90, z: 1.62 }], cur: [[1150, 700], [620, 302]], curT: [1.5, 3.3], click: 3.7 },
+];
+const S1 = [0, 4.2], S7 = [31.6, 39.0], DURATION = 39.0;
+
+const tour = $("tour");
+TOUR.forEach((s) => {
+  const el = document.createElement("div");
+  el.className = "scene"; el.id = "s-" + s.id;
+  el.innerHTML = `
+    <div class="cap"><div class="num mono">${s.n}</div><div class="ttl">${s.title.split(" ").map((w) => `<span class="w">${w}</span>`).join(" ")}</div><div class="sub">${s.sub}</div></div>
+    <div class="browser"><div class="bar"><i></i><i></i><i></i><div class="url"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7E7E88" stroke-width="2.4"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>${s.url}</div></div>
+      <div class="vp"><div class="zoom"><img src="${s.img}"></div><div class="ring"></div>
+        <svg class="cursor" viewBox="0 0 24 24"><path d="M4 2l16 9-7 2-3 7z" fill="#fff" stroke="#000" stroke-width="1.3" stroke-linejoin="round"/></svg></div></div>
+    ${s.note ? `<div class="note">${s.note}</div>` : ""}`;
+  tour.appendChild(el);
+  s.el = el;
+});
+
+const alpha = (t, [a, b], fi = .45, fo = .45, last = false) => Math.min(eo(prog(t, a, a + fi)), last ? 1 : 1 - eio(prog(t, b - fo, b)));
+function words(el, t, s, st = .07, d = .6) { [...el.querySelectorAll(".w")].forEach((w, i) => { const x = eo(prog(t, s + i * st, s + i * st + d)); w.style.opacity = x; w.style.transform = `translateY(${(1 - x) * 36}px)`; w.style.filter = `blur(${(1 - x) * 10}px)`; }); }
+function show(el, t, s, d = .6, dy = 30) { const x = eo(prog(t, s, s + d)); el.style.opacity = x; el.style.transform = `translateY(${(1 - x) * dy}px)`; return x; }
+
+window.render = function (t) {
+  $("fade").style.opacity = 1 - eo(prog(t, 0, .5)) + eio(prog(t, DURATION - .6, DURATION));
+  $("bg").style.transform = `translate(${-t * 4}px,${-t * 2}px)`;
+
+  // intro: logo draws in
+  const s1 = $("s1"); s1.style.opacity = alpha(t, S1, .2, .5);
+  s1.style.transform = `scale(${1 + prog(t, S1[0], S1[1]) * .03})`;
+  for (const [id, o] of [["p1", .25], ["p2", .35]]) { $(id).style.strokeDasharray = 57; $(id).style.strokeDashoffset = 57 * (1 - eio(prog(t, o, o + .7))); }
+  const dx = prog(t, 1.0, 1.5); $("dot").style.transformOrigin = "60px 96px"; $("dot").style.transform = `translateY(${(1 - back(dx)) * -70}px) scale(${dx > 0 ? back(dx) : 0})`; $("dot").style.opacity = dx > 0 ? 1 : 0;
+  const wx = eo5(prog(t, 1.55, 2.35)); $("wmwrap").style.width = wx * 580 + "px"; $("wm").style.transform = `translateX(${(1 - wx) * -60}px)`;
+  show($("tag1"), t, 2.3, .8, 24);
+  $("glow").style.opacity = .8 * Math.min(eo(prog(t, 0, 1.2)), 1 - eio(prog(t, S1[1] - .6, S1[1]))) + .7 * eo(prog(t, S7[0], S7[0] + 1.4));
+
+  // product tour
+  TOUR.forEach((s) => {
+    const [a, b] = s.t, el = s.el;
+    const al = alpha(t, s.t, .5, .5); el.style.opacity = al;
+    const out = eio(prog(t, b - .5, b));
+    el.style.filter = out > 0 ? `blur(${out * 8}px)` : "none";
+    words(el.querySelector(".ttl"), t, a + .25, .07);
+    show(el.querySelector(".num"), t, a + .15, .5, 20);
+    show(el.querySelector(".sub"), t, a + .8, .7, 20);
+    const br = el.querySelector(".browser"), bx = eo(prog(t, a, a + .9));
+    br.style.transform = `translateY(${(1 - bx) * 60}px) scale(${lerp(.96, 1, bx)})`;
+    // camera: hold, then ease into the feature
+    const c = eio(prog(t, a + .9, b - .7));
+    const x = lerp(s.cam[0].x, s.cam[1].x, c), y = lerp(s.cam[0].y, s.cam[1].y, c), z = lerp(s.cam[0].z, s.cam[1].z, c);
+    el.querySelector(".zoom").style.transform = `scale(${K * z}) translate(${-x}px,${-y}px)`;
+    const note = el.querySelector(".note"); if (note) note.style.opacity = .85 * Math.min(eo(prog(t, a + .8, a + 1.4)), 1 - eio(prog(t, b - .5, b)));
+    // cursor, drawn in screenshot coordinates
+    const cur = el.querySelector(".cursor"), ring = el.querySelector(".ring");
+    if (s.cur) {
+      const m = eio(prog(t, a + s.curT[0], a + s.curT[1]));
+      const px = lerp(s.cur[0][0], s.cur[1][0], m), py = lerp(s.cur[0][1], s.cur[1][1], m);
+      const sx = (px - x) * K * z, sy = (py - y) * K * z;
+      const press = t > a + s.click && t < a + s.click + .18;
+      cur.style.opacity = Math.min(eo(prog(t, a + s.curT[0] - .3, a + s.curT[0])), 1 - prog(t, b - .6, b - .3));
+      cur.style.transform = `translate(${sx - 4}px,${sy - 2}px) scale(${press ? .85 : 1})`;
+      const r = prog(t, a + s.click, a + s.click + .55);
+      ring.style.opacity = r > 0 && r < 1 ? 1 - r : 0;
+      ring.style.transform = `translate(${sx - 30}px,${sy - 30}px) scale(${lerp(.4, 1.6, eo(r))})`;
+    }
+  });
+
+  // launch
+  const s7 = $("s7"), t7 = S7[0]; s7.style.opacity = alpha(t, S7, .5, .5, true);
+  const cx = prog(t, t7 + .1, t7 + .9);
+  $("coin").style.opacity = eo(cx);
+  $("coin").style.transform = `scale(${cx > 0 ? lerp(.6, 1, back(cx)) : .6}) rotateY(${(1 - eo(cx)) * 90}deg) translateY(${Math.sin(t * 1.6) * 8}px)`;
+  $("shine").style.transform = `translateX(${lerp(-60, 60, ((t - t7) * .45) % 1)}%)`;
+  show($("l1"), t, t7 + .6, .5, 20);
+  const lx = show($("l2"), t, t7 + .8, .7, 40); $("l2").style.letterSpacing = `${lerp(.05, -.055, eo(lx))}em`;
+  show($("l3"), t, t7 + 1.4, .6, 20); show($("l4"), t, t7 + 1.9, .6, 20); show($("nfa"), t, t7 + 2.3, .8, 0);
+};
+window.DURATION = DURATION;
+render(0);
+</script>
+</body>
+</html>
