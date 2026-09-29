@@ -5,12 +5,11 @@ import { FREE_RUNS_PER_AGENT } from "@/config/models";
 import { SITE } from "@/config/site";
 import { api, ApiError } from "@/lib/client";
 import { copyText } from "@/lib/clipboard";
-import { ago, k, money, record, shortAddr, shortHash, until } from "@/lib/format";
+import { k, money, shortAddr, shortHash, until } from "@/lib/format";
 import type { AgentView, CallStatus, CallView } from "@/lib/types";
 import Avatar from "./Avatar";
 import BuyRuns from "./BuyRuns";
 import LinkToken from "./LinkToken";
-import LineChart from "./LineChart";
 import { useUI } from "./UIProvider";
 import { questionFor } from "@/lib/tokenQuestion";
 
@@ -19,7 +18,7 @@ let popularCache: Promise<PopularToken[]> | null = null;
 const loadPopular = () =>
   (popularCache ??= fetch("/api/tokens/top").then((r) => r.json()).then((d) => d.tokens || []).catch(() => ((popularCache = null), [])));
 
-const TABS: [string, string][] = [["try", "Try it"], ["perf", "Performance"], ["rec", "Receipts"], ["tok", "Token"]];
+const TABS: [string, string][] = [["try", "Try it"], ["tok", "Token"]];
 
 export type AgentDetail = { agent: AgentView; calls: CallView[]; series: (number | null)[]; freeRunsLeft: number | null; paidRunsLeft?: number | null; paymentsEnabled?: boolean; sealingEnabled?: boolean };
 type Msg = { u: boolean; text: string; call?: CallView; error?: boolean };
@@ -122,8 +121,6 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
     : "Free runs used. Paid runs open soon.";
   const isCreator = !!me && (a.creator ? a.creator === me.wallet : me.admin);
   const examples = a.gradingMode === "price7d" ? ["LONG or SHORT on $TICKER?", "What are whales doing with 0x…?"] : ["Is 0x… bundled?", "Check the deployer of 0x…"];
-  const openCalls = data.calls.filter((c) => c.status === "open" && c.gradesAt);
-  const nextGrade = openCalls.map((c) => c.gradesAt!).sort()[0] || null;
   const alertOn = !!me?.alerts.includes(a.slug);
   const starOn = !!me?.watch.includes(a.slug);
   const agentUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/agents/${a.slug}`;
@@ -151,11 +148,11 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
           </svg>
         </button>
       </div>
-      <div className="dtabs">
-        {TABS.filter(([id]) => !(a.official && id === "tok")).map(([id, label]) => (
+      {!a.official && <div className="dtabs">
+        {TABS.map(([id, label]) => (
           <button key={id} className={tab === id ? "on" : ""} onClick={() => setTab(id)}>{label}</button>
         ))}
-      </div>
+      </div>}
 
       <div className={`dpane ${tab === "try" ? "on" : ""}`}>
         <div className="chat" ref={chatRef}>
@@ -193,53 +190,6 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
         {left === 0 && data.paymentsEnabled && (
           <BuyRuns slug={a.slug} price={a.price} onPaid={(n) => setData((d) => d && { ...d, paidRunsLeft: (d.paidRunsLeft || 0) + n })} />
         )}
-      </div>
-
-      <div className={`dpane ${tab === "rec" ? "on" : ""}`}>
-        {data.calls.length ? (
-          <div className="rec">
-            {data.calls.map((c) => (
-              <div key={c.id} className="rc">
-                <div className="rc-main">
-                  <b>
-                    {c.symbol ? `$${c.symbol}` : c.subject ? shortAddr(c.subject) : "Question"}
-                    {c.label && <span className="rc-lab">{c.label}</span>}
-                  </b>
-                  <small>
-                    {ago(c.createdAt)}
-                    {c.claimHash && <> · {c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener">sealed {shortHash(c.claimHash)} ↗</a> : data.sealingEnabled ? "sealing onchain…" : "not sealed yet"}</>}
-                    {c.priceChangePct !== null && <> · price {c.priceChangePct > 0 ? "+" : ""}{c.priceChangePct}%</>}
-                  </small>
-                </div>
-                <Status c={c.status} gradesAt={c.gradesAt} />
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="rec"><div className="rc"><div className="rc-main"><b>No calls yet</b><small>Ask this agent about a token to make its first call.</small></div></div></div>
-        )}
-        <p className="free">Each call is sealed onchain before the result is known, so it can&apos;t be edited or deleted.</p>
-      </div>
-
-      <div className={`dpane ${tab === "perf" ? "on" : ""}`}>
-        <div className="chartbox">
-          <div className="lg">
-            <span><i style={{ background: "var(--gold)" }} />Track record</span>
-            <span style={{ marginLeft: "auto", color: "var(--t3)" }}>Last 30 days</span>
-          </div>
-          {data.series.some((v) => v !== null) ? (
-            <LineChart id={`perf-${a.slug}`} list={[{ d: data.series, c: "#E2CDA6", fill: true }]} w={480} h={170} />
-          ) : (
-            <div className="empty" style={{ padding: "40px 12px" }}>
-              {nextGrade ? `First result in ${until(nextGrade)}. The chart starts with the first graded call.` : "The chart starts with the first graded call."}
-            </div>
-          )}
-        </div>
-        <div className="pstats">
-          <div><small>Awaiting grade</small><b>{openCalls.length}</b></div>
-          <div><small>Hits / misses</small><b>{a.hits} / {a.misses}</b></div>
-          <div><small>Graded after</small><b>{a.gradingMode === "price7d" ? "7 days" : a.gradingMode === "verdict24h" ? "24 hours" : "—"}</b></div>
-        </div>
       </div>
 
       <div className={`dpane ${tab === "tok" ? "on" : ""}`}>
