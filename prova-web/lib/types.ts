@@ -71,6 +71,9 @@ export type SiteStats = {
   pending: number;
   calls24h: number;
   waitlistCount: number;
+  callsMade: number; // gradable calls made, by users and the autopilot
+  tokensChecked: number; // distinct tokens those calls were about
+  marketCapTracked: number | null; // combined market cap of the top tokens on the chain
 };
 
 export type Me = {

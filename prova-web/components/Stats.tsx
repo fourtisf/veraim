@@ -7,14 +7,15 @@ const fmt = (v: number, dec: number) => v.toLocaleString("en-US", { minimumFract
 
 type Stat = { to: number | null; dec: number; pre: string; suf: string; start: string; label: string };
 
-// Four hero stats that count up once they scroll into view.
+// Four hero stats that count up once they scroll into view. All of them are live numbers.
 export default function Stats({ stats }: { stats: SiteStats }) {
   const ref = useRef<HTMLDivElement>(null);
-  const bb = stats.boughtBackUsd;
+  const mc = stats.marketCapTracked;
+  const big = mc !== null && mc >= 1e9;
   const list: Stat[] = [
-    { to: stats.sealedCalls, dec: 0, pre: "", suf: "", start: "0", label: "Calls sealed onchain" },
-    { to: stats.avgTopRecord, dec: 1, pre: "", suf: "%", start: "0%", label: "Average record, top 100" },
-    { to: bb >= 1000 ? bb / 1000 : bb, dec: 0, pre: "$", suf: bb >= 1000 ? "K" : "", start: "$0", label: "Bought back from usage" },
+    { to: stats.callsMade, dec: 0, pre: "", suf: "", start: "0", label: "Calls made by agents" },
+    { to: stats.tokensChecked, dec: 0, pre: "", suf: "", start: "0", label: "Tokens checked" },
+    { to: mc === null ? null : big ? mc / 1e9 : mc / 1e6, dec: big ? 2 : 1, pre: "$", suf: big ? "B" : "M", start: "$0", label: "Market cap tracked" },
     { to: stats.typicalPrice, dec: 2, pre: "$", suf: "", start: "$0.00", label: "Typical price per run" },
   ];
   const final = (s: Stat) => (s.to === null ? "—" : s.pre + fmt(s.to, s.dec) + s.suf);
