@@ -20,8 +20,8 @@ export default async function Home() {
   return (
     <HomeDataProvider initial={await homeData()}>
       <Hero />
-      <Ticker />
       <TopTokens />
+      <Ticker />
       <FeatureTiles />
       <WhyVeraim />
       <Leaderboard />
