@@ -71,7 +71,7 @@ export async function runAgent(agent: Agent, user: User, rawInput: string, viaAp
   const user_ = [
     `Question: ${input}`,
     token ? `Token being asked about: ${token}` : "No token address or known $TICKER was found in the question.",
-    `Live data (JSON):\n${JSON.stringify(toolData, null, 1)}`,
+    `Live data (JSON):\n${JSON.stringify(toolData)}`,
   ].join("\n\n");
 
   const output = await runModel(agent.model, systemPrompt(agent), user_);

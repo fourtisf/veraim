@@ -141,7 +141,7 @@ export async function runTools(names: string[], ctx: ToolCtx) {
   await Promise.all(
     names.filter((n) => TOOLS[n]).map(async (n) => {
       try {
-        results[n] = await Promise.race([TOOLS[n](ctx), new Promise((_, rej) => setTimeout(() => rej(new Error("timed out")), 15_000))]);
+        results[n] = await Promise.race([TOOLS[n](ctx), new Promise((_, rej) => setTimeout(() => rej(new Error("timed out")), 8_000))]);
       } catch (err) {
         results[n] = { error: err instanceof Error ? err.message : "failed" };
       }

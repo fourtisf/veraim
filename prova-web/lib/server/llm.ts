@@ -65,7 +65,7 @@ async function runClaude(model: string, system: string, user: string): Promise<A
       model,
       max_tokens: 16000,
       thinking: { type: "adaptive" },
-      output_config: { effort: "medium", format: zodOutputFormat(AgentOutput) },
+      output_config: { effort: ENV.llmEffort, format: zodOutputFormat(AgentOutput) },
       system,
       messages: [{ role: "user", content: user }],
     });
@@ -94,6 +94,7 @@ async function runOpenRouter(model: string, system: string, user: string): Promi
     body: JSON.stringify({
       model,
       max_tokens: 4000,
+      reasoning: { effort: ENV.llmEffort }, // less thinking = faster answers
       messages: [
         { role: "system", content: `${system}\n\nReply with only a JSON object that matches the agent_output schema.` },
         { role: "user", content: user },

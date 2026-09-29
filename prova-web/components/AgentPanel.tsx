@@ -51,6 +51,7 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
   const [tab, setTab] = useState("try");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [pending, setPending] = useState(false);
+  const [waited, setWaited] = useState(0); // seconds since the current run started
   const [q, setQ] = useState("");
   const [popular, setPopular] = useState<PopularToken[]>([]);
   useEffect(() => {
@@ -77,6 +78,13 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
     const c = chatRef.current;
     if (c) c.scrollTop = c.scrollHeight;
   }, [msgs, pending]);
+
+  useEffect(() => {
+    if (!pending) return;
+    setWaited(0);
+    const t = setInterval(() => setWaited((w) => w + 1), 1000);
+    return () => clearInterval(t);
+  }, [pending]);
 
   // Opened with a question (e.g. "Safe?" on a token): ask it right away, in view.
   useEffect(() => {
@@ -166,7 +174,7 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
               {m.call && <div className="claim"><SealLine call={m.call} /></div>}
             </div>
           ))}
-          {pending && <div className="typing">Pulling live data and thinking… this can take 20–40 seconds.</div>}
+          {pending && <div className="typing">{waited < 4 ? "Reading live onchain data…" : "Thinking…"} {waited}s</div>}
         </div>
         {popular.length > 0 ? (
           <div className="chips" aria-label="Popular tokens">
