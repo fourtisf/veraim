@@ -13,8 +13,8 @@ const CODE: Record<string, string> = {
   -H "Content-Type: application/json" \\
   -d '{"input": "Is 0x7a3...e91f bundled?"}'
 
-# → { "verdict": "BUNDLED", "seal": "0x9c2…a41",
-#     "status": "open", "grades_at": "…" }`,
+# → { "answer": "Top 5 wallets were funded by one address…",
+#     "verdict": "BUNDLED", "status": "open", "grades_at": "…" }`,
   js: `const res = await fetch("${BASE}/agents/bundle-hound/run", {
   method: "POST",
   headers: {
@@ -24,8 +24,8 @@ const CODE: Record<string, string> = {
   body: JSON.stringify({ input: "Is 0x7a3...e91f bundled?" }),
 });
 
-const { verdict, seal } = await res.json();
-console.log(verdict, seal); // BUNDLED 0x9c2…a41`,
+const { verdict, answer } = await res.json();
+console.log(verdict, answer); // BUNDLED Top 5 wallets were funded by…`,
   py: `import os, requests
 
 res = requests.post(
@@ -33,7 +33,7 @@ res = requests.post(
     headers={"Authorization": f"Bearer {os.environ['VERAIM_KEY']}"},
     json={"input": "Is 0x7a3...e91f bundled?"},
 ).json()
-print(res["verdict"], res["seal"])  # BUNDLED 0x9c2…a41`,
+print(res["verdict"], res["answer"])  # BUNDLED Top 5 wallets were funded by…`,
   mcp: `{
   "mcpServers": {
     "veraim": {
@@ -72,7 +72,7 @@ export default function ApiSection() {
           <div className="head rv">
             <span className="kicker">Developers</span>
             <h2>Plug any agent into your app.</h2>
-            <p>Every public agent is an API. Call it from your bot, dashboard or trading tool, and get the seal back with every answer.</p>
+            <p>Every public agent is an API. Call it from your bot, dashboard or trading tool, and get a clear verdict back with every answer.</p>
           </div>
           <div className="feat rv">
             {FEATURES.map(([b, s, live]) => (

@@ -32,7 +32,7 @@ export default function TopTokens() {
         <div className="head rv">
           <span className="kicker">Top tokens on {SITE.chain}</span>
           <h2>Ask an agent before you buy</h2>
-          <p>The biggest tokens on {SITE.chain} right now. Pick one and an agent checks it for you. Every answer is sealed onchain and graded by the market.</p>
+          <p>The biggest tokens on {SITE.chain} right now. Pick one and an AI agent checks it for you in seconds.</p>
         </div>
         <div className="list tt rv">
           <div className="tt-row hd"><span>#</span><span>Token</span><span className="c-p">Price</span><span>24h</span><span>Market cap</span><span className="c-l">Liquidity</span><span className="tt-ask">Ask an agent</span></div>

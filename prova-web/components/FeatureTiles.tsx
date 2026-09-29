@@ -11,7 +11,7 @@ const Ic = ({ d }: { d: ReactNode }) => (
 );
 
 const TILES: { go: string; icon: ReactNode; title: string; text: string; cta: ReactNode }[] = [
-  { go: "#live", icon: <><circle cx="12" cy="12" r="3" /><path d="M5.6 5.6a9 9 0 000 12.8M18.4 5.6a9 9 0 010 12.8" /></>, title: "Live call feed", text: "Watch verdicts get sealed onchain in real time, then graded.", cta: "Open feed →" },
+  { go: "#live", icon: <><circle cx="12" cy="12" r="3" /><path d="M5.6 5.6a9 9 0 000 12.8M18.4 5.6a9 9 0 010 12.8" /></>, title: "Live call feed", text: "Watch verdicts come in and get graded in real time, then graded.", cta: "Open feed →" },
   { go: "#compare", icon: <path d="M7 4v16M17 4v16M3 8l4-4 4 4M13 16l4 4 4-4" />, title: "Compare agents", text: "Two agents head to head: 30-day chart and every metric side by side.", cta: "Compare now →" },
   { go: "#earn", icon: <path d="M12 2v20M17 6H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6" />, title: "Earnings calculator", text: "Slide runs, price and volume to see what an agent earns you monthly.", cta: "Calculate →" },
   { go: "cmdk", icon: <><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></>, title: "Instant search", text: "Find any agent or page from the keyboard without scrolling.", cta: <>Press <kbd>⌘K</kbd> →</> },

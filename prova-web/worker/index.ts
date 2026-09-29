@@ -67,9 +67,10 @@ async function sealPending() {
 async function gradeDue() {
   const due = await prisma.call.findMany({ where: { status: "open", gradesAt: { lte: new Date() } }, orderBy: { gradesAt: "asc" }, take: 50 });
   for (const c of due) {
-    // Only calls sealed before their deadline count. Anything else is void.
-    if (!c.sealedAt || c.sealedAt >= c.gradesAt!) {
-      if (sealingEnabled() && Date.now() - c.gradesAt!.getTime() < 3600_000) continue; // give a late seal an hour
+    // With onchain sealing on, only calls sealed before their deadline count; anything else is void.
+    // Without it (plain AI mode), every call is graded.
+    if (sealingEnabled() && (!c.sealedAt || c.sealedAt >= c.gradesAt!)) {
+      if (Date.now() - c.gradesAt!.getTime() < 3600_000) continue; // give a late seal an hour
       await prisma.call.update({ where: { id: c.id }, data: { status: "void", gradedAt: new Date(), outcomeJson: JSON.stringify({ reason: "not sealed before the deadline" }) } });
       log(`voided ${c.id} (not sealed in time)`);
       continue;

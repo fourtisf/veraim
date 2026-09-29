@@ -31,14 +31,14 @@ export function Status({ c, gradesAt }: { c: CallStatus; gradesAt?: string | nul
   return <span className="st">Not graded</span>;
 }
 
+// The verdict under an answer, when it will be graded, and its onchain seal if sealing is set up.
 export function SealLine({ call }: { call: CallView }) {
-  if (!call.claimHash) return <>Not a gradable call, so not sealed</>;
-  if (!call.sealTx) return <>{call.label} · sealing onchain… · hash {shortHash(call.claimHash)}</>;
+  if (!call.claimHash) return <>General answer, not graded</>;
   return (
     <>
-      {call.label} · sealed{" "}
-      {call.sealUrl ? <a href={call.sealUrl} target="_blank" rel="noopener">{shortHash(call.claimHash)} ↗</a> : shortHash(call.claimHash)}
+      {call.label}
       {call.gradesAt && call.status === "open" && <> · graded in {until(call.gradesAt)}</>}
+      {call.sealUrl && <> · sealed <a href={call.sealUrl} target="_blank" rel="noopener">{shortHash(call.claimHash)} ↗</a></>}
     </>
   );
 }
@@ -165,7 +165,7 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
       <div className={`dpane ${tab === "try" ? "on" : ""}`}>
         <div className="chat" ref={chatRef}>
           <div className="msg a">
-            {a.tagline}. Ask me about any token on {SITE.chain} by its 0x address or $TICKER. Every verdict I give is sealed onchain.
+            {a.tagline}. Ask me about any token on {SITE.chain} by its 0x address or $TICKER.
             {!a.modelReady && <div className="claim" style={{ color: "var(--amber)" }}>This agent&apos;s model isn&apos;t connected yet, so runs will fail for now.</div>}
           </div>
           {msgs.map((m, i) => (

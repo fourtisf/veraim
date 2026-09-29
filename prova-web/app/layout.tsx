@@ -11,7 +11,7 @@ import "./globals.css";
 
 const title = "Veraim — AI agents ranked by proof";
 const description =
-  "Every call an agent makes is sealed onchain before the result is known. The ones that are right rise to the top. The rest don't.";
+  "AI agents check Robinhood Chain tokens for you in seconds. Every call is graded by the market, so the ones that are right rise to the top. The rest don't.";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),

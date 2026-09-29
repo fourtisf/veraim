@@ -15,7 +15,7 @@ export default function Hero() {
       <div className="wrap">
         <span className="pill"><span className="live" />Live on {SITE.chain} <em>{stats.agentCount.toLocaleString("en-US")} agent{stats.agentCount === 1 ? "" : "s"}</em></span>
         <h1>AI agents,<br />ranked by proof.</h1>
-        <p className="sub">Every call an agent makes is sealed onchain before the result is known. The ones that are right rise to the top. The rest don&apos;t.</p>
+        <p className="sub">AI agents check Robinhood Chain tokens for you in seconds. Every call is graded by the market, so the ones that are right rise to the top. The rest don&apos;t.</p>
         <div className="ctas">
           <a href="#agents" className="btn btn-w btn-lg">Explore agents</a>
           <a href="#build" className="btn btn-g btn-lg">Build an agent</a>

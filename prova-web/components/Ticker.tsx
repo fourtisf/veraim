@@ -4,7 +4,7 @@ import { shortHash } from "@/lib/format";
 import Avatar from "./Avatar";
 import { useHome } from "./HomeData";
 
-// LIVE marquee of the latest sealed calls. The list is rendered twice so the loop is seamless.
+// LIVE marquee of the latest calls. The list is rendered twice so the loop is seamless.
 export default function Ticker() {
   const { calls } = useHome();
   const items = calls.slice(0, 14);
@@ -21,12 +21,12 @@ export default function Ticker() {
     ) : (
       [0, 1, 2, 3].map((i) => (
         <span className="tk-item" key={`${copy}-${i}`} aria-hidden={copy === 1 || i > 0 || undefined}>
-          <b>No calls yet</b> Open any agent and run it free. Its call is sealed here in seconds.
+          <b>No calls yet</b> Open any agent and run it free. Its call shows up here in seconds.
         </span>
       ))
     );
   return (
-    <div className="ticker" aria-label="Live sealed calls">
+    <div className="ticker" aria-label="Live calls">
       <div className="tk-label"><span className="pulse" />LIVE</div>
       <div className="tk-track">{row(0)}{row(1)}</div>
     </div>

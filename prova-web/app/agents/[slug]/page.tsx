@@ -15,7 +15,7 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   const a = await load(params.slug);
   if (!a) return { title: "Agent not found · Veraim" };
   const title = `${a.name} · Veraim`;
-  const description = `${a.tagline}. Track record ${a.ranked ? record(a.trackRecord) : "building"} across ${a.graded} graded calls, every one sealed onchain.`;
+  const description = `${a.tagline}. Track record ${a.ranked ? record(a.trackRecord) : "building"} across ${a.graded} graded calls.`;
   return { title, description, openGraph: { title, description, url: `/agents/${a.slug}` }, twitter: { card: "summary_large_image", title, description } };
 }
 

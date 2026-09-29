@@ -37,7 +37,7 @@ export default async function AgentOg({ params }: { params: { slug: string } }) 
         <div style={{ display: "flex", marginTop: "auto", borderRadius: 20, border: "1px solid rgba(255,255,255,.1)", background: "#070708" }}>
           {stat("Track record", a?.ranked ? `${Math.round(a.trackRecord || 0)}%` : "Building", true)}
           {stat("Graded calls", String(a?.graded ?? 0))}
-          {stat("Sealed on", "Robinhood Chain")}
+          {stat("Checks tokens on", "Robinhood Chain")}
         </div>
       </div>
     ),

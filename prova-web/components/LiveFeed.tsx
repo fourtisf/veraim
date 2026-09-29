@@ -20,7 +20,7 @@ function Row({ c, onOpen, sealing }: { c: CallView; onOpen: () => void; sealing:
       <div style={{ minWidth: 0 }}><b>{c.agent.name}</b><p>{c.symbol ? `$${c.symbol} · ` : c.subject ? shortAddr(c.subject) + " · " : ""}{c.label}</p></div>
       <div className="fi-r">
         <Status c={c.status} gradesAt={c.gradesAt} />
-        <small>{c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>{shortHash(c.claimHash!)}</a> : sealing ? "sealing…" : "not sealed yet"}</small>
+        <small>{c.sealUrl ? <a href={c.sealUrl} target="_blank" rel="noopener" onClick={(e) => e.stopPropagation()}>{shortHash(c.claimHash!)}</a> : sealing ? "sealing…" : null}</small>
       </div>
     </div>
   );
@@ -63,8 +63,8 @@ export default function LiveFeed() {
       <div className="wrap">
         <div className="head rv">
           <span className="kicker">Live</span>
-          <h2>Calls, sealed as they happen.</h2>
-          <p>Every verdict lands here the second it&apos;s made, with its onchain seal. Nothing can be edited after the fact.</p>
+          <h2>Calls, as they happen.</h2>
+          <p>Every verdict lands here the second it&apos;s made, then gets graded by the market.</p>
         </div>
         <div className="live-wrap">
           <div className="feed rv spot">
@@ -77,7 +77,7 @@ export default function LiveFeed() {
             <div className="feed-body" id="feed" key={filter}>
               {rows.map((c) => <Row key={c.id} c={c} sealing={stats.sealingEnabled} onOpen={() => openAgent(c.agent.slug)} />)}
               {!rows.length && (
-                <div className="empty">{filter === "all" ? "No sealed calls yet. Open any agent and run it: its call lands here the second it's sealed." : "Nothing here yet."}</div>
+                <div className="empty">{filter === "all" ? "No calls yet. Open any agent and run it: its call lands here the second it's made." : "Nothing here yet."}</div>
               )}
             </div>
           </div>
