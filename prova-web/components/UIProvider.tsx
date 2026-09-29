@@ -19,7 +19,7 @@ type UI = {
   requireWallet: () => Promise<boolean>;
   signOut: () => Promise<void>;
   toast: (msg: string) => void;
-  openAgent: (slug: string) => void;
+  openAgent: (slug: string, ask?: string) => void; // ask: a question to pre-fill
   openPalette: () => void;
   openWaitlist: (source: WaitlistSource, agentName?: string) => void;
   toggleWatch: (slug: string) => Promise<void>;
@@ -44,6 +44,7 @@ export default function UIProvider({ children }: { children: ReactNode }) {
   const [me, setMe] = useState<Me>(null);
   const [meLoaded, setMeLoaded] = useState(false);
   const [agentSlug, setAgentSlug] = useState<string | null>(null);
+  const [agentAsk, setAgentAsk] = useState("");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openCount, setOpenCount] = useState(0);
   const [paletteOpen, setPaletteOpen] = useState(false);
@@ -120,8 +121,9 @@ export default function UIProvider({ children }: { children: ReactNode }) {
     return () => p.removeListener?.("accountsChanged", onAccounts);
   }, [myWallet, signOut, toast]);
 
-  const openAgent = useCallback((slug: string) => {
+  const openAgent = useCallback((slug: string, ask = "") => {
     setAgentSlug(slug);
+    setAgentAsk(ask);
     setOpenCount((c) => c + 1); // fresh drawer state (tab, chat) on every open
     setDrawerOpen(true);
   }, []);
@@ -193,7 +195,7 @@ export default function UIProvider({ children }: { children: ReactNode }) {
   return (
     <Ctx.Provider value={ui}>
       {children}
-      <AgentDrawer session={openCount} slug={agentSlug} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
+      <AgentDrawer session={openCount} slug={agentSlug} ask={agentAsk} open={drawerOpen} onClose={() => setDrawerOpen(false)} />
       <Toast msg={toastMsg} on={toastOn} />
       {paletteOpen && <CommandPalette onClose={() => setPaletteOpen(false)} />}
       {walletOpen && <WalletModal onPick={pickWallet} onClose={() => closeWallet(false)} />}

@@ -8,6 +8,7 @@ import { useUI } from "./UIProvider";
 const LINKS: [string, string, string?][] = [
   ["/#tour", "All features", "6"],
   ["/#agents", "Leaderboard", "Agents"],
+  ["/#tokens", "Top tokens", "Ask first"],
   ["/#live", "Live calls", "Feed"],
   ["/#compare", "Compare", "Head to head"],
   ["/#earn", "Earnings calculator", "Earn"],

@@ -1,11 +1,15 @@
 // The biggest live tokens on the chain, by market cap: shown as one-click picks next to the
 // ask box and used by the autopilot. Candidates come from the explorer's token list plus
-// AUTOPILOT_TOKENS; DexScreener supplies price, liquidity and market cap.
+// AUTOPILOT_TOKENS and DexScreener pairs quoted in USDG/WETH; DexScreener supplies price,
+// liquidity and market cap.
 import { ENV } from "./env";
 import { getJson } from "./tools/http";
 export { questionFor } from "../tokenQuestion";
 
-export type TopToken = { address: string; symbol: string; name: string; marketCapUsd: number; liquidityUsd: number; priceChange24h: number | null };
+export type TopToken = {
+  address: string; symbol: string; name: string; imageUrl: string | null; url: string | null;
+  priceUsd: number; marketCapUsd: number; liquidityUsd: number; volume24hUsd: number; priceChange24h: number | null;
+};
 
 // Stablecoins and wrapped ETH aren't worth asking an agent about.
 const SKIP_SYMBOLS = new Set(["USDG", "USDC", "USDT", "DAI", "WETH", "ETH", "USDC.E", "PYUSD", "USDE"]);
@@ -30,6 +34,18 @@ async function candidates(): Promise<string[]> {
   } catch (err) {
     console.error("top tokens: explorer list failed:", (err as Error).message);
   }
+  // Most tokens trade against USDG or WETH, so those searches find the busy ones too.
+  for (const q of ["USDG", "WETH"]) {
+    try {
+      const d = await getJson<{ pairs?: any[] }>(`${ENV.dexscreenerBase}/latest/dex/search?q=${q}`, { ttlMs: TTL });
+      for (const p of d.pairs || []) {
+        const a = String(p.baseToken?.address || "");
+        if (p.chainId === ENV.dexscreenerChain && isAddr(a)) out.add(a.toLowerCase());
+      }
+    } catch (err) {
+      console.error(`top tokens: search ${q} failed:`, (err as Error).message);
+    }
+  }
   for (const a of [ENV.usdg, ENV.weth]) if (a) out.delete(a.toLowerCase());
   return [...out];
 }
@@ -53,8 +69,12 @@ export async function topTokens(limit = 12): Promise<TopToken[]> {
           address: p.baseToken.address,
           symbol: p.baseToken.symbol || "",
           name: p.baseToken.name || "",
+          imageUrl: typeof p.info?.imageUrl === "string" && p.info.imageUrl.startsWith("https://") ? p.info.imageUrl : null,
+          url: typeof p.url === "string" && p.url.startsWith("https://") ? p.url : null,
+          priceUsd: +p.priceUsd || 0,
           marketCapUsd: p.marketCap || p.fdv || 0,
           liquidityUsd: liq,
+          volume24hUsd: p.volume?.h24 || 0,
           priceChange24h: p.priceChange?.h24 ?? null,
         });
       }

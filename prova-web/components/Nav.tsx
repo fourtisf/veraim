@@ -25,7 +25,7 @@ export default function Nav() {
         <div className="wrap">
           <a href="/" className="logo" aria-label="Veraim home"><span className="mark" />Veraim</a>
           <div className="links">
-            <a href="/#agents">Agents</a><a href="/#live">Live</a><a href="/#compare">Compare</a><a href="/#earn">Earn</a><a href="/#api">API</a>
+            <a href="/#agents">Agents</a><a href="/#tokens">Tokens</a><a href="/#live">Live</a><a href="/#compare">Compare</a><a href="/#earn">Earn</a><a href="/#api">API</a>
           </div>
           <div className="nr">
             <button className="kbtn" id="kbtn" aria-label="Search" onClick={openPalette}>

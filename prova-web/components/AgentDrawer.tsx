@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import AgentPanel from "./AgentPanel";
 
-export default function AgentDrawer({ slug, open, session, onClose }: { slug: string | null; open: boolean; session: number; onClose: () => void }) {
+export default function AgentDrawer({ slug, ask, open, session, onClose }: { slug: string | null; ask?: string; open: boolean; session: number; onClose: () => void }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const drawerRef = useRef<HTMLElement>(null);
 
@@ -24,7 +24,7 @@ export default function AgentDrawer({ slug, open, session, onClose }: { slug: st
       <aside ref={drawerRef} className={`drawer ${open ? "on" : ""}`} aria-hidden={!open} role="dialog" aria-label="Agent details">
         <button className="dx" ref={closeRef} onClick={onClose} aria-label="Close">✕</button>
         {/* keyed so each open starts fresh */}
-        {slug && <AgentPanel key={`${slug}-${session}`} slug={slug} />}
+        {slug && <AgentPanel key={`${slug}-${session}`} slug={slug} ask={ask} />}
       </aside>
     </>
   );

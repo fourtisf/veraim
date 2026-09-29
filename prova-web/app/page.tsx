@@ -10,6 +10,7 @@ import HomeDataProvider from "@/components/HomeData";
 import Leaderboard from "@/components/Leaderboard";
 import LiveFeed from "@/components/LiveFeed";
 import Ticker from "@/components/Ticker";
+import TopTokens from "@/components/TopTokens";
 import WhyVeraim from "@/components/WhyVeraim";
 import { homeData } from "@/lib/server/home";
 
@@ -20,6 +21,7 @@ export default async function Home() {
     <HomeDataProvider initial={await homeData()}>
       <Hero />
       <Ticker />
+      <TopTokens />
       <FeatureTiles />
       <WhyVeraim />
       <Leaderboard />

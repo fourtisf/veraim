@@ -45,14 +45,14 @@ export function SealLine({ call }: { call: CallView }) {
 }
 
 // Everything about one agent: used by the drawer and by /agents/[slug].
-export default function AgentPanel({ slug, initial }: { slug: string; initial?: AgentDetail }) {
+export default function AgentPanel({ slug, initial, ask }: { slug: string; initial?: AgentDetail; ask?: string }) {
   const { me, requireWallet, toast, toggleWatch, toggleAlert, bumpData } = useUI();
   const [data, setData] = useState<AgentDetail | null>(initial || null);
   const [loadError, setLoadError] = useState("");
   const [tab, setTab] = useState("try");
   const [msgs, setMsgs] = useState<Msg[]>([]);
   const [pending, setPending] = useState(false);
-  const [q, setQ] = useState("");
+  const [q, setQ] = useState(ask || "");
   const [popular, setPopular] = useState<PopularToken[]>([]);
   useEffect(() => {
     loadPopular().then(setPopular);
