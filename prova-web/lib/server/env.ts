@@ -9,9 +9,10 @@ export const ENV = {
   adminWallets: (e.ADMIN_WALLETS || "").toLowerCase().split(",").map((s) => s.trim()).filter(Boolean),
 
   // AI models
-  anthropicKey: e.ANTHROPIC_API_KEY || "",
+  // An OpenRouter key (sk-or-…) pasted into ANTHROPIC_API_KEY is used as the OpenRouter key instead.
+  anthropicKey: (e.ANTHROPIC_API_KEY || "").startsWith("sk-or-") ? "" : e.ANTHROPIC_API_KEY || "",
   anthropicBase: e.ANTHROPIC_BASE_URL || "",
-  openrouterKey: e.OPENROUTER_API_KEY || "",
+  openrouterKey: e.OPENROUTER_API_KEY || ((e.ANTHROPIC_API_KEY || "").startsWith("sk-or-") ? e.ANTHROPIC_API_KEY! : ""),
   openrouterBase: (e.OPENROUTER_BASE_URL || "https://openrouter.ai/api/v1").replace(/\/$/, ""),
 
   // Chain
