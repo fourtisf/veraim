@@ -20,7 +20,7 @@ export default function Leaderboard() {
     .filter((a) => cat === "All" || a.category === cat)
     .sort((x, y) =>
       sort === "tr" ? Number(y.ranked) - Number(x.ranked) || (y.ranked ? (y.trackRecord || 0) - (x.trackRecord || 0) : y.graded - x.graded)
-      : sort === "runs" ? y.runs7d - x.runs7d
+      : sort === "runs" ? y.calls7d - x.calls7d
       : sort === "graded" ? y.graded - x.graded
       : sort === "mc" ? (y.marketCapUsd || 0) - (x.marketCapUsd || 0)
       : y.createdAt.localeCompare(x.createdAt)
@@ -42,7 +42,7 @@ export default function Leaderboard() {
             Sort by{" "}
             <select id="sort" value={sort} onChange={(e) => setSort(e.target.value as Sort)}>
               <option value="tr">Track record</option>
-              <option value="runs">Runs this week</option>
+              <option value="runs">Calls this week</option>
               <option value="graded">Graded calls</option>
               <option value="mc">Market cap</option>
               <option value="new">Newest</option>
@@ -50,7 +50,7 @@ export default function Leaderboard() {
           </label>
         </div>
         <div className="list rv spot" id="list">
-          <div className="row hd"><span>#</span><span>Agent</span><span>Track record · last 12</span><span>Runs / 7d</span><span>Market cap</span><span>Bought back</span><span /></div>
+          <div className="row hd"><span>#</span><span>Agent</span><span>Track record · last 12</span><span>Calls / 7d</span><span>Market cap</span><span>Bought back</span><span /></div>
           {!list.length && <div className="empty">No agents here yet. Be the first to build one.</div>}
           {list.map((a, i) => {
             const dots = [...Array(Math.max(0, 12 - a.last12.length)).fill(null), ...a.last12];
@@ -70,7 +70,7 @@ export default function Leaderboard() {
                   <strong>{a.ranked ? record(a.trackRecord) : <small className="unr">{a.gradingMode === "none" ? "Not graded" : `${a.graded}/${MIN_GRADED_TO_RANK}`}</small>}</strong>
                   <div className="dots">{dots.map((d, j) => <i key={j} className={d === "hit" ? "" : d === "miss" ? "m" : "e"} />)}</div>
                 </div>
-                <div className="num c-runs">{k(a.runs7d)}<small>{a.graded} graded</small></div>
+                <div className="num c-runs">{k(a.calls7d)}<small>{a.open && !a.graded ? `${a.open} awaiting grade` : `${a.graded} graded`}</small></div>
                 <div className="num c-mc">
                   {a.marketCapUsd ? money(a.marketCapUsd) : "—"}
                   {a.marketCapUsd && a.priceChange24h !== null

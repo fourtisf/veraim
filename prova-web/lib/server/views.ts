@@ -48,7 +48,7 @@ export async function agentViews(where: { hidden?: boolean; id?: string; slug?: 
   const agents = await prisma.agent.findMany({ where, include: { creator: true }, orderBy: { createdAt: "asc" } });
   if (!agents.length) return [];
   const ids = agents.map((a) => a.id);
-  const [byStatus, runs7d, paid7d, bought, last] = await Promise.all([
+  const [byStatus, runs7d, paid7d, bought, last, calls7d] = await Promise.all([
     prisma.call.groupBy({ by: ["agentId", "status"], where: { agentId: { in: ids } }, _count: true, _sum: { weight: true } }),
     prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, createdAt: { gte: new Date(Date.now() - 7 * DAY) }, user: { wallet: { not: AUTOPILOT_WALLET } } }, _count: true }),
     prisma.run.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, paid: true, createdAt: { gte: new Date(Date.now() - 7 * DAY) } }, _count: true }),
@@ -58,6 +58,7 @@ export async function agentViews(where: { hidden?: boolean; id?: string; slug?: 
         SELECT "agentId", status, ROW_NUMBER() OVER (PARTITION BY "agentId" ORDER BY "gradedAt" DESC) AS rn
         FROM "Call" WHERE status IN ('hit','miss') AND "agentId" = ANY(${ids})
       ) t WHERE rn <= 12`,
+    prisma.call.groupBy({ by: ["agentId"], where: { agentId: { in: ids }, createdAt: { gte: new Date(Date.now() - 7 * DAY) } }, _count: true }),
   ]);
 
   return agents.map((a) => {
@@ -102,6 +103,7 @@ export async function agentViews(where: { hidden?: boolean; id?: string; slug?: 
       open: get("open")?._count || 0,
       ranked: graded >= MIN_GRADED_TO_RANK && a.gradingMode !== "none",
       runs7d: runs7d.find((r) => r.agentId === a.id)?._count || 0,
+      calls7d: calls7d.find((r) => r.agentId === a.id)?._count || 0,
       callsTotal: rows.reduce((s, r) => s + r._count, 0),
       last12: last.filter((l) => l.agentId === a.id).map((l) => l.status as "hit" | "miss").reverse(),
     };

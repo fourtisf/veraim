@@ -34,7 +34,8 @@ export type AgentView = {
   misses: number;
   open: number;
   ranked: boolean;
-  runs7d: number;
+  runs7d: number; // runs by users (not the autopilot)
+  calls7d: number; // calls made, from users and the autopilot
   callsTotal: number;
   last12: ("hit" | "miss")[];
 };
