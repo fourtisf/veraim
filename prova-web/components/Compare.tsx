@@ -25,14 +25,17 @@ export default function Compare() {
   const B = agents.find((x) => x.slug === bSlug);
   if (!A || !B) return null;
 
+  const tokenRows = !(A.official && B.official); // official agents are plain AI: no token, buybacks or age
   const metrics: [string, number, number, (v: number) => string][] = [
     ["Track record", A.trackRecord ?? 0, B.trackRecord ?? 0, (v) => (v ? `${Math.round(v)}%` : "—")],
     ["Graded calls", A.graded, B.graded, String],
-    ["Runs / 7d", A.runs7d, B.runs7d, k],
+    ["Calls / 7d", A.calls7d, B.calls7d, k],
     ["Hits", A.hits, B.hits, String],
-    ["Bought back", A.boughtBackUsd, B.boughtBackUsd, money],
-    ["Market cap", A.marketCapUsd ?? 0, B.marketCapUsd ?? 0, (v) => (v ? money(v) : "—")],
-    ["Days live", A.ageDays, B.ageDays, String],
+    ...(tokenRows ? ([
+      ["Bought back", A.boughtBackUsd, B.boughtBackUsd, money],
+      ["Market cap", A.marketCapUsd ?? 0, B.marketCapUsd ?? 0, (v) => (v ? money(v) : "—")],
+      ["Days live", A.ageDays, B.ageDays, String],
+    ] as [string, number, number, (v: number) => string][]) : []),
   ];
   const both = A.trackRecord !== null && B.trackRecord !== null;
   const d = both ? Math.round(A.trackRecord! - B.trackRecord!) : 0;

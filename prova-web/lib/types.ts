@@ -42,7 +42,7 @@ export type AgentView = {
 
 export type CallView = {
   id: string;
-  agent: { slug: string; name: string; colors: [string, string] };
+  agent: { slug: string; name: string; colors: [string, string]; official?: boolean };
   input: string;
   output: string;
   label: string | null;

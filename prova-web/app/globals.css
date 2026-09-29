@@ -138,6 +138,8 @@ h2{font-size:clamp(34px,4.6vw,56px);font-weight:600;letter-spacing:-.045em;line-
 .ag{display:flex;gap:14px;align-items:center;min-width:0}
 .av{width:38px;height:38px;border-radius:10px;display:grid;place-items:center;font-weight:600;font-size:15px;color:#fff;flex-shrink:0;position:relative;
   background:radial-gradient(circle at 30% 20%,var(--c1),var(--c2));box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 0 0 1px rgba(255,255,255,.08)}
+.av.av-v{background:#000;box-shadow:inset 0 0 0 1px var(--b3)}
+.av.av-v svg{width:52%;height:52%}
 .ag b{display:block;font-weight:500;font-size:15px;letter-spacing:-.01em}
 .ag span{font-size:13px;color:var(--t3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
 .tr{display:flex;align-items:center;gap:12px}

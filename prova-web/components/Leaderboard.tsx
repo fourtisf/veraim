@@ -50,7 +50,7 @@ export default function Leaderboard() {
           </label>
         </div>
         <div className="list rv spot" id="list">
-          <div className="row hd"><span>#</span><span>Agent</span><span>Track record · last 12</span><span>Calls / 7d</span><span>Market cap</span><span>Bought back</span><span /></div>
+          <div className="row hd"><span>#</span><span>Agent</span><span>Track record · last 12</span><span>Calls / 7d</span><span>Token</span><span>Buybacks</span><span /></div>
           {!list.length && <div className="empty">No agents here yet. Be the first to build one.</div>}
           {list.map((a, i) => {
             const dots = [...Array(Math.max(0, 12 - a.last12.length)).fill(null), ...a.last12];
@@ -71,6 +71,12 @@ export default function Leaderboard() {
                   <div className="dots">{dots.map((d, j) => <i key={j} className={d === "hit" ? "" : d === "miss" ? "m" : "e"} />)}</div>
                 </div>
                 <div className="num c-runs">{k(a.calls7d)}<small>{a.open && !a.graded ? `${a.open} awaiting grade` : `${a.graded} graded`}</small></div>
+                {a.official ? (
+                  <>
+                    <div className="num c-mc">Veraim AI<small>No token</small></div>
+                    <div className="num c-rev">Free<small>to try</small></div>
+                  </>
+                ) : (<>
                 <div className="num c-mc">
                   {a.marketCapUsd ? money(a.marketCapUsd) : "—"}
                   {a.marketCapUsd && a.priceChange24h !== null
@@ -78,6 +84,7 @@ export default function Leaderboard() {
                     : <small>{a.tokenAddress ? "No market yet" : "Token soon"}</small>}
                 </div>
                 <div className="num c-rev">{money(a.boughtBackUsd)}<small>from usage</small></div>
+                </>)}
                 <span className="go">Try free</span>
               </div>
             );

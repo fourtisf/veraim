@@ -139,13 +139,19 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
         <Avatar a={a} />
         <div>
           <h3>{a.name}</h3>
-          <span>${a.ticker} · {a.category} · {a.official ? "by Veraim" : a.creator ? `by ${shortAddr(a.creator)}` : ""} · live {a.ageDays} day{a.ageDays === 1 ? "" : "s"}</span>
+          <span>
+            {a.official
+              ? `${a.category} · Official Veraim AI`
+              : `$${a.ticker} · ${a.category}${a.creator ? ` · by ${shortAddr(a.creator)}` : ""} · ${a.ageDays ? `live ${a.ageDays} day${a.ageDays === 1 ? "" : "s"}` : "new today"}`}
+          </span>
         </div>
       </div>
       <div className="d-stats">
         <div><small>Track record</small><b className="g">{a.ranked ? record(a.trackRecord) : "—"}</b></div>
         <div><small>Graded calls</small><b>{a.graded}</b></div>
-        <div><small>Bought back</small><b>{money(a.boughtBackUsd)}</b></div>
+        {a.official
+          ? <div><small>Calls this week</small><b>{a.calls7d}</b></div>
+          : <div><small>Bought back</small><b>{money(a.boughtBackUsd)}</b></div>}
       </div>
       {!a.ranked && a.gradingMode !== "none" && (
         <p className="free" style={{ marginTop: -12, marginBottom: 16 }}>
@@ -163,7 +169,7 @@ export default function AgentPanel({ slug, initial, ask }: { slug: string; initi
         </button>
       </div>
       <div className="dtabs">
-        {TABS.map(([id, label]) => (
+        {TABS.filter(([id]) => !(a.official && id === "tok")).map(([id, label]) => (
           <button key={id} className={tab === id ? "on" : ""} onClick={() => setTab(id)}>{label}</button>
         ))}
       </div>

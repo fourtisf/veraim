@@ -91,7 +91,7 @@ export default function CommandPalette({ onClose }: { onClose: () => void }) {
           {agents.map((a, i) => (
             <div key={a.id} className={`ck-i ${i === cur ? "sel" : ""}`} onMouseEnter={() => setSel(i)} onClick={() => go(i)}>
               <Avatar a={a} />
-              <b>{a.name}</b>${a.ticker}
+              <b>{a.name}</b>{a.official ? "Veraim AI" : `$${a.ticker}`}
               <span className="r">{a.ranked ? record(a.trackRecord) : `${a.graded} graded`}</span>
             </div>
           ))}

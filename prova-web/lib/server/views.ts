@@ -18,14 +18,14 @@ export function colorsFor(slug: string): [string, string] {
 
 const DAY = 86400_000;
 
-export function toCallView(c: Call & { agent: Pick<Agent, "slug" | "name"> }): CallView {
+export function toCallView(c: Call & { agent: Pick<Agent, "slug" | "name"> & Partial<Pick<Agent, "official">> }): CallView {
   let priceChangePct: number | null = null;
   try {
     if (c.outcomeJson) priceChangePct = JSON.parse(c.outcomeJson).priceChangePct ?? null;
   } catch {}
   return {
     id: c.id,
-    agent: { slug: c.agent.slug, name: c.agent.name, colors: colorsFor(c.agent.slug) },
+    agent: { slug: c.agent.slug, name: c.agent.name, colors: colorsFor(c.agent.slug), official: !!c.agent.official },
     input: c.input,
     output: c.output,
     label: c.claimLabel,
@@ -129,7 +129,7 @@ export async function recentCalls(opts: { take?: number; agentId?: string; statu
       ...(opts.status === "graded" && { status: { in: ["hit", "miss"] } }),
       ...(!opts.status && !opts.agentId && { claimHash: { not: null } }),
     },
-    include: { agent: { select: { slug: true, name: true } } },
+    include: { agent: { select: { slug: true, name: true, official: true } } },
     orderBy: { createdAt: "desc" },
     take: opts.take || 40,
   });
