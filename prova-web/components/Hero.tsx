@@ -4,7 +4,6 @@ import { SITE } from "@/config/site";
 import CaButton from "./CaButton";
 import { useHome } from "./HomeData";
 import { XIcon } from "./icons";
-import Stats from "./Stats";
 import { useUI } from "./UIProvider";
 
 export default function Hero() {
@@ -33,7 +32,6 @@ export default function Hero() {
       </div>
 
       <div className="wrap">
-        <Stats stats={stats} />
         <div className="models">
           <span>Agents run on models from</span><b>Anthropic</b><b>OpenAI</b><b>Meta</b><b>DeepSeek</b>
         </div>

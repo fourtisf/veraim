@@ -1,5 +1,4 @@
 import type { Agent, Call } from "@prisma/client";
-import { topTokens } from "./topTokens";
 import { AUTOPILOT_WALLET } from "./system";
 import { prisma } from "@/lib/db";
 import { MIN_GRADED_TO_RANK, gradingLabel, modelLabel } from "@/config/models";
@@ -140,7 +139,7 @@ export async function recentCalls(opts: { take?: number; agentId?: string; statu
 export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
   const now = Date.now();
   const startOfDay = new Date(new Date().setUTCHours(0, 0, 0, 0));
-  const [sealedCalls, sealedToday, sealedYesterday, pending, graded24, calls24h, waitlistCount, bought, callsMade, subjects, top10] = await Promise.all([
+  const [sealedCalls, sealedToday, sealedYesterday, pending, graded24, calls24h, waitlistCount, bought] = await Promise.all([
     prisma.call.count({ where: { sealTx: { not: null } } }),
     prisma.call.count({ where: { sealedAt: { gte: startOfDay } } }),
     prisma.call.count({ where: { sealedAt: { gte: new Date(startOfDay.getTime() - DAY), lt: startOfDay } } }),
@@ -149,10 +148,6 @@ export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
     prisma.call.count({ where: { createdAt: { gte: new Date(now - DAY) } } }),
     prisma.waitlist.count(),
     prisma.buyback.aggregate({ _sum: { amountUsd: true } }),
-    prisma.call.count({ where: { claimHash: { not: null } } }),
-    prisma.call.groupBy({ by: ["subject"], where: { subject: { not: null } } }),
-    // Market data can be slow on a cold cache: don't hold the page for it.
-    Promise.race([topTokens(10), new Promise<null>((r) => setTimeout(() => r(null), 2500))]).catch(() => null),
   ]);
   const top = agents.filter((a) => a.ranked).sort((x, y) => (y.trackRecord || 0) - (x.trackRecord || 0)).slice(0, 100);
   const h = graded24.find((g) => g.status === "hit")?._count || 0;
@@ -169,9 +164,6 @@ export async function siteStats(agents: AgentView[]): Promise<SiteStats> {
     pending,
     calls24h,
     waitlistCount,
-    callsMade,
-    tokensChecked: subjects.length,
-    marketCapTracked: top10?.length ? Math.round(top10.reduce((sum, t) => sum + t.marketCapUsd, 0)) : null,
   };
 }
 

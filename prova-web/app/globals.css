@@ -281,7 +281,7 @@ body:after{content:"";position:fixed;inset:0;pointer-events:none;z-index:100;opa
 .kbtn{display:flex;align-items:center;gap:10px;height:36px;padding:0 6px 0 12px;border-radius:10px;font-size:13px;color:var(--t3);background:rgba(255,255,255,.03);box-shadow:inset 0 0 0 1px var(--b1);min-width:210px;transition:all .2s}
 .kbtn:hover{color:var(--t2);box-shadow:inset 0 0 0 1px var(--b2)}
 .kbtn kbd{margin-left:auto;font-family:var(--m);font-size:11px;padding:2px 7px;border-radius:6px;background:var(--s3);box-shadow:inset 0 0 0 1px var(--b2);color:var(--t2)}
-.models{margin-top:40px;display:flex;justify-content:center;align-items:center;gap:34px;flex-wrap:wrap;font-size:14px;color:var(--t3)}
+.models{margin-top:72px;display:flex;justify-content:center;align-items:center;gap:34px;flex-wrap:wrap;font-size:14px;color:var(--t3)}
 .models b{font-weight:500;color:var(--t2);letter-spacing:-.01em;font-size:15px}
 
 /* ticker */
