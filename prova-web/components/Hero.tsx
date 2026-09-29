@@ -4,10 +4,8 @@ import { SITE } from "@/config/site";
 import CaButton from "./CaButton";
 import { useHome } from "./HomeData";
 import { XIcon } from "./icons";
-import ProductWindow from "./ProductWindow";
 import Stats from "./Stats";
 import { useUI } from "./UIProvider";
-import VerifiedCard from "./VerifiedCard";
 
 export default function Hero() {
   const { stats } = useHome();
@@ -32,11 +30,6 @@ export default function Hero() {
             Get launch updates{stats.waitlistCount > 0 && <span className="cav" style={{ color: "var(--t3)" }}>{stats.waitlistCount.toLocaleString("en-US")} joined</span>}
           </button>
         </div>
-      </div>
-
-      <div className="showcase">
-        <ProductWindow />
-        <VerifiedCard />
       </div>
 
       <div className="wrap">
