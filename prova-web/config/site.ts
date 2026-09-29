@@ -3,7 +3,7 @@
 export const SITE = {
   xUrl: "https://x.com/Veraimxyz",
   telegramUrl: "", // TODO
-  contractAddress: "", // empty = shows "Coming soon" (still copyable)
+  contractAddress: "0xbA5d208f5D42EC6d2aAaC444151C68E59c0f634b", // empty = shows "Coming soon" (still copyable)
   chain: "Robinhood Chain",
   launchDate: "", // e.g. "October 15, 2026" — shown in the waitlist when set
   launchpadUrl: "", // where creators launch agent tokens, e.g. Robinfun's URL
